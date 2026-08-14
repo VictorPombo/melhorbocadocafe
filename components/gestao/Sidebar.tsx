@@ -2,16 +2,28 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, ShoppingCart, Users, Lightbulb, ShieldAlert, Package, Megaphone, Clock, BarChart2, Gift } from "lucide-react";
+import { usePathname } from "next/navigation";
+import {
+  Gift,
+  ShoppingCart,
+  Users,
+  Lightbulb,
+  ShieldAlert,
+  BarChart2,
+  Sparkles,
+  Smartphone,
+  LogOut,
+  QrCode,
+  FileText,
+} from "lucide-react";
 
 const NAV_ITEMS = [
   {
-    href: "/gestao",
-    label: "Dashboard",
-    mobileLabel: "Home",
-    exact: true,
-    icon: <LayoutDashboard className="w-5 h-5" />,
+    href: "/gestao/fidelidade",
+    label: "Fidelidade & Roleta",
+    mobileLabel: "Fidelidade",
+    icon: <Gift className="w-5 h-5" />,
+    badge: "Principal",
   },
   {
     href: "/gestao/fidelidade/caixa",
@@ -20,67 +32,37 @@ const NAV_ITEMS = [
     icon: <ShoppingCart className="w-5 h-5" />,
   },
   {
-    href: "/gestao/clientes",
-    label: "Clientes",
-    mobileLabel: "Clientes",
-    icon: <Users className="w-5 h-5" />,
+    href: "/gestao/guia-apresentacao",
+    label: "Guia Executivo & PDF",
+    mobileLabel: "Guia",
+    icon: <FileText className="w-5 h-5" />,
   },
   { type: "divider" as const },
   {
-    href: "/gestao/fidelidade",
-    label: "Fidelidade & CRM",
-    mobileLabel: "Fidelidade",
-    icon: <Gift className="w-5 h-5" />,
-    subItems: [
-      { href: "/gestao/fidelidade", label: "Dashboard" },
-      { href: "/gestao/fidelidade/roleta", label: "Configurar Roleta" },
-      { href: "/gestao/fidelidade/historico", label: "Histórico" },
-      { href: "/gestao/fidelidade/clientes", label: "Clientes" },
-      { href: "/gestao/fidelidade/automacoes", label: "Automações" },
-    ],
+    href: "/gestao/clientes",
+    label: "Base de Clientes",
+    mobileLabel: "Clientes",
+    icon: <Users className="w-5 h-5" />,
   },
   {
     href: "/gestao/insights",
-    label: "Insights",
+    label: "Insights de Consumo",
     mobileLabel: "Insights",
     icon: <Lightbulb className="w-5 h-5" />,
   },
   {
     href: "/gestao/inteligencia",
-    label: "VIP & Risco",
+    label: "VIPs & Retenção",
     mobileLabel: "VIP",
     icon: <ShieldAlert className="w-5 h-5" />,
   },
   {
-    href: "/gestao/produtos",
-    label: "Produtos",
-    mobileLabel: "Produtos",
-    icon: <Package className="w-5 h-5" />,
-  },
-  {
-    href: "/gestao/canais",
-    label: "Canais",
-    mobileLabel: "Canais",
-    icon: <Megaphone className="w-5 h-5" />,
-  },
-  {
-    href: "/gestao/horarios",
-    label: "Horários",
-    mobileLabel: "Horas",
-    icon: <Clock className="w-5 h-5" />,
-  },
-  {
     href: "/gestao/relatorios",
-    label: "Relatórios",
-    mobileLabel: "Análises",
+    label: "Relatórios & CRM",
+    mobileLabel: "Relatórios",
     icon: <BarChart2 className="w-5 h-5" />,
   },
 ];
-
-type SubItem = {
-  href: string;
-  label: string;
-};
 
 type NavItem = {
   href?: string;
@@ -88,13 +70,12 @@ type NavItem = {
   mobileLabel?: string;
   exact?: boolean;
   icon?: React.ReactNode;
+  badge?: string;
   type?: "divider";
-  subItems?: SubItem[];
 };
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
 
   function handleLogout() {
     localStorage.removeItem("mb_auth");
@@ -105,100 +86,109 @@ export default function Sidebar() {
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
 
-  // Mobile: show only main 4 items
-  const mobileItems = (NAV_ITEMS as NavItem[]).filter((i) => !i.type && i.href && ["/gestao", "/gestao/vendas", "/gestao/clientes", "/gestao/relatorios"].includes(i.href));
+  const mobileItems = (NAV_ITEMS as NavItem[]).filter(
+    (i) => !i.type && i.href && ["/gestao/fidelidade", "/gestao/fidelidade/caixa", "/gestao/clientes", "/gestao/relatorios"].includes(i.href)
+  );
 
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-100 min-h-screen fixed left-0 top-0 z-40">
+      <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-100 min-h-screen fixed left-0 top-0 z-40 shadow-xs">
         <div className="p-6 border-b border-gray-100">
-          <Image src="/logo.png" alt="Melhor Bocado" width={140} height={65} className="h-10 w-auto" />
-          <p className="text-xs text-gray-400 mt-2 font-medium">Painel Administrativo</p>
+          <Link href="/gestao/fidelidade" className="block">
+            <Image
+              src="/logo.png"
+              alt="Melhor Bocado"
+              width={140}
+              height={65}
+              className="h-10 w-auto"
+              priority
+            />
+          </Link>
+          <div className="flex items-center gap-1.5 mt-2.5">
+            <span className="px-2 py-0.5 rounded-md bg-pink-50 text-[#e6398f] text-[10px] font-black uppercase tracking-wider">
+              Painel de Gestão
+            </span>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
-          <nav className="p-4 space-y-0.5">
-            {(NAV_ITEMS as NavItem[]).map((item, i) => {
-              if (item.type === "divider") {
-                return <div key={i} className="border-t border-gray-100 my-3" />;
-              }
-              const parentActive = isActive(item.href!, item.exact);
-              return (
-                <div key={item.href}>
-                  <Link
-                    href={item.href!}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                      parentActive
-                        ? "bg-[#e6398f]/10 text-[#e6398f]"
-                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    {item.icon && <div className="text-gray-400 group-hover:text-[#e6398f] transition-colors">{item.icon}</div>}
-                    <span className="font-bold">{item.label}</span>
-                  </Link>
-                  {item.subItems && parentActive && (
-                    <div className="ml-8 mt-0.5 space-y-0.5">
-                      {item.subItems.map((sub) => (
-                        <Link
-                          key={sub.href}
-                          href={sub.href}
-                          className={`block px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                            pathname === sub.href
-                              ? "text-[#e6398f] bg-[#e6398f]/5 font-bold"
-                              : "text-gray-400 hover:text-gray-600"
-                          }`}
-                        >
-                          {sub.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
+        <div className="flex-1 overflow-y-auto p-4 space-y-1">
+          {(NAV_ITEMS as NavItem[]).map((item, i) => {
+            if (item.type === "divider") {
+              return <div key={i} className="border-t border-gray-100 my-3" />;
+            }
+            const active = isActive(item.href!, item.exact);
+            return (
+              <Link
+                key={item.href}
+                href={item.href!}
+                className={`flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs font-black transition-all ${
+                  active
+                    ? "bg-[#e6398f] text-white shadow-md shadow-pink-500/20"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-pink-50/50"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={active ? "text-white" : "text-gray-400"}>
+                    {item.icon}
+                  </div>
+                  <span>{item.label}</span>
                 </div>
-              );
-            })}
-          </nav>
+
+                {item.badge && !active && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-pink-100 text-[#e6398f] text-[9px] font-black">
+                    {item.badge}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
         </div>
 
-        <div className="p-4 border-t border-gray-100 shrink-0">
+        {/* Rodapé da Sidebar */}
+        <div className="p-4 border-t border-gray-100 space-y-2">
+          <Link
+            href="/fidelidade/girar?unidade=tatuape"
+            target="_blank"
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-stone-900 text-white text-xs font-black hover:bg-stone-800 transition-all shadow-xs"
+          >
+            <Smartphone className="w-3.5 h-3.5 text-amber-300" />
+            <span>Simular Roleta</span>
+          </Link>
+
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
+            className="flex items-center justify-center gap-2 w-full py-2 rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 text-xs font-bold transition-all cursor-pointer"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            Sair
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sair do Sistema</span>
           </button>
         </div>
       </aside>
 
       {/* Mobile bottom nav */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-1 py-1 safe-bottom">
-        <div className="flex justify-around items-center">
-          {mobileItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href!}
-              className={`flex flex-col items-center gap-0.5 py-2 px-2 rounded-xl text-[10px] font-medium transition-all ${
-                isActive(item.href!, item.exact)
-                  ? "text-[#e6398f]"
-                  : "text-gray-400"
-              }`}
-            >
-              {item.icon}
-              {item.mobileLabel}
-            </Link>
-          ))}
-          <button
-            onClick={handleLogout}
-            className="flex flex-col items-center gap-0.5 py-2 px-2 text-[10px] font-medium text-gray-400"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            Sair
-          </button>
+      <nav
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-lg"
+        aria-label="Navegação mobile"
+      >
+        <div className="flex items-center justify-around px-2 py-2">
+          {mobileItems.map((item) => {
+            const active = isActive(item.href!, item.exact);
+            return (
+              <Link
+                key={item.href}
+                href={item.href!}
+                className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-2xl transition-all ${
+                  active
+                    ? "text-[#e6398f] font-black"
+                    : "text-gray-400 hover:text-gray-600 font-bold"
+                }`}
+              >
+                {item.icon}
+                <span className="text-[10px]">{item.mobileLabel || item.label}</span>
+              </Link>
+            );
+          })}
         </div>
       </nav>
     </>

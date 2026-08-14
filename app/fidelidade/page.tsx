@@ -74,76 +74,24 @@ export default function FidelidadePage() {
         <p className="text-sm text-gray-400 mt-1">Programa de Fidelidade</p>
       </div>
 
-      {/* Card principal */}
-      <div className="w-full max-w-sm">
-        <div className="bg-white rounded-3xl shadow-xl shadow-pink-100/50 p-6 border border-pink-50">
-          <h2 className="text-lg font-bold text-gray-800 text-center mb-1">
-            Gire a roleta e ganhe! 🎉
-          </h2>
-          <p className="text-sm text-gray-400 text-center mb-6">
-            Digite seu WhatsApp para começar
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="whatsapp"
-                className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
-              >
-                Seu WhatsApp
-              </label>
-              <input
-                id="whatsapp"
-                type="tel"
-                inputMode="numeric"
-                autoComplete="tel"
-                value={whatsapp}
-                onChange={(e) => handleChange(e.target.value)}
-                placeholder="(31) 99999-9999"
-                className="w-full px-4 py-4 rounded-2xl border-2 border-gray-200 focus:border-[#e6398f] bg-gray-50 outline-none transition-all text-lg text-gray-800 placeholder-gray-300 text-center font-semibold tracking-wider"
-                disabled={loading}
-              />
-              {erro && (
-                <p className="text-red-500 text-xs mt-2 text-center font-medium">
-                  {erro}
-                </p>
-              )}
-            </div>
+        {/* Card principal */}
+        <div className="w-full max-w-sm">
+          <div className="bg-white rounded-3xl shadow-xl shadow-pink-100/50 p-6 border border-pink-50 text-center">
+            <h2 className="text-xl font-extrabold text-gray-800 mb-2">
+              Gire a roleta e ganhe! 🎉
+            </h2>
+            <p className="text-sm text-gray-500 mb-6">
+              Escaneou o QR Code? Preencha seu nome e gire para resgatar seu prêmio.
+            </p>
 
             <button
-              type="submit"
-              disabled={loading || whatsapp.replace(/\D/g, "").length < 10}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#e6398f] to-[#b51e6c] text-white font-bold text-base shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/30 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
+              onClick={() => router.push("/fidelidade/girar")}
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#e6398f] to-[#b51e6c] text-white font-black text-lg shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/30 active:scale-[0.98] transition-all min-h-[52px] flex items-center justify-center gap-2"
             >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg
-                    className="animate-spin h-5 w-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    />
-                  </svg>
-                  Verificando...
-                </span>
-              ) : (
-                "Continuar"
-              )}
+              <span>🎰</span>
+              <span>Ir para a Roleta de Prêmios</span>
             </button>
-          </form>
-        </div>
+          </div>
 
         {/* Link para meus cupons */}
         <button

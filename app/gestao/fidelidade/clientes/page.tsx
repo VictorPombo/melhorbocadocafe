@@ -1,72 +1,39 @@
 "use client";
 
-import { useState } from "react";
-import { MOCK_CLIENTES_FIDELIDADE } from "@/lib/fidelidade/mock-data";
+import { useState, useEffect } from "react";
+import type { Cliente } from "@/lib/fidelidade/types";
 import { useRouter } from "next/navigation";
-
-// Clientes expandidos com dados estratégicos
-const CLIENTES_ENRIQUECIDOS = [
-  ...MOCK_CLIENTES_FIDELIDADE,
-  {
-    id: "cli_4",
-    nome: "Carlos Lima",
-    whatsapp: "31999990004",
-    nascimento: "1988-11-10",
-    canal_aquisicao: "instagram" as const,
-    aceite_lgpd: true,
-    aceite_lgpd_em: "2026-06-20T10:00:00Z",
-    aceite_lgpd_texto_versao: "1.0",
-    criado_em: "2026-06-20T10:00:00Z",
-    primeira_compra_em: "2026-06-21T10:00:00Z",
-    ultima_compra_em: "2026-07-14T10:00:00Z",
-    total_gasto: 312.5,
-    ticket_medio: 31.25,
-    qtd_compras: 10,
-    loja_preferida: "loja_1",
-    horario_preferido: "15:00",
-    ltv: 312.5,
-    vip: true,
-  },
-  {
-    id: "cli_5",
-    nome: "Fernanda Costa",
-    whatsapp: "31999990005",
-    nascimento: "1992-08-25",
-    canal_aquisicao: "tiktok" as const,
-    aceite_lgpd: true,
-    aceite_lgpd_em: "2026-07-01T10:00:00Z",
-    aceite_lgpd_texto_versao: "1.0",
-    criado_em: "2026-07-01T10:00:00Z",
-    primeira_compra_em: "2026-07-02T10:00:00Z",
-    ultima_compra_em: "2026-07-12T10:00:00Z",
-    total_gasto: 156.8,
-    ticket_medio: 26.13,
-    qtd_compras: 6,
-    loja_preferida: "loja_1",
-    horario_preferido: "10:00",
-    ltv: 156.8,
-    vip: false,
-  },
-];
 
 export default function ClientesFidelidadePage() {
   const router = useRouter();
+  const [listaClientes, setListaClientes] = useState<Cliente[]>([]);
   const [busca, setBusca] = useState("");
   const [filtro, setFiltro] = useState<"todos" | "vip" | "risco" | "novos">(
     "todos"
   );
 
+  useEffect(() => {
+    fetch("/api/fidelidade/metricas")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.sucesso && Array.isArray(data.clientes)) {
+          setListaClientes(data.clientes);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const agora = new Date();
   const quinzeDiasAtras = new Date(agora.getTime() - 15 * 24 * 60 * 60 * 1000);
   const seteDiasAtras = new Date(agora.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-  const clientes = CLIENTES_ENRIQUECIDOS.filter((c) => {
+  const clientes = listaClientes.filter((c) => {
     // Filtro por busca
     if (busca) {
       const term = busca.toLowerCase();
       if (
         !c.nome.toLowerCase().includes(term) &&
-        !c.whatsapp.includes(term)
+        !(c.whatsapp || "").includes(term)
       )
         return false;
     }
@@ -93,7 +60,7 @@ export default function ClientesFidelidadePage() {
           Clientes Fidelidade
         </h1>
         <p className="text-sm text-gray-400 mt-1">
-          {CLIENTES_ENRIQUECIDOS.length} clientes cadastrados
+          {listaClientes.length} {listaClientes.length === 1 ? "cliente cadastrado" : "clientes cadastrados"}
         </p>
       </div>
 
@@ -129,80 +96,65 @@ export default function ClientesFidelidadePage() {
         </div>
       </div>
 
-      {/* Lista */}
-      <div className="space-y-2">
-        {clientes.map((cliente) => {
-          const diasSemCompra = cliente.ultima_compra_em
-            ? Math.floor(
-                (agora.getTime() -
-                  new Date(cliente.ultima_compra_em).getTime()) /
-                  (24 * 60 * 60 * 1000)
-              )
-            : null;
-          const emRisco =
-            diasSemCompra !== null &&
-            diasSemCompra > 15 &&
-            cliente.qtd_compras >= 2;
+      {/* Lista ou Estado Vazio */}
+      {clientes.length > 0 ? (
+        <div className="space-y-2">
+          {clientes.map((cliente) => {
+            const diasSemCompra = cliente.ultima_compra_em
+              ? Math.floor(
+                  (agora.getTime() -
+                    new Date(cliente.ultima_compra_em).getTime()) /
+                    (24 * 60 * 60 * 1000)
+                )
+              : null;
+            const emRisco =
+              diasSemCompra !== null &&
+              diasSemCompra > 15 &&
+              cliente.qtd_compras >= 2;
 
-          return (
-            <div
-              key={cliente.id}
-              className={`bg-white rounded-2xl border p-4 hover:shadow-md transition-all cursor-pointer ${
-                emRisco ? "border-red-200" : "border-gray-100"
-              }`}
-            >
-              <div className="flex items-center gap-4">
-                {/* Avatar */}
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                    cliente.vip
-                      ? "bg-gradient-to-br from-yellow-400 to-orange-500"
-                      : "bg-gradient-to-br from-gray-300 to-gray-400"
-                  }`}
-                >
-                  {cliente.nome.charAt(0)}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-bold text-gray-800 truncate">
-                      {cliente.nome}
-                    </p>
-                    {cliente.vip && <span className="text-xs">👑</span>}
-                    {emRisco && <span className="text-xs">⚠️</span>}
+            return (
+              <div
+                key={cliente.id}
+                onClick={() => router.push(`/gestao/clientes/${cliente.id}`)}
+                className="bg-white p-4 rounded-2xl border border-gray-100 flex items-center justify-between hover:shadow-md transition-all cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#e6398f] to-[#5c2d16] text-white flex items-center justify-center font-bold text-sm">
+                    {cliente.nome.charAt(0)}
                   </div>
-                  <p className="text-xs text-gray-400">
-                    {cliente.qtd_compras} compras • Ticket R${" "}
-                    {cliente.ticket_medio.toFixed(2)}
-                  </p>
-                </div>
-
-                {/* Métricas */}
-                <div className="text-right hidden sm:block">
-                  <p className="text-sm font-extrabold text-gray-800">
-                    R$ {cliente.total_gasto.toFixed(2)}
-                  </p>
-                  <p className="text-[10px] text-gray-400">
-                    {diasSemCompra !== null
-                      ? diasSemCompra === 0
-                        ? "Comprou hoje"
-                        : `${diasSemCompra}d sem comprar`
-                      : "Sem compras"}
-                  </p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-gray-800">
+                        {cliente.nome}
+                      </span>
+                      {cliente.vip && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">
+                          VIP
+                        </span>
+                      )}
+                      {emRisco && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600">
+                          Em Risco
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      {cliente.whatsapp || cliente.celular || "Sem WhatsApp"} • {cliente.qtd_compras}{" "}
+                      {cliente.qtd_compras === 1 ? "giro" : "giros"}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-
-        {clientes.length === 0 && (
-          <div className="text-center py-12 text-gray-300">
-            <p className="text-4xl mb-2">🔍</p>
-            <p className="text-sm">Nenhum cliente encontrado</p>
-          </div>
-        )}
-      </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="text-center py-16 bg-white rounded-3xl border border-dashed border-gray-200">
+          <p className="text-4xl mb-2">👥</p>
+          <p className="text-sm font-bold text-gray-700">Nenhum cliente cadastrado ainda</p>
+          <p className="text-xs text-gray-400 mt-1">Conforme os clientes giram a roleta no balcão, os cadastros reais aparecerão aqui.</p>
+        </div>
+      )}
     </div>
   );
 }

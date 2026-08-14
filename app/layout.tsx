@@ -1,6 +1,5 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fredoka, Inter } from "next/font/google";
-import ConditionalHeader from "@/components/ConditionalHeader";
 import { LOJA } from "@/lib/config";
 import "./globals.css";
 
@@ -19,39 +18,22 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: LOJA.seo.title,
+    default: "Melhor Bocado — Programa de Fidelidade & Roleta da Sorte",
     template: `%s | ${LOJA.nomeCurto}`,
   },
-  description: LOJA.seo.description,
-  keywords: [
-    "donuts",
-    "donuts americanos",
-    "café",
-    "Tatuapé",
-    "São Paulo",
-    "Melhor Bocado",
-    "donut delivery",
-    "confeitaria",
-    "donuts artesanais",
-  ],
-  openGraph: {
-    title: LOJA.seo.title,
-    description: LOJA.seo.description,
-    images: [{ url: LOJA.seo.ogImage, width: 1200, height: 630 }],
-    locale: "pt_BR",
-    type: "website",
-    siteName: LOJA.nome,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: LOJA.seo.title,
-    description: LOJA.seo.description,
-    images: [LOJA.seo.ogImage],
-  },
+  description: "Sistema oficial de fidelidade, roleta de prêmios e recompensas da Melhor Bocado Café.",
   robots: {
-    index: true,
-    follow: true,
+    index: false,
+    follow: false,
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -61,8 +43,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${fredoka.variable} ${inter.variable}`}>
-      <body className="bg-white text-gray-900 antialiased">
-        <ConditionalHeader />
+      <body className="bg-white text-gray-900 antialiased min-h-screen">
         <main>{children}</main>
       </body>
     </html>

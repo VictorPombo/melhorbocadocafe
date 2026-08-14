@@ -2,226 +2,218 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-interface CupomItem {
-  id: string;
-  codigo_cupom: string;
-  status: string;
-  criado_em: string;
-  expira_em: string;
-  utilizado_em: string | null;
-  premio: { nome: string; tipo: string; valor: number } | null;
-}
+import type { Cupom } from "@/lib/fidelidade/types";
+import { Gift, ChevronRight, CheckCircle2, Clock, RotateCcw } from "lucide-react";
 
 export default function MeusCuponsPage() {
   const router = useRouter();
   const [whatsapp, setWhatsapp] = useState("");
   const [loading, setLoading] = useState(false);
-  const [erro, setErro] = useState("");
-  const [nomeCliente, setNomeCliente] = useState("");
-  const [cupons, setCupons] = useState<CupomItem[] | null>(null);
-  const [tab, setTab] = useState<"disponivel" | "utilizado" | "expirado">(
-    "disponivel"
-  );
-
-  function handleChange(value: string) {
-    const digits = value.replace(/\D/g, "").slice(0, 11);
-    let masked = digits;
-    if (digits.length > 2) masked = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    if (digits.length > 7)
-      masked = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-    setWhatsapp(masked);
-    setErro("");
-  }
+  const [cupons, setCupons] = useState<Cupom[] | null>(null);
+  const [nomeCliente, setNomeCliente] = useState<string>("");
 
   async function handleBuscar(e: React.FormEvent) {
     e.preventDefault();
-    const digits = whatsapp.replace(/\D/g, "");
-    if (digits.length < 10) {
-      setErro("Digite um WhatsApp válido com DDD");
-      return;
-    }
+    if (!whatsapp) return;
 
     setLoading(true);
-    setErro("");
-
     try {
-      const res = await fetch("/api/fidelidade/cupons", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ whatsapp: digits }),
-      });
-
+      const cleanWpp = whatsapp.replace(/\D/g, "");
+      const res = await fetch(`/api/fidelidade/cupons?whatsapp=${cleanWpp}`);
       const data = await res.json();
 
-      if (!res.ok) {
-        setErro(
-          res.status === 404
-            ? "WhatsApp não encontrado. Faça seu cadastro primeiro!"
-            : data.erro || "Algo deu errado."
-        );
-        return;
+      if (data.sucesso) {
+        setCupons(data.cupons || []);
+        setNomeCliente(data.cliente_nome || "");
+      } else {
+        setCupons([]);
       }
-
-      setNomeCliente(data.cliente.nome);
-      setCupons(data.cupons);
     } catch {
-      setErro("Sem conexão. Tente novamente.");
+      setCupons([]);
     } finally {
       setLoading(false);
     }
   }
 
-  // Se ainda não buscou, mostra form
+  // Formulário inicial para informar o WhatsApp
   if (cupons === null) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
-        <div className="text-center mb-8">
-          <div className="text-4xl mb-3">🎫</div>
-          <h1 className="text-xl font-extrabold text-gray-800">Meus Cupons</h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Digite seu WhatsApp para ver seus cupons
-          </p>
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 max-w-sm mx-auto w-full text-center">
+        <div className="w-16 h-16 rounded-3xl bg-pink-100/80 text-[#e6398f] flex items-center justify-center text-3xl shadow-sm mb-4">
+          🎁
         </div>
+        <h1 className="text-xl font-black text-gray-900 mb-1">
+          Consultar Meus Cupons
+        </h1>
+        <p className="text-xs text-gray-500 mb-6">
+          Digite seu WhatsApp para acessar todos os seus prêmios ganhos na Roleta da Sorte.
+        </p>
 
-        <form onSubmit={handleBuscar} className="w-full max-w-sm space-y-4">
+        <form onSubmit={handleBuscar} className="w-full space-y-3">
           <input
             type="tel"
-            inputMode="numeric"
+            placeholder="(11) 99999-9999"
             value={whatsapp}
-            onChange={(e) => handleChange(e.target.value)}
-            placeholder="(31) 99999-9999"
-            className="w-full px-4 py-4 rounded-2xl border-2 border-gray-200 focus:border-[#e6398f] bg-gray-50 outline-none text-lg text-center font-semibold tracking-wider text-gray-800 placeholder-gray-300"
-            disabled={loading}
+            onChange={(e) => setWhatsapp(e.target.value)}
+            className="w-full px-4 py-3.5 rounded-2xl border-2 border-pink-200 bg-white text-center text-base font-black text-gray-900 focus:border-[#e6398f] outline-none shadow-xs"
+            required
+            autoFocus
           />
-          {erro && (
-            <p className="text-red-500 text-sm text-center font-medium bg-red-50 rounded-xl p-3">
-              {erro}
-            </p>
-          )}
+
           <button
             type="submit"
             disabled={loading || whatsapp.replace(/\D/g, "").length < 10}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#e6398f] to-[#b51e6c] text-white font-bold shadow-lg shadow-pink-500/25 disabled:opacity-50 min-h-[48px]"
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#e6398f] to-[#b51e6c] hover:opacity-95 text-white text-xs font-black shadow-md shadow-pink-500/25 disabled:opacity-50 transition-all cursor-pointer"
           >
-            {loading ? "Buscando..." : "Ver meus cupons"}
+            {loading ? "Buscando Cupons..." : "Ver Meus Prêmios"}
           </button>
         </form>
 
         <button
-          onClick={() => router.push("/fidelidade")}
-          className="mt-4 text-sm text-gray-400 hover:underline"
+          onClick={() => router.push("/fidelidade/girar")}
+          className="mt-6 text-xs font-black text-[#e6398f] hover:underline"
         >
-          ← Voltar ao início
+          ← Ir para a Roleta da Sorte
         </button>
       </div>
     );
   }
 
-  // Filtra por tab
-  const cuponsFiltrados = cupons.filter((c) => {
-    if (tab === "disponivel") return c.status === "disponivel";
-    if (tab === "utilizado") return c.status === "utilizado";
-    return c.status === "expirado";
-  });
+  // Se não tem cupons cadastrados para esse número
+  if (cupons.length === 0) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-10 max-w-sm mx-auto space-y-4">
+        <div className="w-16 h-16 rounded-3xl bg-gray-100 text-gray-400 flex items-center justify-center text-3xl">
+          🎁
+        </div>
+        <div>
+          <h2 className="text-lg font-black text-gray-900">Nenhum cupom encontrado</h2>
+          <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+            O número <strong>{whatsapp}</strong> ainda não possui cupons registrados.
+          </p>
+          <p className="text-[11px] text-gray-400 mt-1">
+            Ao realizar seu pedido no balcão de qualquer unidade, aponte a câmera para o QR Code da comanda e gire a roleta para concorrer a prêmios!
+          </p>
+        </div>
 
+        <div className="w-full pt-4 space-y-2">
+          <button
+            onClick={() => setCupons(null)}
+            className="w-full py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-extrabold text-xs transition-all cursor-pointer"
+          >
+            Consultar outro WhatsApp
+          </button>
+          <button
+            onClick={() => router.push("/fidelidade/girar")}
+            className="w-full py-3 text-xs font-black text-[#e6398f] hover:underline cursor-pointer"
+          >
+            ← Ir para a Roleta da Sorte
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Exibe a lista completa de todos os cupons ganhos
   return (
-    <div className="flex-1 flex flex-col px-6 py-8">
-      <div className="text-center mb-6">
+    <div className="flex-1 flex flex-col px-4 sm:px-6 py-6 max-w-md mx-auto w-full">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-xl font-black text-gray-900">
+            Cupons de {nomeCliente.split(" ")[0] || "Cliente"} 🎁
+          </h1>
+          <p className="text-xs text-gray-400 mt-0.5">
+            {cupons.length} {cupons.length === 1 ? "prêmio registrado" : "prêmios registrados"}
+          </p>
+        </div>
         <button
           onClick={() => setCupons(null)}
-          className="text-gray-400 text-sm mb-3 inline-block"
+          className="text-xs text-[#e6398f] font-black hover:underline cursor-pointer"
         >
-          ← Voltar
+          Trocar telefone
         </button>
-        <h1 className="text-xl font-extrabold text-gray-800">
-          Olá, {nomeCliente.split(" ")[0]}! 🎫
-        </h1>
-        <p className="text-sm text-gray-400 mt-1">
-          {cupons.length === 0
-            ? "Você ainda não tem cupons"
-            : `${cupons.length} cupom(s) no total`}
-        </p>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 rounded-2xl p-1 mb-6">
-        {(["disponivel", "utilizado", "expirado"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`flex-1 py-2 text-sm font-semibold rounded-xl transition-all ${
-              tab === t
-                ? "bg-white text-[#e6398f] shadow-sm"
-                : "text-gray-400"
-            }`}
-          >
-            {t === "disponivel"
-              ? "Ativos"
-              : t === "utilizado"
-              ? "Usados"
-              : "Expirados"}
-          </button>
-        ))}
-      </div>
-
-      {/* Lista de cupons */}
       <div className="space-y-3 flex-1">
-        {cuponsFiltrados.length === 0 && (
-          <div className="text-center text-gray-300 py-8">
-            <div className="text-3xl mb-2">📭</div>
-            <p className="text-sm">Nenhum cupom nesta categoria</p>
-          </div>
-        )}
+        {cupons.map((c) => {
+          const isUsado = c.status === "utilizado";
+          const dataUso = c.utilizado_em
+            ? new Date(c.utilizado_em).toLocaleDateString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : null;
 
-        {cuponsFiltrados.map((cupom) => (
-          <button
-            key={cupom.id}
-            onClick={() => router.push(`/fidelidade/premio/${cupom.id}`)}
-            className="w-full bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-left flex items-center gap-4 active:scale-[0.98] transition-all"
-          >
-            <div className="text-2xl">
-              {cupom.premio?.tipo === "produto" ? "🍩" : "💰"}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-bold text-gray-800 text-sm truncate">
-                {cupom.premio?.nome || "Prêmio"}
-              </p>
-              <p className="text-xs text-gray-400 font-mono">
-                {cupom.codigo_cupom}
-              </p>
-            </div>
-            <div className="text-right">
-              <span
-                className={`text-xs font-bold ${
-                  cupom.status === "disponivel"
-                    ? "text-green-500"
-                    : cupom.status === "utilizado"
-                    ? "text-gray-400"
-                    : "text-red-400"
-                }`}
-              >
-                {cupom.status === "disponivel"
-                  ? "Ativo"
-                  : cupom.status === "utilizado"
-                  ? "Usado"
-                  : "Expirado"}
-              </span>
-              <p className="text-[10px] text-gray-300 mt-1">
-                {new Date(cupom.expira_em).toLocaleDateString("pt-BR")}
-              </p>
-            </div>
-          </button>
-        ))}
+          return (
+            <button
+              key={c.id}
+              onClick={() => router.push(`/fidelidade/premio/${c.id}`)}
+              className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between cursor-pointer ${
+                isUsado
+                  ? "bg-gray-50/80 border-gray-200 opacity-60"
+                  : "bg-white border-pink-200 shadow-sm hover:border-pink-400 hover:shadow-md"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 ${
+                    isUsado ? "bg-gray-200" : "bg-pink-100"
+                  }`}
+                >
+                  {c.premio?.icone || "🎁"}
+                </div>
+                <div>
+                  <span
+                    className={`text-[10px] font-black uppercase tracking-wider ${
+                      isUsado ? "text-gray-400" : "text-[#e6398f]"
+                    }`}
+                  >
+                    {c.codigo_cupom}
+                  </span>
+                  <h3 className="font-extrabold text-sm text-gray-900 leading-tight">
+                    {c.premio?.nome}
+                  </h3>
+                  {isUsado && dataUso ? (
+                    <p className="text-[10px] text-gray-500 mt-0.5">
+                      ✓ Resgatado em {dataUso}
+                    </p>
+                  ) : (
+                    <p className="text-[10px] text-emerald-600 font-bold mt-0.5">
+                      ✓ Válido para resgate no balcão
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-right shrink-0">
+                <span
+                  className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                    isUsado
+                      ? "bg-gray-200 text-gray-600"
+                      : "bg-green-100 text-green-700"
+                  }`}
+                >
+                  {isUsado ? "Já Utilizado" : "Disponível"}
+                </span>
+                <p className="text-[10px] text-gray-400 mt-1.5 flex items-center justify-end gap-0.5 font-medium">
+                  Ver detalhes →
+                </p>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
-      {/* CTA */}
-      <button
-        onClick={() => router.push("/fidelidade")}
-        className="mt-6 w-full py-4 rounded-2xl bg-gradient-to-r from-[#e6398f] to-[#b51e6c] text-white font-bold shadow-lg shadow-pink-500/25 min-h-[48px]"
-      >
-        Girar a roleta novamente
-      </button>
+      <div className="mt-8 pt-4 border-t border-gray-100 text-center">
+        <button
+          onClick={() => router.push("/fidelidade/girar")}
+          className="text-xs text-[#e6398f] hover:text-[#b51e6c] font-black cursor-pointer"
+        >
+          ← Ir para a Roleta da Sorte
+        </button>
+      </div>
     </div>
   );
 }

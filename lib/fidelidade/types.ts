@@ -13,18 +13,38 @@ export type CanalAquisicao =
   | "ifood"
   | "indicacao"
   | "passei_em_frente"
+  | "roleta_qrcode"
   | "outro";
+
+export interface UnidadeLoja {
+  id: string;
+  nome: string;
+  cidade: string;
+  bairro?: string;
+  endereco?: string;
+  telefone?: string;
+  caixas?: string[];
+  ativa?: boolean;
+}
+
+export const UNIDADES_LOJA: UnidadeLoja[] = [
+  { id: "tatuape", nome: "Tatuapé (Matriz)", cidade: "São Paulo - SP", bairro: "Tatuapé", ativa: true, caixas: ["Caixa 01", "Caixa 02", "Totem Autoatendimento"] },
+  { id: "mooca", nome: "Mooca", cidade: "São Paulo - SP", bairro: "Mooca", ativa: true, caixas: ["Caixa 01", "Caixa 02"] },
+  { id: "campo_belo", nome: "Campo Belo", cidade: "São Paulo - SP", bairro: "Campo Belo", ativa: true, caixas: ["Caixa 01"] },
+  { id: "santana", nome: "Santana", cidade: "São Paulo - SP", bairro: "Santana", ativa: true, caixas: ["Caixa 01", "Caixa 02"] },
+  { id: "santo_amaro", nome: "Santo Amaro", cidade: "São Paulo - SP", bairro: "Santo Amaro", ativa: true, caixas: ["Caixa 01"] },
+];
 
 export interface Cliente {
   id: string;
   nome: string;
-  /** Chave de identidade — WhatsApp com DDD, sem +55 (ex: "31999998888") */
-  whatsapp: string;
-  nascimento: string; // YYYY-MM-DD
+  whatsapp?: string;
+  celular?: string;
+  nascimento: string;
   canal_aquisicao: CanalAquisicao;
   aceite_lgpd: boolean;
-  aceite_lgpd_em: string | null;
-  aceite_lgpd_texto_versao: string | null;
+  aceite_lgpd_em: string;
+  aceite_lgpd_texto_versao: string;
   criado_em: string;
   primeira_compra_em: string | null;
   ultima_compra_em: string | null;
@@ -35,19 +55,19 @@ export interface Cliente {
   horario_preferido: string | null;
   ltv: number;
   vip: boolean;
+  unidade_cadastro?: string;
 }
-
-export type StatusCodigoVinculo = "aguardando" | "usado" | "expirado";
 
 export interface CodigoVinculo {
   id: string;
-  /** Código de 4 dígitos exibido ao cliente */
   codigo: string;
   loja: string;
   caixa: string;
   criado_em: string;
   expira_em: string;
-  status: StatusCodigoVinculo;
+  status: "aguardando" | "utilizado" | "expirado";
+  utilizado_em?: string | null;
+  utilizado_por_cliente_id?: string | null;
 }
 
 export interface Venda {
@@ -78,43 +98,81 @@ export interface VendaItem {
 
 export interface Giro {
   id: string;
-  cliente_id: string;
-  /** Pode ser null se a venda ainda não foi casada (vínculo pendente) */
+  visitor_id: string;
+  cliente_id: string | null;
+  cliente_nome?: string;
+  cliente_nascimento?: string;
+  cliente_whatsapp?: string;
+  unidade: string;
+  visita_numero: number;
   venda_id: string | null;
   codigo_vinculo_id: string;
   premio_id: string;
   criado_em: string;
 }
 
-export type TipoPremio = "produto" | "desconto";
+export type TipoPremio = "produto" | "desconto" | "desconto_reais";
 
 export interface Premio {
   id: string;
   nome: string;
   tipo: TipoPremio;
-  /** Valor do desconto em reais ou descrição do produto */
+  /** Valor do desconto em reais ou porcentagem ou descrição do produto */
   valor: number;
   /** Probabilidade em porcentagem (0-100) */
   probabilidade: number;
+  /** Posição da fatia na roleta de 1 a 10 */
+  posicao_roleta: number;
   ativo: boolean;
   limite_diario: number | null;
   limite_mensal: number | null;
-  imagem: string | null;
+  cor_fatia: string;
+  icone: string;
+  imagem?: string | null;
 }
 
 export type StatusCupom = "disponivel" | "utilizado" | "expirado";
 
+export type ModoVisita = "roleta" | "fixo";
+
+export interface PremioFixoTrilha {
+  nome: string;
+  tipo: TipoPremio;
+  valor: number;
+  icone: string;
+  cor: string;
+}
+
+export interface EtapaTrilhaVisita {
+  visita: number; // 1 a 10
+  titulo: string;
+  modo: ModoVisita; // "roleta" ou "fixo"
+  premio_fixo?: PremioFixoTrilha;
+  premios_roleta?: Premio[]; // Roleta personalizada exclusiva desta etapa
+  descricao: string;
+  ativo: boolean;
+}
+
 export interface Cupom {
   id: string;
-  cliente_id: string;
+  visitor_id: string;
+  cliente_id: string | null;
+  cliente_nome?: string;
+  cliente_nascimento?: string;
+  cliente_whatsapp?: string;
+  unidade: string;
+  visita_numero: number;
   premio_id: string;
   giro_id: string;
+  origem?: "roleta" | "trilha_fixa";
   /** Código alfanumérico do cupom exibido ao cliente */
   codigo_cupom: string;
   status: StatusCupom;
   criado_em: string;
   expira_em: string;
   utilizado_em: string | null;
+  balconista_resgatou?: string | null;
+  premio?: Premio | null;
 }
 
 export interface Config {

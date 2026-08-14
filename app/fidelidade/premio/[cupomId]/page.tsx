@@ -112,8 +112,13 @@ export default function PremioPage({
               {premio?.nome || "Prêmio"}
             </h1>
             {premio?.tipo === "desconto" && (
-              <p className="text-sm text-gray-400">
-                {premio.valor}% de desconto na próxima compra
+              <p className="text-sm font-bold text-[#e6398f]">
+                {premio.valor}% de desconto na sua compra
+              </p>
+            )}
+            {premio?.tipo === "desconto_reais" && (
+              <p className="text-sm font-bold text-emerald-600">
+                R$ {Number(premio.valor || 0).toFixed(2).replace(".", ",")} de desconto na sua compra
               </p>
             )}
 
@@ -158,23 +163,16 @@ export default function PremioPage({
         {/* Ações */}
         <div className="mt-6 space-y-3">
           <button
-            onClick={() => {
-              const text = `🍩 Melhor Bocado - Cupom: ${cupom.codigo_cupom}\n${premio?.nome}\nVálido até ${new Date(cupom.expira_em).toLocaleDateString("pt-BR")}`;
-              if (navigator.share) {
-                navigator.share({ text });
-              } else {
-                navigator.clipboard.writeText(text);
-              }
-            }}
-            className="w-full py-3 rounded-2xl border-2 border-[#e6398f] text-[#e6398f] font-bold min-h-[48px]"
-          >
-            Compartilhar cupom
-          </button>
-          <button
             onClick={() => router.push("/fidelidade/meus-cupons")}
-            className="w-full py-3 rounded-2xl text-gray-400 font-medium min-h-[48px]"
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#e6398f] to-[#b51e6c] text-white font-bold shadow-lg shadow-pink-500/25 min-h-[48px] active:scale-[0.98] transition-all"
           >
             Ver todos os meus cupons
+          </button>
+          <button
+            onClick={() => router.push("/fidelidade/girar")}
+            className="w-full py-3 rounded-2xl text-[#e6398f] hover:bg-pink-50 font-black text-xs transition-all cursor-pointer"
+          >
+            ← Voltar para a Roleta de Prêmios
           </button>
         </div>
       </div>

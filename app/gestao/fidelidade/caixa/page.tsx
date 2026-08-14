@@ -1,181 +1,405 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { UNIDADES_LOJA } from "@/lib/fidelidade/types";
 
 export default function CaixaFidelidadePage() {
-  const [codigo, setCodigo] = useState<string | null>(null);
-  const [expiraEm, setExpiraEm] = useState<string | null>(null);
-  const [loadingCodigo, setLoadingCodigo] = useState(false);
-  
-  // Estado do validador de cupons
+  const [unidade, setUnidade] = useState("tatuape");
   const [cupomInput, setCupomInput] = useState("");
-  const [validacaoStatus, setValidacaoStatus] = useState<"idle" | "valido" | "invalido">("idle");
-  const [cupomInfo, setCupomInfo] = useState<{ premio: string; cliente: string } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [resgatando, setResgatando] = useState(false);
+  const [erroMsg, setErroMsg] = useState("");
+  const [sucessoMsg, setSucessoMsg] = useState("");
 
-  // Gera novo código
-  const gerarCodigo = useCallback(async () => {
-    setLoadingCodigo(true);
-    try {
-      const res = await fetch("/api/fidelidade/codigo-vinculo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ loja: "loja_1", caixa: "1" }),
-      });
-      const data = await res.json();
-      if (data.sucesso) {
-        setCodigo(data.codigo);
-        setExpiraEm(data.expira_em);
-      }
-    } catch {
-      // Falha silenciosa
-    } finally {
-      setLoadingCodigo(false);
+  const [validacaoData, setValidacaoData] = useState<{
+    cupom: {
+      id: string;
+      codigo_cupom: string;
+      status: "disponivel" | "utilizado" | "expirado";
+      visita_numero?: number | null;
+      cliente_nome?: string | null;
+      cliente_nascimento?: string | null;
+      unidade_nome: string;
+      expira_em?: string;
+      utilizado_em?: string | null;
+    };
+    premio: {
+      nome: string;
+      tipo: string;
+      valor: number;
+      icone: string;
+    };
+  } | null>(null);
+
+  interface ItemResgateCaixa {
+    codigo: string;
+    cliente: string;
+    premio: string;
+    dataHora: string;
+    unidadeId: string;
+    unidadeNome: string;
+  }
+
+  const [todosResgates, setTodosResgates] = useState<ItemResgateCaixa[]>([]);
+  const [listaUnidades, setListaUnidades] = useState(UNIDADES_LOJA);
+
+  // Carregar histórico inicial de resgates reais e unidade logada
+  useEffect(() => {
+    const savedUnidade = localStorage.getItem("mb_unidade_id");
+    if (savedUnidade && savedUnidade !== "todas") {
+      setUnidade(savedUnidade);
     }
+
+    fetch("/api/fidelidade/unidades")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.sucesso && Array.isArray(data.unidades)) {
+          setListaUnidades(data.unidades);
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/fidelidade/metricas")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.sucesso && Array.isArray(data.resgatesRecentes)) {
+          setTodosResgates(
+            data.resgatesRecentes.map((r: any) => ({
+              codigo: r.codigo,
+              cliente: r.cliente,
+              premio: r.premio,
+              dataHora: r.dataHora || r.hora,
+              unidadeId: r.unidade_id || "tatuape",
+              unidadeNome: r.unidade || "Tatuapé",
+            }))
+          );
+        }
+      })
+      .catch(() => {});
   }, []);
 
-  // Gera código inicial
-  useEffect(() => {
-    gerarCodigo();
-  }, [gerarCodigo]);
-
-  // Timer de renovação automática (a cada 2 min pra simplificar a visão do caixa)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      gerarCodigo();
-    }, 120000); // 2 minutos
-    return () => clearInterval(interval);
-  }, [gerarCodigo]);
-
-  // Função mockada para validar cupom
-  function handleValidarCupom(e: React.FormEvent) {
+  // Buscar dados do cupom no endpoint de validação
+  async function handleBuscarCupom(e: React.FormEvent) {
     e.preventDefault();
-    if (!cupomInput.trim()) return;
+    const cleanCode = cupomInput.trim();
+    if (!cleanCode) return;
 
-    // Lógica mockada: se tiver 6 caracteres, assume válido para apresentação
-    if (cupomInput.length >= 5) {
-      setValidacaoStatus("valido");
-      setCupomInfo({ premio: "Donut Tradicional", cliente: "Cliente Exemplo" });
-    } else {
-      setValidacaoStatus("invalido");
-      setCupomInfo(null);
+    setLoading(true);
+    setErroMsg("");
+    setSucessoMsg("");
+    setValidacaoData(null);
+
+    try {
+      const res = await fetch(`/api/fidelidade/cupom/validar?codigo=${encodeURIComponent(cleanCode)}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErroMsg(data.erro || "Cupom não encontrado.");
+      } else {
+        setValidacaoData(data);
+      }
+    } catch {
+      setErroMsg("Erro de conexão. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
   }
 
-  function handleUsarCupom() {
-    alert("Cupom marcado como utilizado!");
-    setCupomInput("");
-    setValidacaoStatus("idle");
-    setCupomInfo(null);
+  // Confirmar o resgate pelo Balconista
+  async function handleUsarCupom() {
+    if (!validacaoData) return;
+
+    setResgatando(true);
+    setErroMsg("");
+
+    try {
+      const res = await fetch("/api/fidelidade/cupom/resgatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          codigo_cupom: validacaoData.cupom.codigo_cupom,
+          balconista: `Atendente - ${unidade.toUpperCase()}`,
+          unidade: unidade,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErroMsg(data.erro || "Não foi possível resgatar o cupom.");
+      } else {
+        setSucessoMsg(
+          `✓ Prêmio "${validacaoData.premio.nome}" entregue com sucesso a ${validacaoData.cupom.cliente_nome || "Cliente"}!`
+        );
+
+        const agora = new Date();
+        const dataFmt = agora.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+        const horaFmt = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
+        // Adiciona ao histórico isolado da unidade atual
+        setTodosResgates((prev) => [
+          {
+            codigo: validacaoData.cupom.codigo_cupom,
+            cliente: validacaoData.cupom.cliente_nome || "Cliente",
+            premio: validacaoData.premio.nome,
+            dataHora: `${dataFmt} • ${horaFmt}`,
+            unidadeId: unidade,
+            unidadeNome: listaUnidades.find((u) => u.id === unidade)?.nome || unidade,
+          },
+          ...prev.filter((p) => p.codigo !== validacaoData.cupom.codigo_cupom),
+        ]);
+
+        setValidacaoData(null);
+        setCupomInput("");
+      }
+    } catch {
+      setErroMsg("Erro ao processar resgate. Tente novamente.");
+    } finally {
+      setResgatando(false);
+    }
   }
 
   function handleSair() {
     localStorage.removeItem("mb_auth");
     localStorage.removeItem("mb_role");
+    localStorage.removeItem("mb_unidade_id");
+    localStorage.removeItem("mb_unidade_nome");
+    localStorage.removeItem("mb_caixa");
     window.location.href = "/gestao/login";
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col md:flex-row relative">
-      <button 
-        onClick={handleSair}
-        className="absolute top-4 right-4 px-4 py-2 bg-gray-800 text-gray-400 text-xs font-bold rounded-lg hover:bg-gray-700 hover:text-white transition-all z-10"
-      >
-        Sair
-      </button>
+    <div className="min-h-screen bg-stone-950 text-white flex flex-col relative font-sans">
+      {/* Header do Caixa / Terminal */}
+      <header className="px-6 py-4 bg-stone-900 border-b border-stone-800 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">🍩</span>
+          <div>
+            <h1 className="font-extrabold text-lg text-white tracking-tight">
+              Terminal do Balconista — Resgate de Cupons
+            </h1>
+            <p className="text-xs text-stone-400">Melhor Bocado Fidelidade</p>
+          </div>
+        </div>
 
-      {/* LADO ESQUERDO: GERADOR DE CÓDIGO */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8 border-b md:border-b-0 md:border-r border-gray-800">
-        <p className="text-sm text-gray-500 uppercase tracking-widest mb-6 font-bold text-center">
-          Código para a Roleta
-        </p>
+        <div className="flex items-center gap-4">
+          {/* Seletor de Unidade Ativa */}
+          <div className="flex items-center gap-2 bg-stone-800 px-3 py-1.5 rounded-xl border border-stone-700">
+            <span className="text-xs text-stone-400 font-bold">Unidade:</span>
+            <select
+              value={unidade}
+              onChange={(e) => setUnidade(e.target.value)}
+              className="bg-transparent text-amber-400 font-extrabold text-xs outline-none cursor-pointer"
+            >
+              {listaUnidades.map((u) => (
+                <option key={u.id} value={u.id} className="bg-stone-900 text-white">
+                  {u.nome}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {loadingCodigo ? (
-          <div className="animate-pulse w-64 h-24 bg-gray-800 rounded-2xl" />
-        ) : (
-          <div className="bg-gray-900 rounded-3xl px-12 py-8 border border-gray-800 shadow-2xl shadow-pink-500/10 mb-8">
-            <p className="text-8xl font-mono font-extrabold tracking-[0.3em] text-[#e6398f] text-center">
-              {codigo || "----"}
+          <Link
+            href="/gestao/fidelidade"
+            className="px-3.5 py-1.5 bg-[#e6398f]/20 hover:bg-[#e6398f]/30 text-pink-300 text-xs font-extrabold rounded-xl border border-pink-500/30 transition-all flex items-center gap-1.5"
+          >
+            <span>← Painel de Gestão</span>
+          </Link>
+
+          <button
+            onClick={handleSair}
+            className="px-3 py-1.5 bg-stone-800 text-stone-400 text-xs font-bold rounded-lg hover:bg-stone-700 hover:text-white transition-all"
+          >
+            Sair
+          </button>
+        </div>
+      </header>
+
+      {/* Conteúdo Principal do Caixa */}
+      <div className="flex-1 flex flex-col lg:flex-row p-6 gap-6 max-w-6xl mx-auto w-full">
+        {/* Painel Esquerdo: Validação do Código */}
+        <div className="flex-1 bg-stone-900/80 rounded-3xl p-8 border border-stone-800 flex flex-col justify-between shadow-2xl">
+          <div>
+            <div className="mb-6">
+              <h2 className="text-xl font-black text-white">Digite o Código do Cliente</h2>
+              <p className="text-xs text-stone-400 mt-1">
+                Insira o código alfanumérico exibido no celular do cliente (ex: <span className="font-mono text-amber-300">MB-88A2</span>)
+              </p>
+            </div>
+
+            <form onSubmit={handleBuscarCupom} className="flex gap-3 mb-6">
+              <input
+                type="text"
+                value={cupomInput}
+                onChange={(e) => setCupomInput(e.target.value.toUpperCase())}
+                placeholder="Ex: MB-88A2"
+                maxLength={10}
+                className="flex-1 px-5 py-4 rounded-2xl border-2 border-stone-700 bg-stone-950 focus:border-[#e6398f] outline-none transition-all text-2xl font-mono font-bold text-white placeholder-stone-600 uppercase tracking-widest"
+              />
+              <button
+                type="submit"
+                disabled={loading || !cupomInput.trim()}
+                className="px-8 py-4 rounded-2xl bg-[#e6398f] text-white font-extrabold text-base hover:bg-pink-600 transition-colors disabled:opacity-50 min-w-[120px]"
+              >
+                {loading ? "Buscando..." : "Buscar"}
+              </button>
+            </form>
+
+            {/* Mensagem de Erro */}
+            {erroMsg && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 text-center mb-6">
+                <p className="text-red-400 font-bold text-sm">{erroMsg}</p>
+              </div>
+            )}
+
+            {/* Mensagem de Sucesso */}
+            {sucessoMsg && (
+              <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-4 text-center mb-6">
+                <p className="text-green-400 font-bold text-sm">{sucessoMsg}</p>
+              </div>
+            )}
+
+            {/* Resultado da Validação */}
+            {validacaoData && (
+              <div className="bg-stone-950 rounded-2xl p-6 border border-stone-800 space-y-4 animate-fade-in">
+                <div className="flex items-center justify-between pb-3 border-b border-stone-800">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">{validacaoData.premio.icone}</span>
+                    <div>
+                      <p className="text-xs text-stone-400 uppercase font-bold">Prêmio do Cliente</p>
+                      <p className="text-lg font-black text-amber-400">{validacaoData.premio.nome}</p>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-black uppercase ${
+                      validacaoData.cupom.status === "disponivel"
+                        ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                        : validacaoData.cupom.status === "utilizado"
+                        ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
+                        : "bg-red-500/20 text-red-400 border border-red-500/30"
+                    }`}
+                  >
+                    {validacaoData.cupom.status === "disponivel"
+                      ? "Disponível para Resgate"
+                      : validacaoData.cupom.status === "utilizado"
+                      ? "Já Utilizado"
+                      : "Expirado"}
+                  </span>
+                </div>
+
+                {/* Detalhes do Cliente e Visita (Apenas se o cupom estiver disponível para resgate) */}
+                {validacaoData.cupom.status === "disponivel" ? (
+                  <>
+                    <div className="grid grid-cols-2 gap-4 bg-stone-900/60 p-4 rounded-xl text-sm">
+                      <div>
+                        <p className="text-xs text-stone-400">Cliente</p>
+                        <p className="font-extrabold text-white text-base">{validacaoData.cupom.cliente_nome}</p>
+                        {validacaoData.cupom.cliente_nascimento && (
+                          <p className="text-xs text-stone-400 mt-0.5">
+                            Nascimento: {validacaoData.cupom.cliente_nascimento}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-stone-400">Frequência / Visita</p>
+                        <div className="inline-flex items-center gap-1 text-pink-400 font-extrabold mt-1">
+                          <span>🏆</span>
+                          <span>
+                            {validacaoData.cupom.visita_numero === 1
+                              ? "1ª Visita (Novo Cliente)"
+                              : `${validacaoData.cupom.visita_numero}ª Visita`}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleUsarCupom}
+                      disabled={resgatando}
+                      className="w-full py-4 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black text-lg hover:shadow-lg hover:shadow-green-500/20 active:scale-[0.98] transition-all min-h-[50px]"
+                    >
+                      {resgatando ? "Confirmando resgate..." : "✓ Confirmar Entrega do Prêmio no Caixa"}
+                    </button>
+                  </>
+                ) : (
+                  <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-5 text-center space-y-2">
+                    <p className="text-base font-black text-yellow-400">
+                      🚫 Cupom Já Utilizado Anteriormente
+                    </p>
+                    <p className="text-xs text-stone-300">
+                      Este código já foi validado e entregue no balcão. Não é possível resgatar novamente.
+                    </p>
+                    {validacaoData.cupom.utilizado_em && (
+                      <p className="text-[11px] font-mono text-stone-400">
+                        Resgatado em: {new Date(validacaoData.cupom.utilizado_em).toLocaleDateString("pt-BR")} às {new Date(validacaoData.cupom.utilizado_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    )}
+                    <p className="text-[10px] text-stone-500 pt-1">
+                      🔒 Por política de privacidade (LGPD), dados do cliente ficam ocultos em cupons já resgatados.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-8 pt-4 border-t border-stone-800 text-xs text-stone-500 text-center">
+            Ao confirmar o resgate, a validação é computada instantaneamente no relatório gerencial.
+          </div>
+        </div>
+
+        {/* Painel Direito: Histórico de Resgates Recentes do Caixa */}
+        <div className="w-full lg:w-80 bg-stone-900/60 rounded-3xl p-6 border border-stone-800 flex flex-col">
+          <div className="mb-4">
+            <h3 className="font-extrabold text-sm text-stone-300 flex items-center justify-between">
+              <span>Resgates Recentes</span>
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            </h3>
+            <p className="text-[11px] text-stone-400 mt-1">
+              Caixa da Unidade: <strong className="text-amber-400">{listaUnidades.find(u => u.id === unidade)?.nome || "Tatuapé"}</strong>
             </p>
           </div>
-        )}
 
-        <p className="text-xs text-gray-500 max-w-xs text-center mb-6">
-          Peça para o cliente escanear o QR Code no balcão e digitar este código no celular.
-        </p>
+          {(() => {
+            const resgatesDaUnidade = todosResgates.filter(
+              (item) => item.unidadeId.toLowerCase() === unidade.toLowerCase()
+            );
 
-        <button
-          onClick={gerarCodigo}
-          disabled={loadingCodigo}
-          className="px-6 py-3 rounded-xl bg-gray-800 text-gray-300 font-medium text-sm hover:bg-gray-700 transition-all active:scale-[0.98]"
-        >
-          🔄 Gerar novo código
-        </button>
-      </div>
-
-      {/* LADO DIREITO: VALIDADOR DE CUPOM */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-gray-900/50">
-        <div className="w-full max-w-md">
-          <p className="text-sm text-gray-500 uppercase tracking-widest mb-6 font-bold text-center">
-            Validar Cupom
-          </p>
-
-          <form onSubmit={handleValidarCupom} className="flex gap-2 mb-6">
-            <input
-              type="text"
-              value={cupomInput}
-              onChange={(e) => setCupomInput(e.target.value.toUpperCase())}
-              placeholder="Ex: A3F7K2"
-              className="flex-1 px-4 py-4 rounded-xl border border-gray-700 bg-gray-900 focus:border-[#e6398f] outline-none transition-all text-xl font-mono text-white placeholder-gray-600 uppercase"
-            />
-            <button
-              type="submit"
-              className="px-6 py-4 rounded-xl bg-gray-800 text-white font-bold hover:bg-gray-700 transition-colors"
-            >
-              Buscar
-            </button>
-          </form>
-
-          {/* Resultado da Validação */}
-          {validacaoStatus === "invalido" && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-center">
-              <p className="text-red-400 font-bold">Cupom inválido ou expirado</p>
-            </div>
-          )}
-
-          {validacaoStatus === "valido" && cupomInfo && (
-            <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-6">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400">
-                  ✓
+            if (resgatesDaUnidade.length === 0) {
+              return (
+                <div className="flex-1 flex flex-col items-center justify-center py-12 text-center text-stone-600">
+                  <span className="text-4xl mb-2">🏷️</span>
+                  <p className="text-xs font-bold text-stone-400">Nenhum resgate nesta unidade</p>
+                  <p className="text-[10px] text-stone-500 mt-1">
+                    Histórico 100% isolado por loja.
+                  </p>
                 </div>
-                <p className="text-green-400 font-bold text-lg">Cupom Válido</p>
+              );
+            }
+
+            return (
+              <div className="space-y-3">
+                {resgatesDaUnidade.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-stone-950 p-3.5 rounded-2xl border border-stone-800 flex items-center justify-between"
+                  >
+                    <div>
+                      <p className="text-xs font-mono font-bold text-amber-300">{item.codigo}</p>
+                      <p className="text-xs font-extrabold text-white">{item.cliente}</p>
+                      <p className="text-[11px] text-pink-400">{item.premio}</p>
+                    </div>
+                    <span className="text-[10px] font-bold text-stone-400 bg-stone-900 px-2 py-1 rounded-md border border-stone-800 shrink-0">
+                      {item.dataHora}
+                    </span>
+                  </div>
+                ))}
               </div>
-              
-              <div className="space-y-3 bg-gray-900/50 rounded-xl p-4 mb-6">
-                <div>
-                  <p className="text-xs text-gray-500">Prêmio</p>
-                  <p className="text-lg font-bold text-white">{cupomInfo.premio}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Cliente</p>
-                  <p className="text-sm text-gray-300">{cupomInfo.cliente}</p>
-                </div>
-              </div>
-
-              <button
-                onClick={handleUsarCupom}
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-green-500 to-green-600 text-white font-bold hover:shadow-lg hover:shadow-green-500/20 transition-all active:scale-[0.98]"
-              >
-                Confirmar Entrega do Prêmio
-              </button>
-            </div>
-          )}
-
-          {validacaoStatus === "idle" && (
-            <p className="text-xs text-gray-600 text-center">
-              Digite o código do cupom que o cliente apresentar no celular para validar a entrega do prêmio.
-            </p>
-          )}
+            );
+          })()}
         </div>
       </div>
     </div>

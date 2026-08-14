@@ -1,84 +1,208 @@
 // =============================================================================
-// API: Girar a roleta
+// API: Girar a roleta gamificada (com Trava Antifraude & Deduplicação)
 // POST /api/fidelidade/girar
-// Body: { cliente_id, codigo_vinculo }
+// Body: { visitor_id, nome, nascimento, whatsapp, unidade, codigo_vinculo? }
 // =============================================================================
 
 import { NextRequest, NextResponse } from "next/server";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import {
-  buscarCodigoVinculoAtivo,
   registrarGiro,
   criarCupom,
-  buscarPremioPorId,
-  giroStore,
-  codigoVinculoStore,
+  calcularNumeroVisita,
+  buscarOuCriarClienteIdentificado,
+  consumirCodigoVinculo,
+  buscarCodigoVinculo,
 } from "@/lib/fidelidade/mock-data";
 import { sortearPremio } from "@/lib/fidelidade/sorteio";
 
 export async function POST(req: NextRequest) {
   try {
-    const { cliente_id, codigo_vinculo } = await req.json();
+    const body = await req.json();
+    const {
+      visitor_id,
+      nome,
+      nascimento,
+      whatsapp,
+      celular,
+      unidade = "tatuape",
+      codigo_vinculo,
+      cliente_id,
+    } = body;
 
-    if (!cliente_id || !codigo_vinculo) {
+    const zapInput = (whatsapp || celular || "").trim();
+
+    if (!visitor_id) {
       return NextResponse.json(
-        { erro: "Cliente e código do caixa são obrigatórios" },
+        { erro: "Identificador de visitante é obrigatório." },
         { status: 400 }
       );
     }
 
-    // 1. Valida o código de vínculo
-    const cvReal = buscarCodigoVinculoAtivo(codigo_vinculo);
-    const cv = cvReal || { 
-      id: `mock_${Date.now()}`, 
-      codigo: codigo_vinculo, 
-      status: "aguardando" as const, 
-      loja_id: "loja_1", 
-      caixa_id: "caixa_1", 
-      criado_em: new Date().toISOString() 
-    };
-
-    // 2. Verifica se já houve giro com esse código de vínculo (antifraude)
-    const giroExistente = giroStore.find(
-      (g) => g.codigo_vinculo_id === cv.id
-    );
-    if (giroExistente) {
+    if (!nome || !nascimento || !unidade || !zapInput) {
       return NextResponse.json(
-        { erro: "Este código já foi utilizado." },
-        { status: 409 }
+        {
+          erro: "Por favor, preencha todos os campos obrigatórios: Nome Completo, Data de Nascimento, Celular/WhatsApp e Unidade.",
+        },
+        { status: 400 }
       );
     }
 
-    // 3. Sorteia o prêmio
-    const premio = sortearPremio();
+    // 1. Identificação única e deduplicação do cliente por WhatsApp + Nome + Nascimento
+    const { cliente: clienteResolvido, ehNovoCliente, visitaNumero } =
+      buscarOuCriarClienteIdentificado(
+        nome,
+        nascimento,
+        zapInput,
+        unidade,
+        visitor_id
+      );
+    const currentClienteId = clienteResolvido.id;
 
-    // 4. Registra o giro (venda_id null por enquanto — será casada depois)
-    const giro = registrarGiro(cliente_id, cv.id, premio.id, null);
+    // 2. Trava Antifraude de Uso Único de QR Code / Código de Compra
+    const vinculoCode = (codigo_vinculo || "").trim();
 
-    // 5. Marca o código como usado
-    const cvIndex = codigoVinculoStore.findIndex((c) => c.id === cv.id);
-    if (cvIndex !== -1) {
-      codigoVinculoStore[cvIndex].status = "usado";
+    if (vinculoCode) {
+      const consumo = consumirCodigoVinculo(vinculoCode, unidade, currentClienteId);
+      if (!consumo.sucesso) {
+        if (consumo.motivo === "ja_utilizado") {
+          return NextResponse.json(
+            {
+              erro: "Este QR Code já foi utilizado nesta compra. Cada compra dá direito a 1 giro exclusivo. Para girar novamente, solicite um novo QR Code ao atendente em sua próxima compra!",
+              ja_utilizado: true,
+            },
+            { status: 400 }
+          );
+        }
+        if (consumo.motivo === "expirado") {
+          return NextResponse.json(
+            {
+              erro: "Este QR Code expirou o tempo de validade. Solicite um novo QR Code ao atendente.",
+              expirado: true,
+            },
+            { status: 400 }
+          );
+        }
+      }
     }
 
-    // 6. Cria o cupom
-    const cupom = criarCupom(cliente_id, premio.id, giro.id);
+    const finalVinculoCode = vinculoCode || "QR-" + Math.floor(1000 + Math.random() * 9000);
+
+    // Tentar executar via Supabase RPC se configurado
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.rpc("fn_sortear_girar_roleta", {
+          p_visitor_id: visitor_id,
+          p_codigo_vinculo: finalVinculoCode,
+          p_cliente_id: currentClienteId,
+          p_loja: unidade || "tatuape",
+          p_caixa: "caixa_1",
+          p_cliente_nome: nome,
+          p_cliente_nascimento: nascimento,
+          p_cliente_whatsapp: zapInput,
+        });
+
+        if (!error && data) {
+          return NextResponse.json(data);
+        }
+      } catch {
+        // Fallback em memória transparente
+      }
+    }
+
+    // 3. Obter configuração da etapa da visita atual na Trilha de Fidelidade
+    const { obterConfiguracaoVisita } = await import("@/lib/fidelidade/mock-data");
+    const etapaVisita = obterConfiguracaoVisita(visitaNumero);
+
+    let premioFinal: {
+      id: string;
+      nome: string;
+      tipo: import("@/lib/fidelidade/types").TipoPremio;
+      valor: number;
+      posicao_roleta?: number;
+      cor_fatia?: string;
+      icone?: string;
+    };
+
+    let origemCupom: "roleta" | "trilha_fixa" = "roleta";
+
+    if (etapaVisita.modo === "fixo" && etapaVisita.premio_fixo) {
+      // Prêmio Fixo Direto da Trilha (sem roleta)
+      origemCupom = "trilha_fixa";
+      premioFinal = {
+        id: `trilha_fixo_${etapaVisita.visita}`,
+        nome: etapaVisita.premio_fixo.nome,
+        tipo: etapaVisita.premio_fixo.tipo,
+        valor: etapaVisita.premio_fixo.valor,
+        posicao_roleta: 1,
+        cor_fatia: etapaVisita.premio_fixo.cor,
+        icone: etapaVisita.premio_fixo.icone,
+      };
+    } else {
+      // Modo Roleta da Sorte (usa a roleta exclusiva da etapa se configurada, ou a roleta padrão)
+      const sorteado = sortearPremio(
+        etapaVisita.premios_roleta && etapaVisita.premios_roleta.length > 0
+          ? etapaVisita.premios_roleta
+          : undefined
+      );
+      origemCupom = "roleta";
+      premioFinal = {
+        id: sorteado.id,
+        nome: sorteado.nome,
+        tipo: sorteado.tipo,
+        valor: sorteado.valor,
+        posicao_roleta: sorteado.posicao_roleta,
+        cor_fatia: sorteado.cor_fatia,
+        icone: sorteado.icone,
+      };
+    }
+
+    const giro = registrarGiro(
+      visitor_id,
+      finalVinculoCode,
+      premioFinal.id,
+      null,
+      currentClienteId,
+      unidade,
+      nome,
+      nascimento,
+      zapInput
+    );
+
+    const cupom = criarCupom(
+      visitor_id,
+      premioFinal.id,
+      giro.id,
+      currentClienteId,
+      unidade,
+      visitaNumero,
+      nome,
+      nascimento,
+      zapInput,
+      origemCupom
+    );
 
     return NextResponse.json({
       sucesso: true,
-      premio: {
-        id: premio.id,
-        nome: premio.nome,
-        tipo: premio.tipo,
-        valor: premio.valor,
-      },
+      modo: etapaVisita.modo,
+      etapa: etapaVisita,
+      giro_id: giro.id,
+      visita_numero: visitaNumero,
+      unidade,
+      cliente_nome: nome,
+      cliente_whatsapp: zapInput,
+      eh_novo_cliente: ehNovoCliente,
+      premio: premioFinal,
       cupom: {
         id: cupom.id,
         codigo_cupom: cupom.codigo_cupom,
         expira_em: cupom.expira_em,
       },
-      giro_id: giro.id,
     });
-  } catch {
-    return NextResponse.json({ erro: "Erro interno" }, { status: 500 });
+  } catch (err: any) {
+    return NextResponse.json(
+      { erro: err?.message || "Erro interno ao girar a roleta" },
+      { status: 500 }
+    );
   }
 }

@@ -74,69 +74,133 @@ export const PRODUTOS_CARDAPIO = [
 export const MOCK_PREMIOS: Premio[] = [
   {
     id: "premio_1",
-    nome: "Café Espresso Grátis",
+    nome: "Donut Glazed Clássico",
     tipo: "produto",
-    valor: 7.5,
-    probabilidade: 30,
+    valor: 0,
+    probabilidade: 15,
+    posicao_roleta: 1,
     ativo: true,
     limite_diario: 20,
     limite_mensal: null,
-    imagem: null,
+    cor_fatia: "#e6398f",
+    icone: "🍩",
   },
   {
     id: "premio_2",
     nome: "10% de Desconto",
     tipo: "desconto",
     valor: 10,
-    probabilidade: 25,
+    probabilidade: 20,
+    posicao_roleta: 2,
     ativo: true,
     limite_diario: null,
     limite_mensal: null,
-    imagem: null,
+    cor_fatia: "#f43f5e",
+    icone: "💰",
   },
   {
     id: "premio_3",
-    nome: "Donut Grátis",
+    nome: "Café Expresso Grátis",
     tipo: "produto",
-    valor: 8.9,
+    valor: 0,
     probabilidade: 15,
-    ativo: true,
-    limite_diario: 10,
-    limite_mensal: 200,
-    imagem: null,
-  },
-  {
-    id: "premio_4",
-    nome: "Pão de Queijo Grátis",
-    tipo: "produto",
-    valor: 10,
-    probabilidade: 20,
+    posicao_roleta: 3,
     ativo: true,
     limite_diario: 15,
     limite_mensal: null,
-    imagem: null,
+    cor_fatia: "#d97706",
+    icone: "☕",
+  },
+  {
+    id: "premio_4",
+    nome: "15% de Desconto",
+    tipo: "desconto",
+    valor: 15,
+    probabilidade: 10,
+    posicao_roleta: 4,
+    ativo: true,
+    limite_diario: null,
+    limite_mensal: null,
+    cor_fatia: "#8b5cf6",
+    icone: "🎉",
   },
   {
     id: "premio_5",
-    nome: "Combo Donut + Café",
+    nome: "Donut Chocolate Belga",
     tipo: "produto",
-    valor: 16.9,
-    probabilidade: 5,
+    valor: 0,
+    probabilidade: 10,
+    posicao_roleta: 5,
     ativo: true,
-    limite_diario: 3,
-    limite_mensal: 50,
-    imagem: null,
+    limite_diario: 10,
+    limite_mensal: null,
+    cor_fatia: "#ec4899",
+    icone: "🍫",
   },
   {
     id: "premio_6",
-    nome: "20% de Desconto",
+    nome: "5% de Desconto",
     tipo: "desconto",
-    valor: 20,
+    valor: 5,
+    probabilidade: 15,
+    posicao_roleta: 6,
+    ativo: true,
+    limite_diario: null,
+    limite_mensal: null,
+    cor_fatia: "#10b981",
+    icone: "🏷️",
+  },
+  {
+    id: "premio_7",
+    nome: "Capuccino Pequeno",
+    tipo: "produto",
+    valor: 0,
     probabilidade: 5,
+    posicao_roleta: 7,
     ativo: true,
     limite_diario: 5,
-    limite_mensal: 100,
-    imagem: null,
+    limite_mensal: null,
+    cor_fatia: "#3b82f6",
+    icone: "🥤",
+  },
+  {
+    id: "premio_8",
+    nome: "20% de Desconto VIP",
+    tipo: "desconto",
+    valor: 20,
+    probabilidade: 3,
+    posicao_roleta: 8,
+    ativo: true,
+    limite_diario: 3,
+    limite_mensal: null,
+    cor_fatia: "#ef4444",
+    icone: "🌟",
+  },
+  {
+    id: "premio_9",
+    nome: "Mini Donut Recheado",
+    tipo: "produto",
+    valor: 0,
+    probabilidade: 5,
+    posicao_roleta: 9,
+    ativo: true,
+    limite_diario: 10,
+    limite_mensal: null,
+    cor_fatia: "#6366f1",
+    icone: "🧁",
+  },
+  {
+    id: "premio_10",
+    nome: "Tente Novamente",
+    tipo: "desconto",
+    valor: 0,
+    probabilidade: 2,
+    posicao_roleta: 10,
+    ativo: true,
+    limite_diario: null,
+    limite_mensal: null,
+    cor_fatia: "#6b7280",
+    icone: "🔄",
   },
 ];
 
@@ -158,71 +222,11 @@ export const MOCK_CONFIG: Config[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Clientes mockados (pré-cadastrados para testes)
+// ---------------------------------------------------------------------------
+// Base de Clientes (Iniciada limpa para dados 100% reais gerados pela operação)
 // ---------------------------------------------------------------------------
 
-export const MOCK_CLIENTES_FIDELIDADE: Cliente[] = [
-  {
-    id: "cli_1",
-    nome: "Maria Silva",
-    whatsapp: "31999990001",
-    nascimento: "1990-03-15",
-    canal_aquisicao: "instagram",
-    aceite_lgpd: true,
-    aceite_lgpd_em: daysAgo(30),
-    aceite_lgpd_texto_versao: "1.0",
-    criado_em: daysAgo(30),
-    primeira_compra_em: daysAgo(28),
-    ultima_compra_em: daysAgo(1),
-    total_gasto: 245.6,
-    ticket_medio: 24.56,
-    qtd_compras: 10,
-    loja_preferida: "loja_1",
-    horario_preferido: "14:00",
-    ltv: 245.6,
-    vip: true,
-  },
-  {
-    id: "cli_2",
-    nome: "João Santos",
-    whatsapp: "31999990002",
-    nascimento: "1985-07-22",
-    canal_aquisicao: "indicacao",
-    aceite_lgpd: true,
-    aceite_lgpd_em: daysAgo(15),
-    aceite_lgpd_texto_versao: "1.0",
-    criado_em: daysAgo(15),
-    primeira_compra_em: daysAgo(14),
-    ultima_compra_em: daysAgo(3),
-    total_gasto: 89.7,
-    ticket_medio: 29.9,
-    qtd_compras: 3,
-    loja_preferida: "loja_1",
-    horario_preferido: "09:00",
-    ltv: 89.7,
-    vip: false,
-  },
-  {
-    id: "cli_3",
-    nome: "Ana Oliveira",
-    whatsapp: "31999990003",
-    nascimento: "1995-12-01",
-    canal_aquisicao: "passei_em_frente",
-    aceite_lgpd: true,
-    aceite_lgpd_em: daysAgo(60),
-    aceite_lgpd_texto_versao: "1.0",
-    criado_em: daysAgo(60),
-    primeira_compra_em: daysAgo(58),
-    ultima_compra_em: daysAgo(45),
-    total_gasto: 52.8,
-    ticket_medio: 26.4,
-    qtd_compras: 2,
-    loja_preferida: "loja_1",
-    horario_preferido: "16:00",
-    ltv: 52.8,
-    vip: false,
-  },
-];
+export const MOCK_CLIENTES_FIDELIDADE: Cliente[] = [];
 
 // ---------------------------------------------------------------------------
 // Função para gerar vendas simuladas do "Degust"
@@ -266,40 +270,378 @@ function gerarVendaSimulada(
   };
 }
 
+export const MOCK_TRILHA_VISITAS: import("./types").EtapaTrilhaVisita[] = [
+  {
+    visita: 1,
+    titulo: "Boas-Vindas",
+    modo: "fixo",
+    premio_fixo: {
+      nome: "Café Expresso Grátis",
+      tipo: "produto",
+      valor: 0,
+      icone: "☕",
+      cor: "#4a2810",
+    },
+    descricao: "Ganhe 1 Café Expresso Grátis no seu 1º pedido!",
+    ativo: true,
+  },
+  {
+    visita: 2,
+    titulo: "Roleta da Sorte",
+    modo: "roleta",
+    descricao: "Gire a roleta da sorte e concorra a prêmios e descontos!",
+    ativo: true,
+  },
+  {
+    visita: 3,
+    titulo: "Cliente Frequente",
+    modo: "fixo",
+    premio_fixo: {
+      nome: "10% de Desconto",
+      tipo: "desconto",
+      valor: 10,
+      icone: "💰",
+      cor: "#e6398f",
+    },
+    descricao: "10% de desconto garantido no seu pedido!",
+    ativo: true,
+  },
+  {
+    visita: 4,
+    titulo: "Roleta da Sorte",
+    modo: "roleta",
+    descricao: "Gire a roleta e concorra a donuts e doces artesanais!",
+    ativo: true,
+  },
+  {
+    visita: 5,
+    titulo: "Marco de 5 Visitas",
+    modo: "fixo",
+    premio_fixo: {
+      nome: "Donut Glazed Clássico",
+      tipo: "produto",
+      valor: 0,
+      icone: "🍩",
+      cor: "#d97706",
+    },
+    descricao: "Parabéns por 5 visitas! Escolha 1 Donut Clássico!",
+    ativo: true,
+  },
+  {
+    visita: 6,
+    titulo: "Roleta da Sorte",
+    modo: "roleta",
+    descricao: "Gire a roleta premiada de confeitaria!",
+    ativo: true,
+  },
+  {
+    visita: 7,
+    titulo: "Quase VIP",
+    modo: "fixo",
+    premio_fixo: {
+      nome: "15% de Desconto",
+      tipo: "desconto",
+      valor: 15,
+      icone: "🎉",
+      cor: "#8b5cf6",
+    },
+    descricao: "15% de desconto especial para clientes recorrentes!",
+    ativo: true,
+  },
+  {
+    visita: 8,
+    titulo: "Roleta da Sorte",
+    modo: "roleta",
+    descricao: "Gire a roleta da sorte e concorra a prêmios especiais!",
+    ativo: true,
+  },
+  {
+    visita: 9,
+    titulo: "Super Fiel",
+    modo: "fixo",
+    premio_fixo: {
+      nome: "Capuccino Especial",
+      tipo: "produto",
+      valor: 0,
+      icone: "🧋",
+      cor: "#059669",
+    },
+    descricao: "Bebida quente artesanal à sua escolha!",
+    ativo: true,
+  },
+  {
+    visita: 10,
+    titulo: "VIP Master 10ª Visita",
+    modo: "fixo",
+    premio_fixo: {
+      nome: "Donut Recheado Especial VIP",
+      tipo: "produto",
+      valor: 0,
+      icone: "👑",
+      cor: "#f59e0b",
+    },
+    descricao: "Você é VIP Master! Donut Especial Recheado Grátis!",
+    ativo: true,
+  },
+];
+
 // ---------------------------------------------------------------------------
-// Stores mutáveis (in-memory, simula o banco)
+// Stores mutáveis com persistência em globalThis (compatível com Server e Client)
 // ---------------------------------------------------------------------------
+
+const globalForFidelidade = globalThis as unknown as {
+  __mb_vendaStore?: Venda[];
+  __mb_codigoVinculoStore?: CodigoVinculo[];
+  __mb_giroStore?: Giro[];
+  __mb_cupomStore?: Cupom[];
+  __mb_clienteStore?: Cliente[];
+  __mb_premiosRoletaStore?: Premio[];
+  __mb_trilhaStore?: import("./types").EtapaTrilhaVisita[];
+  __mb_automacaoLogStore?: AutomacaoLog[];
+  __mb_unidadesStore?: import("./types").UnidadeLoja[];
+};
+
+export function salvarDB() {
+  // Mantido para compatibilidade
+}
 
 /** Vendas sincronizadas do "Degust" */
-export const vendaStore: Venda[] = [];
+export const vendaStore = (globalForFidelidade.__mb_vendaStore ??= []);
 
 /** Códigos de vínculo ativos */
-export const codigoVinculoStore: CodigoVinculo[] = [];
+export const codigoVinculoStore = (globalForFidelidade.__mb_codigoVinculoStore ??= []);
 
 /** Giros realizados */
-export const giroStore: Giro[] = [];
+export const giroStore = (globalForFidelidade.__mb_giroStore ??= []);
 
 /** Cupons emitidos */
-export const cupomStore: Cupom[] = [];
+export const cupomStore = (globalForFidelidade.__mb_cupomStore ??= []);
 
 /** Clientes (mutável — novos cadastros entram aqui) */
-export const clienteStore: Cliente[] = [...MOCK_CLIENTES_FIDELIDADE];
+export const clienteStore = (globalForFidelidade.__mb_clienteStore ??= []);
+
+/** Prêmios mutáveis da roleta */
+export let premiosRoletaStore = (globalForFidelidade.__mb_premiosRoletaStore ??= [...MOCK_PREMIOS]);
+
+/** Trilha de visitas mutável (flexível com N etapas) */
+export let trilhaStore: import("./types").EtapaTrilhaVisita[] = (globalForFidelidade.__mb_trilhaStore ??= JSON.parse(JSON.stringify(MOCK_TRILHA_VISITAS)));
 
 /** Log de automações */
-export const automacaoLogStore: AutomacaoLog[] = [];
+export const automacaoLogStore = (globalForFidelidade.__mb_automacaoLogStore ??= []);
+
+/** Lojas e franquias cadastradas no sistema */
+export let unidadesStore: import("./types").UnidadeLoja[] = (globalForFidelidade.__mb_unidadesStore ??= [
+  { id: "tatuape", nome: "Tatuapé (Matriz)", cidade: "São Paulo - SP", bairro: "Tatuapé", ativa: true, caixas: ["Caixa 01", "Caixa 02", "Totem Autoatendimento"] },
+  { id: "mooca", nome: "Mooca", cidade: "São Paulo - SP", bairro: "Mooca", ativa: true, caixas: ["Caixa 01", "Caixa 02"] },
+  { id: "campo_belo", nome: "Campo Belo", cidade: "São Paulo - SP", bairro: "Campo Belo", ativa: true, caixas: ["Caixa 01"] },
+  { id: "santana", nome: "Santana", cidade: "São Paulo - SP", bairro: "Santana", ativa: true, caixas: ["Caixa 01", "Caixa 02"] },
+  { id: "santo_amaro", nome: "Santo Amaro", cidade: "São Paulo - SP", bairro: "Santo Amaro", ativa: true, caixas: ["Caixa 01"] },
+]);
 
 // ---------------------------------------------------------------------------
-// Funções de acesso aos stores (simula queries no banco)
+// Funções de Gestão de Lojas & Franquias
 // ---------------------------------------------------------------------------
+
+export function listarUnidades(): import("./types").UnidadeLoja[] {
+  return [...unidadesStore];
+}
+
+export function cadastrarUnidade(dados: {
+  nome: string;
+  cidade: string;
+  bairro?: string;
+  endereco?: string;
+  telefone?: string;
+  caixas?: string[];
+  id?: string;
+}): import("./types").UnidadeLoja {
+  const slugId = (dados.id || dados.nome)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "_")
+    .replace(/^_+|_+$/g, "") || `loja_${Date.now()}`;
+
+  // Se já existe com esse ID, adiciona timestamp
+  const existe = unidadesStore.some((u) => u.id === slugId);
+  const finalId = existe ? `${slugId}_${Date.now().toString(36)}` : slugId;
+
+  const novaUnidade: import("./types").UnidadeLoja = {
+    id: finalId,
+    nome: dados.nome,
+    cidade: dados.cidade || "São Paulo - SP",
+    bairro: dados.bairro || "",
+    endereco: dados.endereco || "",
+    telefone: dados.telefone || "",
+    caixas: dados.caixas && dados.caixas.length > 0 ? dados.caixas : ["Caixa 01"],
+    ativa: true,
+  };
+
+  unidadesStore.push(novaUnidade);
+  return novaUnidade;
+}
+
+export function atualizarUnidade(
+  id: string,
+  dados: Partial<import("./types").UnidadeLoja>
+): import("./types").UnidadeLoja | null {
+  const idx = unidadesStore.findIndex((u) => u.id === id);
+  if (idx === -1) return null;
+  unidadesStore[idx] = { ...unidadesStore[idx], ...dados };
+  return unidadesStore[idx];
+}
+
+export function removerUnidade(id: string): boolean {
+  if (unidadesStore.length <= 1) return false; // Impede remover a última loja
+  const idx = unidadesStore.findIndex((u) => u.id === id);
+  if (idx === -1) return false;
+  unidadesStore.splice(idx, 1);
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// Funções de acesso à Trilha de Visitas (Flexível N Etapas)
+// ---------------------------------------------------------------------------
+
+export function listarTrilhaVisitas(): import("./types").EtapaTrilhaVisita[] {
+  return [...trilhaStore].sort((a, b) => a.visita - b.visita);
+}
+
+export function obterConfiguracaoVisita(visitaNumero: number): import("./types").EtapaTrilhaVisita {
+  const etapas = listarTrilhaVisitas();
+  if (etapas.length === 0) {
+    return MOCK_TRILHA_VISITAS[0];
+  }
+  // Tenta encontrar a etapa exata
+  const etapaExata = etapas.find((t) => t.visita === visitaNumero);
+  if (etapaExata) return etapaExata;
+
+  // Se a visita for maior que a trilha configurada (ex: cliente na 12ª visita e trilha tem 10),
+  // ele permanece na última etapa VIP ou faz loop suave
+  const ultimaEtapa = etapas[etapas.length - 1];
+  return ultimaEtapa || etapas[0];
+}
+
+export function atualizarEtapaTrilha(
+  visita: number,
+  dados: Partial<import("./types").EtapaTrilhaVisita>
+): { sucesso: boolean; etapa?: import("./types").EtapaTrilhaVisita; erro?: string } {
+  const index = trilhaStore.findIndex((t: import("./types").EtapaTrilhaVisita) => t.visita === visita);
+  if (index === -1) {
+    return { sucesso: false, erro: "Etapa da visita não encontrada." };
+  }
+  trilhaStore[index] = {
+    ...trilhaStore[index],
+    ...dados,
+  };
+  salvarDB();
+  return { sucesso: true, etapa: trilhaStore[index] };
+}
+
+export function salvarTrilhaCompleta(
+  novaTrilha: import("./types").EtapaTrilhaVisita[]
+): { sucesso: boolean; trilha: import("./types").EtapaTrilhaVisita[] } {
+  if (Array.isArray(novaTrilha) && novaTrilha.length >= 1) {
+    // Reindexa as visitas sequencialmente de 1 a N
+    const reindexada = novaTrilha.map((etapa, idx) => ({
+      ...etapa,
+      visita: idx + 1,
+    }));
+    trilhaStore.length = 0;
+    trilhaStore.push(...reindexada);
+    salvarDB();
+    return { sucesso: true, trilha: listarTrilhaVisitas() };
+  }
+  return { sucesso: false, trilha: listarTrilhaVisitas() };
+}
+
+export function resetarTrilhaPadrao(): import("./types").EtapaTrilhaVisita[] {
+  trilhaStore.length = 0;
+  trilhaStore.push(...JSON.parse(JSON.stringify(MOCK_TRILHA_VISITAS)));
+  salvarDB();
+  return listarTrilhaVisitas();
+}
+
+export function listarPremios(): Premio[] {
+  return [...premiosRoletaStore].sort((a, b) => a.posicao_roleta - b.posicao_roleta);
+}
+
+export function atualizarPremio(id: string, dados: Partial<Premio>): { sucesso: boolean; premio?: Premio; erro?: string } {
+  const index = premiosRoletaStore.findIndex((p) => p.id === id);
+  if (index === -1) {
+    return { sucesso: false, erro: "Prêmio não encontrado." };
+  }
+
+  premiosRoletaStore[index] = {
+    ...premiosRoletaStore[index],
+    ...dados,
+  };
+
+  salvarDB();
+  return { sucesso: true, premio: premiosRoletaStore[index] };
+}
+
+export function resetarPremiosPadrao(): Premio[] {
+  premiosRoletaStore = [...MOCK_PREMIOS];
+  return listarPremios();
+}
+
+export function limparTudo() {
+  vendaStore.length = 0;
+  codigoVinculoStore.length = 0;
+  giroStore.length = 0;
+  cupomStore.length = 0;
+  clienteStore.length = 0;
+  automacaoLogStore.length = 0;
+  premiosRoletaStore = [...MOCK_PREMIOS];
+  trilhaStore.length = 0;
+  trilhaStore.push(...JSON.parse(JSON.stringify(MOCK_TRILHA_VISITAS)));
+}
 
 export function buscarClientePorWhatsapp(
   whatsapp: string
 ): Cliente | undefined {
-  // Normaliza: remove tudo que não é número
   const normalizado = whatsapp.replace(/\D/g, "");
-  return clienteStore.find(
-    (c) => c.whatsapp.replace(/\D/g, "") === normalizado
+  if (!normalizado) return undefined;
+  
+  // 1. Busca no clienteStore
+  const cliente = clienteStore.find(
+    (c) => (c.whatsapp || c.celular || "").replace(/\D/g, "") === normalizado
   );
+  if (cliente) return cliente;
+
+  // 2. Fallback inteligente: se houver cupom com este zap, reconstrói o perfil
+  const cup = cupomStore.find(
+    (c) => (c.cliente_whatsapp || "").replace(/\D/g, "") === normalizado
+  );
+  if (cup) {
+    const novoCli: Cliente = {
+      id: cup.cliente_id || `cli_${cup.id}`,
+      nome: cup.cliente_nome || "Cliente",
+      whatsapp: cup.cliente_whatsapp || normalizado,
+      nascimento: cup.cliente_nascimento || "",
+      celular: cup.cliente_whatsapp || normalizado,
+      canal_aquisicao: "roleta_qrcode",
+      aceite_lgpd: true,
+      aceite_lgpd_em: cup.criado_em,
+      aceite_lgpd_texto_versao: "1.0",
+      criado_em: cup.criado_em,
+      primeira_compra_em: cup.criado_em,
+      ultima_compra_em: cup.criado_em,
+      total_gasto: 0,
+      ticket_medio: 0,
+      qtd_compras: cup.visita_numero || 1,
+      loja_preferida: cup.unidade,
+      horario_preferido: null,
+      ltv: 0,
+      vip: false,
+    };
+    clienteStore.push(novoCli);
+    salvarDB();
+    return novoCli;
+  }
+
+  return undefined;
 }
 
 export function cadastrarCliente(dados: Omit<Cliente, "id" | "criado_em" | "primeira_compra_em" | "ultima_compra_em" | "total_gasto" | "ticket_medio" | "qtd_compras" | "loja_preferida" | "horario_preferido" | "ltv" | "vip">): Cliente {
@@ -307,50 +649,159 @@ export function cadastrarCliente(dados: Omit<Cliente, "id" | "criado_em" | "prim
     ...dados,
     id: `cli_${id()}`,
     criado_em: new Date().toISOString(),
-    primeira_compra_em: null,
-    ultima_compra_em: null,
+    primeira_compra_em: new Date().toISOString(),
+    ultima_compra_em: new Date().toISOString(),
     total_gasto: 0,
     ticket_medio: 0,
-    qtd_compras: 0,
-    loja_preferida: null,
+    qtd_compras: 1,
+    loja_preferida: dados.unidade_cadastro || null,
     horario_preferido: null,
     ltv: 0,
     vip: false,
   };
   clienteStore.push(novoCliente);
+  salvarDB();
   return novoCliente;
 }
 
-export function gerarCodigoVinculo(loja: string, caixa: string): CodigoVinculo {
-  // Expira códigos antigos do mesmo caixa
-  codigoVinculoStore.forEach((cv) => {
-    if (cv.loja === loja && cv.caixa === caixa && cv.status === "aguardando") {
-      cv.status = "expirado";
+/**
+ * Deduplicação Inteligente:
+ * 1. Busca por WhatsApp/Celular normalizado (apenas dígitos)
+ * 2. Se não encontrou celular, busca por Nome Completo + Data de Nascimento
+ * 3. Se não encontrou, cadastra novo cliente sem duplicar
+ */
+export function buscarOuCriarClienteIdentificado(
+  nome: string,
+  nascimento: string,
+  whatsapp: string,
+  unidade: string,
+  visitorId?: string
+): { cliente: Cliente; ehNovoCliente: boolean; visitaNumero: number } {
+  const nomeClean = nome.trim().toLowerCase();
+  const nascClean = nascimento.trim();
+  const zapClean = whatsapp.replace(/\D/g, "");
+
+  // 1. Chave mestre de deduplicação: Celular/WhatsApp
+  let cliente = zapClean ? buscarClientePorWhatsapp(zapClean) : undefined;
+
+  // 2. Se não achou por WhatsApp, busca por Nome Completo + Data de Nascimento
+  if (!cliente && nomeClean && nascClean) {
+    cliente = clienteStore.find(
+      (c) =>
+        c.nome.trim().toLowerCase() === nomeClean &&
+        c.nascimento.trim() === nascClean
+    );
+  }
+
+  // 3. Fallback por visitorId se aplicável
+  if (!cliente && visitorId) {
+    cliente = clienteStore.find((c) => c.id === visitorId);
+  }
+
+  if (cliente) {
+    cliente.qtd_compras = (cliente.qtd_compras || 1) + 1;
+    cliente.ultima_compra_em = new Date().toISOString();
+    if (zapClean && (!cliente.whatsapp || cliente.whatsapp !== zapClean)) {
+      cliente.whatsapp = zapClean;
+      cliente.celular = zapClean;
     }
+    if (nome.trim() && cliente.nome !== nome.trim()) {
+      cliente.nome = nome.trim();
+    }
+    if (nascClean && cliente.nascimento !== nascClean) {
+      cliente.nascimento = nascClean;
+    }
+    const visitaNumero = calcularNumeroVisita(visitorId || "", cliente.id);
+    return { cliente, ehNovoCliente: false, visitaNumero };
+  }
+
+  // 4. Cria novo perfil individual
+  const novoCliente = cadastrarCliente({
+    nome: nome.trim(),
+    nascimento: nascClean,
+    whatsapp: zapClean,
+    celular: zapClean,
+    canal_aquisicao: "roleta_qrcode",
+    aceite_lgpd: true,
+    aceite_lgpd_em: new Date().toISOString(),
+    aceite_lgpd_texto_versao: "1.0",
+    unidade_cadastro: unidade,
   });
+
+  const visitaNumero = calcularNumeroVisita(visitorId || "", novoCliente.id);
+  return { cliente: novoCliente, ehNovoCliente: true, visitaNumero };
+}
+
+/** Gerador de Código de Vínculo / QR Code de uso único */
+export function gerarCodigoVinculo(loja: string, caixa: string): CodigoVinculo {
+  // Código aleatório de 4 dígitos ou alfanumérico amigável
+  const randomNum = randomBetween(1000, 9999);
+  const prefixoLoja = loja.slice(0, 3).toUpperCase();
+  const codigoFormatado = `${randomNum}`;
 
   const codigo: CodigoVinculo = {
     id: `cv_${id()}`,
-    codigo: String(randomBetween(1000, 9999)),
+    codigo: codigoFormatado,
     loja,
     caixa,
     criado_em: new Date().toISOString(),
-    expira_em: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 min
+    expira_em: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 60 min de validade
     status: "aguardando",
   };
   codigoVinculoStore.push(codigo);
   return codigo;
 }
 
-export function buscarCodigoVinculoAtivo(
-  codigo: string
-): CodigoVinculo | undefined {
+export function buscarCodigoVinculo(codigo: string, loja?: string): CodigoVinculo | undefined {
+  const codeFormatted = codigo.trim().toUpperCase();
   return codigoVinculoStore.find(
     (cv) =>
-      cv.codigo === codigo &&
-      cv.status === "aguardando" &&
-      new Date(cv.expira_em) > new Date()
+      cv.codigo.toUpperCase() === codeFormatted &&
+      (!loja || cv.loja === loja || loja === "todas")
   );
+}
+
+export function buscarCodigoVinculoAtivo(
+  codigo: string,
+  loja?: string
+): CodigoVinculo | undefined {
+  const cv = buscarCodigoVinculo(codigo, loja);
+  if (!cv) return undefined;
+  if (cv.status !== "aguardando") return undefined;
+  if (new Date(cv.expira_em) <= new Date()) {
+    cv.status = "expirado";
+    return undefined;
+  }
+  return cv;
+}
+
+/** Consumo atômico do QR code / código de vínculo - TRAVA ANTIFRAUDE */
+export function consumirCodigoVinculo(
+  codigo: string,
+  loja?: string,
+  clienteId?: string
+): { sucesso: boolean; motivo?: "codigo_invalido" | "ja_utilizado" | "expirado"; codigoVinculo?: CodigoVinculo } {
+  const cv = buscarCodigoVinculo(codigo, loja);
+
+  if (!cv) {
+    return { sucesso: false, motivo: "codigo_invalido" };
+  }
+
+  if (cv.status === "utilizado") {
+    return { sucesso: false, motivo: "ja_utilizado", codigoVinculo: cv };
+  }
+
+  if (new Date(cv.expira_em) <= new Date()) {
+    cv.status = "expirado";
+    return { sucesso: false, motivo: "expirado", codigoVinculo: cv };
+  }
+
+  // Marca como consumido de forma atômica e irreversível
+  cv.status = "utilizado";
+  cv.utilizado_em = new Date().toISOString();
+  cv.utilizado_por_cliente_id = clienteId || null;
+
+  return { sucesso: true, codigoVinculo: cv };
 }
 
 /** Verifica se uma venda já teve giro (trava antifraude) */
@@ -358,57 +809,165 @@ export function vendaJaTemGiro(vendaId: string): boolean {
   return giroStore.some((g) => g.venda_id === vendaId);
 }
 
+export function calcularNumeroVisita(visitorId: string, clienteId: string | null): number {
+  const girosAnteriores = giroStore.filter(
+    (g) => (clienteId && g.cliente_id === clienteId) || (visitorId && g.visitor_id === visitorId)
+  );
+  return girosAnteriores.length + 1;
+}
+
 export function registrarGiro(
-  clienteId: string,
+  visitorId: string,
   codigoVinculoId: string,
   premioId: string,
-  vendaId: string | null
+  vendaId: string | null = null,
+  clienteId: string | null = null,
+  unidade: string = "tatuape",
+  clienteNome?: string,
+  clienteNascimento?: string,
+  clienteWhatsapp?: string
 ): Giro {
+  const visita_numero = calcularNumeroVisita(visitorId, clienteId);
   const giro: Giro = {
     id: `giro_${id()}`,
+    visitor_id: visitorId,
     cliente_id: clienteId,
+    cliente_nome: clienteNome,
+    cliente_nascimento: clienteNascimento,
+    cliente_whatsapp: clienteWhatsapp,
+    unidade,
+    visita_numero,
     venda_id: vendaId,
     codigo_vinculo_id: codigoVinculoId,
     premio_id: premioId,
     criado_em: new Date().toISOString(),
   };
   giroStore.push(giro);
+  salvarDB();
   return giro;
 }
 
+
 export function criarCupom(
-  clienteId: string,
+  visitorId: string,
   premioId: string,
-  giroId: string
+  giroId: string,
+  clienteId: string | null = null,
+  unidade: string = "tatuape",
+  visitaNumero: number = 1,
+  clienteNome?: string,
+  clienteNascimento?: string,
+  clienteWhatsapp?: string,
+  origem: "roleta" | "trilha_fixa" = "roleta"
 ): Cupom {
   const validadeDias = Number(
     MOCK_CONFIG.find((c) => c.chave === "validade_cupom_dias")?.valor || "7"
   );
   const cupom: Cupom = {
     id: `cup_${id()}`,
+    visitor_id: visitorId,
     cliente_id: clienteId,
+    cliente_nome: clienteNome,
+    cliente_nascimento: clienteNascimento,
+    cliente_whatsapp: clienteWhatsapp,
+    unidade,
+    visita_numero: visitaNumero,
     premio_id: premioId,
     giro_id: giroId,
-    codigo_cupom: Math.random().toString(36).slice(2, 8).toUpperCase(),
+    origem,
+    codigo_cupom: "MB-" + Math.random().toString(36).slice(2, 6).toUpperCase(),
     status: "disponivel",
     criado_em: new Date().toISOString(),
     expira_em: daysFromNow(validadeDias),
     utilizado_em: null,
   };
   cupomStore.push(cupom);
+  salvarDB();
   return cupom;
 }
 
-export function listarCuponsDoCliente(clienteId: string): Cupom[] {
-  return cupomStore.filter((c) => c.cliente_id === clienteId);
+export function listarCuponsDoCliente(identificador: string): Cupom[] {
+  const idLimpo = (identificador || "").trim();
+  const zapLimpo = idLimpo.replace(/\D/g, "");
+
+  return cupomStore.filter((c) => {
+    if (c.cliente_id && c.cliente_id === idLimpo) return true;
+    if (zapLimpo && c.cliente_whatsapp) {
+      const cZap = c.cliente_whatsapp.replace(/\D/g, "");
+      if (cZap === zapLimpo || cZap.includes(zapLimpo) || zapLimpo.includes(cZap)) return true;
+    }
+    return false;
+  });
 }
 
 export function buscarCupomPorId(cupomId: string): Cupom | undefined {
   return cupomStore.find((c) => c.id === cupomId);
 }
 
+export function buscarCupomPorCodigo(codigoCupom: string): Cupom | undefined {
+  const codeFormatted = codigoCupom.trim().toUpperCase();
+  return cupomStore.find(
+    (c) => c.codigo_cupom.toUpperCase() === codeFormatted || c.codigo_cupom.replace("MB-", "").toUpperCase() === codeFormatted
+  );
+}
+
+export function resgatarCupomPorBalconista(codigoCupom: string, balconista: string = "caixa_1", unidade?: string): { sucesso: boolean; mensagem: string; cupom?: Cupom } {
+  const cupom = buscarCupomPorCodigo(codigoCupom);
+  if (!cupom) {
+    return { sucesso: false, mensagem: "Cupom não encontrado." };
+  }
+  if (cupom.status === "utilizado") {
+    return { sucesso: false, mensagem: "Este cupom já foi utilizado anteriormente.", cupom };
+  }
+  if (new Date(cupom.expira_em) < new Date()) {
+    cupom.status = "expirado";
+    salvarDB();
+    return { sucesso: false, mensagem: "Este cupom está expirado.", cupom };
+  }
+
+  cupom.status = "utilizado";
+  cupom.utilizado_em = new Date().toISOString();
+  cupom.balconista_resgatou = balconista;
+  if (unidade) {
+    cupom.unidade = unidade;
+  }
+
+  salvarDB();
+  return { sucesso: true, mensagem: "Cupom resgatado com sucesso!", cupom };
+}
+
 export function buscarPremioPorId(premioId: string): Premio | undefined {
-  return MOCK_PREMIOS.find((p) => p.id === premioId);
+  if (premioId && premioId.startsWith("trilha_fixo_")) {
+    const visita = Number(premioId.replace("trilha_fixo_", ""));
+    const etapa = obterConfiguracaoVisita(visita);
+    if (etapa && etapa.premio_fixo) {
+      return {
+        id: premioId,
+        nome: etapa.premio_fixo.nome,
+        tipo: etapa.premio_fixo.tipo,
+        valor: etapa.premio_fixo.valor,
+        probabilidade: 100,
+        posicao_roleta: 1,
+        ativo: true,
+        limite_diario: null,
+        limite_mensal: null,
+        cor_fatia: etapa.premio_fixo.cor,
+        icone: etapa.premio_fixo.icone,
+      };
+    }
+  }
+
+  const found = premiosRoletaStore.find((p) => p.id === premioId);
+  if (found) return found;
+
+  for (const etapa of trilhaStore) {
+    if (etapa.premios_roleta && Array.isArray(etapa.premios_roleta)) {
+      const foundEtapa = etapa.premios_roleta.find((p) => p.id === premioId);
+      if (foundEtapa) return foundEtapa;
+    }
+  }
+
+  return undefined;
 }
 
 export function getConfig(chave: string): string | undefined {

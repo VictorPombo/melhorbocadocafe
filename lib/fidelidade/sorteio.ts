@@ -3,35 +3,36 @@
 // =============================================================================
 
 import type { Premio } from "./types";
-import { MOCK_PREMIOS, giroStore } from "./mock-data";
+import { premiosRoletaStore, listarPremios, giroStore } from "./mock-data";
 
 /**
  * Sorteia um prêmio respeitando probabilidades e limites.
  * Usa roleta ponderada: cada prêmio tem um "peso" proporcional à sua probabilidade.
  */
-export function sortearPremio(): Premio {
-  const premiosAtivos = getPremiosDisponiveis();
+export function sortearPremio(customPremios?: Premio[]): Premio {
+  const base = customPremios && customPremios.length > 0 ? customPremios : premiosRoletaStore;
+  const premiosAtivos = base.filter((p) => p.ativo !== false);
 
   if (premiosAtivos.length === 0) {
-    // Fallback: retorna o primeiro prêmio ativo sem limites
-    return MOCK_PREMIOS.find((p) => p.ativo) || MOCK_PREMIOS[0];
+    // Fallback
+    return base[0] || premiosRoletaStore[0];
   }
 
   // Soma total das probabilidades dos prêmios disponíveis
-  const pesoTotal = premiosAtivos.reduce((s, p) => s + p.probabilidade, 0);
+  const pesoTotal = premiosAtivos.reduce((s, p) => s + (Number(p.probabilidade) || 0), 0);
 
   // Gera número aleatório entre 0 e pesoTotal
-  let sorteio = Math.random() * pesoTotal;
+  let sorteio = Math.random() * (pesoTotal > 0 ? pesoTotal : 100);
 
   // Percorre os prêmios subtraindo as probabilidades
   for (const premio of premiosAtivos) {
-    sorteio -= premio.probabilidade;
+    sorteio -= Number(premio.probabilidade) || 0;
     if (sorteio <= 0) {
       return premio;
     }
   }
 
-  // Fallback (não deveria chegar aqui)
+  // Fallback
   return premiosAtivos[premiosAtivos.length - 1];
 }
 
@@ -44,7 +45,7 @@ function getPremiosDisponiveis(): Premio[] {
 
   const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
 
-  return MOCK_PREMIOS.filter((premio) => {
+  return premiosRoletaStore.filter((premio) => {
     if (!premio.ativo) return false;
 
     // Conta giros com este prêmio hoje

@@ -15,9 +15,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
     if (!isAuthed && !isLoginPage) {
       router.replace("/gestao/login");
-    } else if (isAuthed && role === "caixa" && pathname !== "/gestao/fidelidade/caixa" && !isLoginPage) {
-      // Caixa only has access to the fidelidade validation panel
-      router.replace("/gestao/fidelidade/caixa");
     } else {
       setAuthorized(true);
     }

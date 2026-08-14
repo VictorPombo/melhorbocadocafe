@@ -1,7 +1,7 @@
 // =============================================================================
 // API: Buscar cupons do cliente
-// POST /api/fidelidade/cupons
-// Body: { whatsapp }
+// GET & POST /api/fidelidade/cupons
+// Query / Body: { whatsapp }
 // =============================================================================
 
 import { NextRequest, NextResponse } from "next/server";
@@ -11,45 +11,69 @@ import {
   buscarPremioPorId,
 } from "@/lib/fidelidade/mock-data";
 
+function processarBuscaCupons(zapInput: string) {
+  const cleanDigits = String(zapInput).replace(/\D/g, "");
+
+  if (!cleanDigits || cleanDigits.length < 8) {
+    return { erro: "Por favor, digite seu WhatsApp com DDD.", status: 400 };
+  }
+
+  const cliente = buscarClientePorWhatsapp(cleanDigits);
+  const cuponsRaw = listarCuponsDoCliente(cliente?.id || cleanDigits);
+
+  const nomeCliente = cliente?.nome || cuponsRaw[0]?.cliente_nome || "Cliente";
+
+  const cupons = cuponsRaw.map((cupom) => {
+    const premio = buscarPremioPorId(cupom.premio_id);
+    return {
+      ...cupom,
+      premio: premio || {
+        id: cupom.premio_id,
+        nome: "Brinde Especial Melhor Bocado",
+        tipo: "produto",
+        valor: 0,
+        probabilidade: 10,
+        posicao_roleta: 1,
+        ativo: true,
+        limite_diario: null,
+        limite_mensal: null,
+        cor_fatia: "#e6398f",
+        icone: "🎁",
+      },
+    };
+  });
+
+  return {
+    sucesso: true,
+    cliente: { nome: nomeCliente },
+    cliente_nome: nomeCliente,
+    cupons,
+  };
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const zap = req.nextUrl.searchParams.get("whatsapp") || req.nextUrl.searchParams.get("celular") || "";
+    const result = processarBuscaCupons(zap);
+    if ("erro" in result) {
+      return NextResponse.json({ erro: result.erro }, { status: result.status });
+    }
+    return NextResponse.json(result);
+  } catch (err: any) {
+    return NextResponse.json({ erro: err?.message || "Erro interno" }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { whatsapp } = await req.json();
-
-    if (!whatsapp) {
-      return NextResponse.json(
-        { erro: "WhatsApp é obrigatório" },
-        { status: 400 }
-      );
+    const body = await req.json();
+    const zapInput = body.whatsapp || body.celular || "";
+    const result = processarBuscaCupons(zapInput);
+    if ("erro" in result) {
+      return NextResponse.json({ erro: result.erro }, { status: result.status });
     }
-
-    const cliente = buscarClientePorWhatsapp(whatsapp);
-    if (!cliente) {
-      return NextResponse.json(
-        { erro: "Cliente não encontrado" },
-        { status: 404 }
-      );
-    }
-
-    const cupons = listarCuponsDoCliente(cliente.id).map((cupom) => {
-      const premio = buscarPremioPorId(cupom.premio_id);
-      return {
-        id: cupom.id,
-        codigo_cupom: cupom.codigo_cupom,
-        status: cupom.status,
-        criado_em: cupom.criado_em,
-        expira_em: cupom.expira_em,
-        utilizado_em: cupom.utilizado_em,
-        premio: premio
-          ? { nome: premio.nome, tipo: premio.tipo, valor: premio.valor }
-          : null,
-      };
-    });
-
-    return NextResponse.json({
-      cliente: { nome: cliente.nome },
-      cupons,
-    });
-  } catch {
-    return NextResponse.json({ erro: "Erro interno" }, { status: 500 });
+    return NextResponse.json(result);
+  } catch (err: any) {
+    return NextResponse.json({ erro: err?.message || "Erro interno" }, { status: 500 });
   }
 }

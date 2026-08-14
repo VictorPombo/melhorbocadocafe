@@ -1,96 +1,35 @@
 "use client";
 
-import { useState } from "react";
-
-// Mock de histórico de giros
-const HISTORICO_GIROS = [
-  {
-    id: "1",
-    cliente: "Maria Silva",
-    whatsapp: "31999990001",
-    premio: "Café Espresso Grátis",
-    cupom: "A3F7K2",
-    status: "utilizado",
-    data: "2026-07-15 14:32",
-    caixa: "Caixa 1",
-  },
-  {
-    id: "2",
-    cliente: "João Santos",
-    whatsapp: "31999990002",
-    premio: "10% de Desconto",
-    cupom: "B8G2M9",
-    status: "disponivel",
-    data: "2026-07-15 13:18",
-    caixa: "Caixa 1",
-  },
-  {
-    id: "3",
-    cliente: "Ana Oliveira",
-    whatsapp: "31999990003",
-    premio: "Donut Grátis",
-    cupom: "C4H5N1",
-    status: "expirado",
-    data: "2026-07-08 11:45",
-    caixa: "Caixa 1",
-  },
-  {
-    id: "4",
-    cliente: "Carlos Lima",
-    whatsapp: "31999990004",
-    premio: "Pão de Queijo Grátis",
-    cupom: "D1J8P3",
-    status: "utilizado",
-    data: "2026-07-15 10:20",
-    caixa: "Caixa 1",
-  },
-  {
-    id: "5",
-    cliente: "Fernanda Costa",
-    whatsapp: "31999990005",
-    premio: "20% de Desconto",
-    cupom: "E6L3Q7",
-    status: "disponivel",
-    data: "2026-07-15 09:55",
-    caixa: "Caixa 1",
-  },
-  {
-    id: "6",
-    cliente: "Pedro Almeida",
-    whatsapp: "31999990006",
-    premio: "Combo Donut + Café",
-    cupom: "F2M9R4",
-    status: "utilizado",
-    data: "2026-07-14 16:40",
-    caixa: "Caixa 1",
-  },
-  {
-    id: "7",
-    cliente: "Juliana Ribeiro",
-    whatsapp: "31999990007",
-    premio: "Café Espresso Grátis",
-    cupom: "G5N1S8",
-    status: "disponivel",
-    data: "2026-07-14 15:12",
-    caixa: "Caixa 1",
-  },
-  {
-    id: "8",
-    cliente: "Rafael Souza",
-    whatsapp: "31999990008",
-    premio: "Donut Grátis",
-    cupom: "H9P4T2",
-    status: "expirado",
-    data: "2026-07-07 14:05",
-    caixa: "Caixa 1",
-  },
-];
+import { useState, useEffect } from "react";
 
 export default function HistoricoPage() {
+  const [historico, setHistorico] = useState<
+    {
+      id: string;
+      cliente: string;
+      whatsapp: string;
+      premio: string;
+      cupom: string;
+      status: string;
+      data: string;
+      unidade: string;
+    }[]
+  >([]);
   const [filtro, setFiltro] = useState<"todos" | "disponivel" | "utilizado" | "expirado">("todos");
   const [busca, setBusca] = useState("");
 
-  const filtrados = HISTORICO_GIROS.filter((g) => {
+  useEffect(() => {
+    fetch("/api/fidelidade/metricas")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.sucesso && Array.isArray(data.historicoCompleto)) {
+          setHistorico(data.historicoCompleto);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const filtrados = historico.filter((g) => {
     if (filtro !== "todos" && g.status !== filtro) return false;
     if (busca) {
       const term = busca.toLowerCase();
@@ -196,7 +135,7 @@ export default function HistoricoPage() {
                 >
                   <td className="px-5 py-3">
                     <p className="font-bold text-gray-800">{giro.cliente}</p>
-                    <p className="text-xs text-gray-400">{giro.caixa}</p>
+                    <p className="text-xs text-gray-400">{giro.unidade} • {giro.whatsapp}</p>
                   </td>
                   <td className="px-5 py-3 text-gray-600">{giro.premio}</td>
                   <td className="px-5 py-3">
