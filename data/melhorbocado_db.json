@@ -1,0 +1,341 @@
+{
+  "clientes": [],
+  "giros": [],
+  "cupons": [],
+  "codigos": [
+    {
+      "id": "cv_zsuim4klmstf5898",
+      "codigo": "7929",
+      "loja": "tatuape",
+      "caixa": "caixa_1",
+      "criado_em": "2026-08-14T20:47:52.844Z",
+      "expira_em": "2026-08-14T21:47:52.844Z",
+      "status": "aguardando"
+    },
+    {
+      "id": "cv_krjmzh7dmstirq2s",
+      "codigo": "5738",
+      "loja": "tatuape",
+      "caixa": "caixa_1",
+      "criado_em": "2026-08-14T22:29:21.220Z",
+      "expira_em": "2026-08-14T23:29:21.220Z",
+      "status": "aguardando"
+    }
+  ],
+  "unidades": [
+    {
+      "id": "tatuape",
+      "nome": "Tatuapé (Matriz)",
+      "cidade": "São Paulo - SP",
+      "bairro": "Tatuapé",
+      "ativa": true,
+      "caixas": [
+        "Caixa 01",
+        "Caixa 02",
+        "Totem Autoatendimento"
+      ]
+    },
+    {
+      "id": "mooca",
+      "nome": "Mooca",
+      "cidade": "São Paulo - SP",
+      "bairro": "Mooca",
+      "ativa": true,
+      "caixas": [
+        "Caixa 01",
+        "Caixa 02"
+      ]
+    },
+    {
+      "id": "campo_belo",
+      "nome": "Campo Belo",
+      "cidade": "São Paulo - SP",
+      "bairro": "Campo Belo",
+      "ativa": true,
+      "caixas": [
+        "Caixa 01"
+      ]
+    },
+    {
+      "id": "santana",
+      "nome": "Santana",
+      "cidade": "São Paulo - SP",
+      "bairro": "Santana",
+      "ativa": true,
+      "caixas": [
+        "Caixa 01",
+        "Caixa 02"
+      ]
+    },
+    {
+      "id": "santo_amaro",
+      "nome": "Santo Amaro",
+      "cidade": "São Paulo - SP",
+      "bairro": "Santo Amaro",
+      "ativa": true,
+      "caixas": [
+        "Caixa 01"
+      ]
+    },
+    {
+      "id": "itaim_bibi",
+      "nome": "Itaim Bibi",
+      "cidade": "São Paulo - SP",
+      "bairro": "Itaim Bibi",
+      "endereco": "",
+      "telefone": "",
+      "caixas": [
+        "Caixa 01",
+        "Caixa 02"
+      ],
+      "ativa": true
+    }
+  ],
+  "trilha": [
+    {
+      "visita": 1,
+      "titulo": "Boas-Vindas",
+      "modo": "fixo",
+      "premio_fixo": {
+        "nome": "Café Expresso Grátis",
+        "tipo": "produto",
+        "valor": 0,
+        "icone": "☕",
+        "cor": "#4a2810"
+      },
+      "descricao": "Ganhe 1 Café Expresso Grátis no seu 1º pedido!",
+      "ativo": true
+    },
+    {
+      "visita": 2,
+      "titulo": "Roleta da Sorte",
+      "modo": "roleta",
+      "descricao": "Gire a roleta da sorte e concorra a prêmios e descontos!",
+      "ativo": true
+    },
+    {
+      "visita": 3,
+      "titulo": "Cliente Frequente",
+      "modo": "fixo",
+      "premio_fixo": {
+        "nome": "10% de Desconto",
+        "tipo": "desconto",
+        "valor": 10,
+        "icone": "💰",
+        "cor": "#e6398f"
+      },
+      "descricao": "10% de desconto garantido no seu pedido!",
+      "ativo": true
+    },
+    {
+      "visita": 4,
+      "titulo": "Roleta da Sorte",
+      "modo": "roleta",
+      "descricao": "Gire a roleta e concorra a donuts e doces artesanais!",
+      "ativo": true
+    },
+    {
+      "visita": 5,
+      "titulo": "Marco de 5 Visitas",
+      "modo": "fixo",
+      "premio_fixo": {
+        "nome": "Donut Glazed Clássico",
+        "tipo": "produto",
+        "valor": 0,
+        "icone": "🍩",
+        "cor": "#d97706"
+      },
+      "descricao": "Parabéns por 5 visitas! Escolha 1 Donut Clássico!",
+      "ativo": true
+    },
+    {
+      "visita": 6,
+      "titulo": "Roleta da Sorte",
+      "modo": "roleta",
+      "descricao": "Gire a roleta premiada de confeitaria!",
+      "ativo": true
+    },
+    {
+      "visita": 7,
+      "titulo": "Quase VIP",
+      "modo": "fixo",
+      "premio_fixo": {
+        "nome": "15% de Desconto",
+        "tipo": "desconto",
+        "valor": 15,
+        "icone": "🎉",
+        "cor": "#8b5cf6"
+      },
+      "descricao": "15% de desconto especial para clientes recorrentes!",
+      "ativo": true
+    },
+    {
+      "visita": 8,
+      "titulo": "Roleta da Sorte",
+      "modo": "roleta",
+      "descricao": "Gire a roleta da sorte e concorra a prêmios especiais!",
+      "ativo": true
+    },
+    {
+      "visita": 9,
+      "titulo": "Super Fiel",
+      "modo": "fixo",
+      "premio_fixo": {
+        "nome": "Capuccino Especial",
+        "tipo": "produto",
+        "valor": 0,
+        "icone": "🧋",
+        "cor": "#059669"
+      },
+      "descricao": "Bebida quente artesanal à sua escolha!",
+      "ativo": true
+    },
+    {
+      "visita": 10,
+      "titulo": "VIP Master 10ª Visita",
+      "modo": "fixo",
+      "premio_fixo": {
+        "nome": "Donut Recheado Especial VIP",
+        "tipo": "produto",
+        "valor": 0,
+        "icone": "👑",
+        "cor": "#f59e0b"
+      },
+      "descricao": "Você é VIP Master! Donut Especial Recheado Grátis!",
+      "ativo": true
+    }
+  ],
+  "premios": [
+    {
+      "id": "premio_1",
+      "nome": "Donut Glazed Clássico",
+      "tipo": "produto",
+      "valor": 0,
+      "probabilidade": 15,
+      "posicao_roleta": 1,
+      "ativo": true,
+      "limite_diario": 20,
+      "limite_mensal": null,
+      "cor_fatia": "#e6398f",
+      "icone": "🍩"
+    },
+    {
+      "id": "premio_2",
+      "nome": "10% de Desconto",
+      "tipo": "desconto",
+      "valor": 10,
+      "probabilidade": 20,
+      "posicao_roleta": 2,
+      "ativo": true,
+      "limite_diario": null,
+      "limite_mensal": null,
+      "cor_fatia": "#f43f5e",
+      "icone": "💰"
+    },
+    {
+      "id": "premio_3",
+      "nome": "Café Expresso Grátis",
+      "tipo": "produto",
+      "valor": 0,
+      "probabilidade": 15,
+      "posicao_roleta": 3,
+      "ativo": true,
+      "limite_diario": 15,
+      "limite_mensal": null,
+      "cor_fatia": "#d97706",
+      "icone": "☕"
+    },
+    {
+      "id": "premio_4",
+      "nome": "15% de Desconto",
+      "tipo": "desconto",
+      "valor": 15,
+      "probabilidade": 10,
+      "posicao_roleta": 4,
+      "ativo": true,
+      "limite_diario": null,
+      "limite_mensal": null,
+      "cor_fatia": "#8b5cf6",
+      "icone": "🎉"
+    },
+    {
+      "id": "premio_5",
+      "nome": "Donut Chocolate Belga",
+      "tipo": "produto",
+      "valor": 0,
+      "probabilidade": 10,
+      "posicao_roleta": 5,
+      "ativo": true,
+      "limite_diario": 10,
+      "limite_mensal": null,
+      "cor_fatia": "#ec4899",
+      "icone": "🍫"
+    },
+    {
+      "id": "premio_6",
+      "nome": "5% de Desconto",
+      "tipo": "desconto",
+      "valor": 5,
+      "probabilidade": 15,
+      "posicao_roleta": 6,
+      "ativo": true,
+      "limite_diario": null,
+      "limite_mensal": null,
+      "cor_fatia": "#10b981",
+      "icone": "🏷️"
+    },
+    {
+      "id": "premio_7",
+      "nome": "Capuccino Pequeno",
+      "tipo": "produto",
+      "valor": 0,
+      "probabilidade": 5,
+      "posicao_roleta": 7,
+      "ativo": true,
+      "limite_diario": 5,
+      "limite_mensal": null,
+      "cor_fatia": "#3b82f6",
+      "icone": "🥤"
+    },
+    {
+      "id": "premio_8",
+      "nome": "20% de Desconto VIP",
+      "tipo": "desconto",
+      "valor": 20,
+      "probabilidade": 3,
+      "posicao_roleta": 8,
+      "ativo": true,
+      "limite_diario": 3,
+      "limite_mensal": null,
+      "cor_fatia": "#ef4444",
+      "icone": "🌟"
+    },
+    {
+      "id": "premio_9",
+      "nome": "Mini Donut Recheado",
+      "tipo": "produto",
+      "valor": 0,
+      "probabilidade": 5,
+      "posicao_roleta": 9,
+      "ativo": true,
+      "limite_diario": 10,
+      "limite_mensal": null,
+      "cor_fatia": "#6366f1",
+      "icone": "🧁"
+    },
+    {
+      "id": "premio_10",
+      "nome": "Tente Novamente",
+      "tipo": "desconto",
+      "valor": 0,
+      "probabilidade": 2,
+      "posicao_roleta": 10,
+      "ativo": true,
+      "limite_diario": null,
+      "limite_mensal": null,
+      "cor_fatia": "#6b7280",
+      "icone": "🔄"
+    }
+  ],
+  "atualizado_em": "2026-08-14T22:47:52.012Z"
+}

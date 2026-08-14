@@ -389,6 +389,17 @@ export const MOCK_TRILHA_VISITAS: import("./types").EtapaTrilhaVisita[] = [
 // Stores mutáveis com persistência em globalThis (compatível com Server e Client)
 // ---------------------------------------------------------------------------
 
+import {
+  carregarSnapshotDisco,
+  salvarSnapshotDisco,
+  salvarClienteSupabase,
+  salvarGiroSupabase,
+  salvarCupomSupabase,
+  sincronizarDoSupabase,
+} from "./persistencia";
+
+const snapshot = typeof window === "undefined" ? carregarSnapshotDisco() : null;
+
 const globalForFidelidade = globalThis as unknown as {
   __mb_vendaStore?: Venda[];
   __mb_codigoVinculoStore?: CodigoVinculo[];
@@ -399,44 +410,90 @@ const globalForFidelidade = globalThis as unknown as {
   __mb_trilhaStore?: import("./types").EtapaTrilhaVisita[];
   __mb_automacaoLogStore?: AutomacaoLog[];
   __mb_unidadesStore?: import("./types").UnidadeLoja[];
+  __mb_supabaseHydrated?: boolean;
 };
-
-export function salvarDB() {
-  // Mantido para compatibilidade
-}
 
 /** Vendas sincronizadas do "Degust" */
 export const vendaStore = (globalForFidelidade.__mb_vendaStore ??= []);
 
 /** Códigos de vínculo ativos */
-export const codigoVinculoStore = (globalForFidelidade.__mb_codigoVinculoStore ??= []);
+export const codigoVinculoStore = (globalForFidelidade.__mb_codigoVinculoStore ??= snapshot?.codigos ?? []);
 
 /** Giros realizados */
-export const giroStore = (globalForFidelidade.__mb_giroStore ??= []);
+export const giroStore = (globalForFidelidade.__mb_giroStore ??= snapshot?.giros ?? []);
 
 /** Cupons emitidos */
-export const cupomStore = (globalForFidelidade.__mb_cupomStore ??= []);
+export const cupomStore = (globalForFidelidade.__mb_cupomStore ??= snapshot?.cupons ?? []);
 
-/** Clientes (mutável — novos cadastros entram aqui) */
-export const clienteStore = (globalForFidelidade.__mb_clienteStore ??= []);
+/** Clientes (mutável — persistido em disco e Supabase) */
+export const clienteStore = (globalForFidelidade.__mb_clienteStore ??= snapshot?.clientes ?? []);
 
 /** Prêmios mutáveis da roleta */
-export let premiosRoletaStore = (globalForFidelidade.__mb_premiosRoletaStore ??= [...MOCK_PREMIOS]);
+export let premiosRoletaStore = (globalForFidelidade.__mb_premiosRoletaStore ??= snapshot?.premios ?? [...MOCK_PREMIOS]);
 
 /** Trilha de visitas mutável (flexível com N etapas) */
-export let trilhaStore: import("./types").EtapaTrilhaVisita[] = (globalForFidelidade.__mb_trilhaStore ??= JSON.parse(JSON.stringify(MOCK_TRILHA_VISITAS)));
+export let trilhaStore: import("./types").EtapaTrilhaVisita[] = (globalForFidelidade.__mb_trilhaStore ??= snapshot?.trilha ?? JSON.parse(JSON.stringify(MOCK_TRILHA_VISITAS)));
 
 /** Log de automações */
 export const automacaoLogStore = (globalForFidelidade.__mb_automacaoLogStore ??= []);
 
 /** Lojas e franquias cadastradas no sistema */
-export let unidadesStore: import("./types").UnidadeLoja[] = (globalForFidelidade.__mb_unidadesStore ??= [
+export let unidadesStore: import("./types").UnidadeLoja[] = (globalForFidelidade.__mb_unidadesStore ??= snapshot?.unidades ?? [
   { id: "tatuape", nome: "Tatuapé", cidade: "São Paulo - SP", bairro: "Tatuapé", ativa: true, caixas: ["Caixa 01", "Caixa 02", "Totem Autoatendimento"] },
   { id: "mooca", nome: "Mooca", cidade: "São Paulo - SP", bairro: "Mooca", ativa: true, caixas: ["Caixa 01", "Caixa 02"] },
   { id: "campo_belo", nome: "Campo Belo", cidade: "São Paulo - SP", bairro: "Campo Belo", ativa: true, caixas: ["Caixa 01"] },
   { id: "santana", nome: "Santana", cidade: "São Paulo - SP", bairro: "Santana", ativa: true, caixas: ["Caixa 01", "Caixa 02"] },
   { id: "santo_amaro", nome: "Santo Amaro", cidade: "São Paulo - SP", bairro: "Santo Amaro", ativa: true, caixas: ["Caixa 01"] },
 ]);
+
+export function salvarDB() {
+  if (typeof window === "undefined") {
+    salvarSnapshotDisco({
+      clientes: clienteStore,
+      giros: giroStore,
+      cupons: cupomStore,
+      codigos: codigoVinculoStore,
+      unidades: unidadesStore,
+      trilha: trilhaStore,
+      premios: premiosRoletaStore,
+      atualizado_em: new Date().toISOString(),
+    });
+  }
+}
+
+// Hidratação em background a partir do Supabase Postgres
+if (typeof window === "undefined" && !globalForFidelidade.__mb_supabaseHydrated) {
+  globalForFidelidade.__mb_supabaseHydrated = true;
+  sincronizarDoSupabase()
+    .then((data) => {
+      if (data) {
+        if (data.clientes.length > 0) {
+          for (const c of data.clientes) {
+            const zap = (c.whatsapp || c.celular || "").replace(/\D/g, "");
+            if (!clienteStore.some((existing) => (existing.whatsapp || existing.celular || "").replace(/\D/g, "") === zap)) {
+              clienteStore.push(c);
+            }
+          }
+        }
+        if (data.giros.length > 0) {
+          for (const g of data.giros) {
+            if (!giroStore.some((existing) => existing.id === g.id)) {
+              giroStore.push(g);
+            }
+          }
+        }
+        if (data.cupons.length > 0) {
+          for (const cup of data.cupons) {
+            if (!cupomStore.some((existing) => existing.codigo_cupom === cup.codigo_cupom)) {
+              cupomStore.push(cup);
+            }
+          }
+        }
+        salvarDB();
+      }
+    })
+    .catch(() => {});
+}
 
 // ---------------------------------------------------------------------------
 // Funções de Gestão de Lojas & Franquias
@@ -711,6 +768,8 @@ export function buscarOuCriarClienteIdentificado(
     if (nascClean && cliente.nascimento !== nascClean) {
       cliente.nascimento = nascClean;
     }
+    salvarDB();
+    salvarClienteSupabase(cliente).catch(() => {});
     const visitaNumero = calcularNumeroVisita(visitorId || "", cliente.id);
     return { cliente, ehNovoCliente: false, visitaNumero };
   }
@@ -727,6 +786,7 @@ export function buscarOuCriarClienteIdentificado(
     aceite_lgpd_texto_versao: "1.0",
     unidade_cadastro: unidade,
   });
+  salvarClienteSupabase(novoCliente).catch(() => {});
 
   const visitaNumero = calcularNumeroVisita(visitorId || "", novoCliente.id);
   return { cliente: novoCliente, ehNovoCliente: true, visitaNumero };
@@ -844,6 +904,7 @@ export function registrarGiro(
   };
   giroStore.push(giro);
   salvarDB();
+  salvarGiroSupabase(giro).catch(() => {});
   return giro;
 }
 
@@ -883,6 +944,7 @@ export function criarCupom(
   };
   cupomStore.push(cupom);
   salvarDB();
+  salvarCupomSupabase(cupom).catch(() => {});
   return cupom;
 }
 
@@ -922,6 +984,7 @@ export function resgatarCupomPorBalconista(codigoCupom: string, balconista: stri
   if (new Date(cupom.expira_em) < new Date()) {
     cupom.status = "expirado";
     salvarDB();
+    salvarCupomSupabase(cupom).catch(() => {});
     return { sucesso: false, mensagem: "Este cupom está expirado.", cupom };
   }
 
@@ -933,6 +996,7 @@ export function resgatarCupomPorBalconista(codigoCupom: string, balconista: stri
   }
 
   salvarDB();
+  salvarCupomSupabase(cupom).catch(() => {});
   return { sucesso: true, mensagem: "Cupom resgatado com sucesso!", cupom };
 }
 
