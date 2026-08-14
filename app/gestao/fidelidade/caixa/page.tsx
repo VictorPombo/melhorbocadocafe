@@ -43,9 +43,13 @@ export default function CaixaFidelidadePage() {
 
   const [todosResgates, setTodosResgates] = useState<ItemResgateCaixa[]>([]);
   const [listaUnidades, setListaUnidades] = useState(UNIDADES_LOJA);
+  const [userRole, setUserRole] = useState<string>("admin");
 
   // Carregar histórico inicial de resgates reais e unidade logada
   useEffect(() => {
+    const role = localStorage.getItem("mb_role") || "admin";
+    setUserRole(role);
+
     const savedUnidade = localStorage.getItem("mb_unidade_id");
     if (savedUnidade && savedUnidade !== "todas") {
       setUnidade(savedUnidade);
@@ -187,17 +191,23 @@ export default function CaixaFidelidadePage() {
           {/* Seletor de Unidade Ativa */}
           <div className="flex items-center gap-2 bg-stone-800 px-3 py-1.5 rounded-xl border border-stone-700">
             <span className="text-xs text-stone-400 font-bold">Unidade:</span>
-            <select
-              value={unidade}
-              onChange={(e) => setUnidade(e.target.value)}
-              className="bg-transparent text-amber-400 font-extrabold text-xs outline-none cursor-pointer"
-            >
-              {listaUnidades.map((u) => (
-                <option key={u.id} value={u.id} className="bg-stone-900 text-white">
-                  {u.nome}
-                </option>
-              ))}
-            </select>
+            {userRole === "admin" ? (
+              <select
+                value={unidade}
+                onChange={(e) => setUnidade(e.target.value)}
+                className="bg-transparent text-amber-400 font-extrabold text-xs outline-none cursor-pointer"
+              >
+                {listaUnidades.map((u) => (
+                  <option key={u.id} value={u.id} className="bg-stone-900 text-white">
+                    {u.nome}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span className="text-amber-400 font-extrabold text-xs">
+                {listaUnidades.find((u) => u.id === unidade)?.nome || "Tatuapé"}
+              </span>
+            )}
           </div>
 
           <Link

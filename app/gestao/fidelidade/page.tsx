@@ -741,61 +741,84 @@ export default function FidelidadeDashboardPage() {
       {/* ========================================================================= */}
       {/* SELETOR DE LOJAS / FRANQUIAS & BOTÃO DE NOVA UNIDADE */}
       {/* ========================================================================= */}
-      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-stone-200/90 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-black shrink-0 shadow-xs">
-            <Store className="w-3.5 h-3.5 text-amber-300" />
-            <span>Loja Ativa:</span>
+      {userRole === "admin" ? (
+        <div className="bg-white rounded-3xl p-4 sm:p-5 border border-stone-200/90 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-black shrink-0 shadow-xs">
+              <Store className="w-3.5 h-3.5 text-amber-300" />
+              <span>Loja Ativa:</span>
+            </div>
+
+            {/* Chips de Lojas (Visão Admin) */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setLojaFiltro("todas")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  lojaFiltro === "todas"
+                    ? "bg-gradient-to-r from-[#e6398f] to-rose-600 text-white shadow-sm shadow-pink-500/20"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                🌐 Rede Consolidada ({unidades.length})
+              </button>
+
+              {unidades.map((u) => {
+                const isSelected = lojaFiltro === u.id;
+                return (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onClick={() => {
+                      setLojaFiltro(u.id);
+                      setUnidadeAtiva(u.id);
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                      isSelected
+                        ? "bg-stone-900 text-white shadow-sm"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900"
+                    }`}
+                  >
+                    <span>{u.nome}</span>
+                    {isSelected && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Chips de Lojas */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <button
-              type="button"
-              onClick={() => setLojaFiltro("todas")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                lojaFiltro === "todas"
-                  ? "bg-gradient-to-r from-[#e6398f] to-rose-600 text-white shadow-sm shadow-pink-500/20"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              🌐 Rede Consolidada ({unidades.length})
-            </button>
-
-            {unidades.map((u) => {
-              const isSelected = lojaFiltro === u.id;
-              return (
-                <button
-                  key={u.id}
-                  type="button"
-                  onClick={() => {
-                    setLojaFiltro(u.id);
-                    setUnidadeAtiva(u.id);
-                  }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                    isSelected
-                      ? "bg-stone-900 text-white shadow-sm"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900"
-                  }`}
-                >
-                  <span>{u.nome}</span>
-                  {isSelected && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />}
-                </button>
-              );
-            })}
-          </div>
+          {/* Ação de Cadastrar Nova Franquia (Exclusivo Admin) */}
+          <button
+            type="button"
+            onClick={() => setModalNovaLojaAberta(true)}
+            className="px-4 py-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20 shrink-0 cursor-pointer active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ Cadastrar Nova Loja / Franquia</span>
+          </button>
         </div>
-
-        {/* Ação de Cadastrar Nova Franquia */}
-        <button
-          type="button"
-          onClick={() => setModalNovaLojaAberta(true)}
-          className="px-4 py-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20 shrink-0 cursor-pointer active:scale-95"
-        >
-          <Plus className="w-4 h-4" />
-          <span>+ Cadastrar Nova Loja / Franquia</span>
-        </button>
-      </div>
+      ) : (
+        /* Franquia Logada: Visão 100% Isolada da sua Loja */
+        <div className="bg-white rounded-3xl p-4 sm:p-5 border border-amber-200 shadow-sm flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 border border-amber-300 text-amber-900 flex items-center justify-center text-xl font-black">
+              🏪
+            </div>
+            <div>
+              <p className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider">
+                Unidade Franqueada
+              </p>
+              <h3 className="text-base font-black text-gray-900">
+                {unidades.find((u) => u.id === userUnidadeId)?.nome || userUnidadeNome || "Tatuapé"}
+              </h3>
+            </div>
+          </div>
+          <span className="px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 font-extrabold text-xs border border-emerald-200 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Dados e Histórico Exclusivos Desta Unidade</span>
+          </span>
+        </div>
+      )}
 
       {mensagemLoja && (
         <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-emerald-900 text-xs font-bold flex items-center gap-2 animate-fade-in shadow-xs">
@@ -808,8 +831,8 @@ export default function FidelidadeDashboardPage() {
       {/* ========================================================================= */}
       {tabAtual === "geral" && (
         <div className="space-y-6 animate-fade-in">
-          {/* Banner de Contexto da Loja Filtrada */}
-          {lojaFiltro !== "todas" && (
+          {/* Banner de Contexto da Loja Filtrada (Apenas Admin para poder alternar) */}
+          {userRole === "admin" && lojaFiltro !== "todas" && (
             <div className="p-3.5 bg-amber-50 rounded-2xl border border-amber-200 text-amber-900 text-xs font-bold flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <span className="text-base">🏪</span>
@@ -1013,20 +1036,26 @@ export default function FidelidadeDashboardPage() {
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
                   Unidade / Loja do Balcão
                 </label>
-                <select
-                  value={unidadeAtiva}
-                  onChange={(e) => {
-                    setUnidadeAtiva(e.target.value);
-                    setQrCodeGerado(null);
-                  }}
-                  className="px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-gray-50 text-gray-900 font-bold text-sm focus:border-[#e6398f] outline-none"
-                >
-                  {UNIDADES_LOJA.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.nome}
-                    </option>
-                  ))}
-                </select>
+                {userRole === "admin" ? (
+                  <select
+                    value={unidadeAtiva}
+                    onChange={(e) => {
+                      setUnidadeAtiva(e.target.value);
+                      setQrCodeGerado(null);
+                    }}
+                    className="px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-gray-50 text-gray-900 font-bold text-sm focus:border-[#e6398f] outline-none cursor-pointer"
+                  >
+                    {unidades.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.nome}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="px-4 py-2.5 rounded-xl bg-amber-50 border-2 border-amber-200 text-stone-900 font-black text-sm flex items-center gap-2">
+                    <span>🏪 {unidades.find((u) => u.id === userUnidadeId)?.nome || userUnidadeNome || "Tatuapé"}</span>
+                  </div>
+                )}
               </div>
 
               <div>

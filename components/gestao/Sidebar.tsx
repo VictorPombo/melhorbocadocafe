@@ -7,14 +7,8 @@ import {
   Gift,
   ShoppingCart,
   Users,
-  Lightbulb,
-  ShieldAlert,
-  BarChart2,
-  Sparkles,
   Smartphone,
   LogOut,
-  QrCode,
-  FileText,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -32,46 +26,19 @@ const NAV_ITEMS = [
     icon: <ShoppingCart className="w-5 h-5" />,
   },
   {
-    href: "/gestao/guia-apresentacao",
-    label: "Guia Executivo & PDF",
-    mobileLabel: "Guia",
-    icon: <FileText className="w-5 h-5" />,
-  },
-  { type: "divider" as const },
-  {
-    href: "/gestao/clientes",
+    href: "/gestao/fidelidade/clientes",
     label: "Base de Clientes",
     mobileLabel: "Clientes",
     icon: <Users className="w-5 h-5" />,
   },
-  {
-    href: "/gestao/insights",
-    label: "Insights de Consumo",
-    mobileLabel: "Insights",
-    icon: <Lightbulb className="w-5 h-5" />,
-  },
-  {
-    href: "/gestao/inteligencia",
-    label: "VIPs & Retenção",
-    mobileLabel: "VIP",
-    icon: <ShieldAlert className="w-5 h-5" />,
-  },
-  {
-    href: "/gestao/relatorios",
-    label: "Relatórios & CRM",
-    mobileLabel: "Relatórios",
-    icon: <BarChart2 className="w-5 h-5" />,
-  },
 ];
 
 type NavItem = {
-  href?: string;
-  label?: string;
-  mobileLabel?: string;
-  exact?: boolean;
-  icon?: React.ReactNode;
+  href: string;
+  label: string;
+  mobileLabel: string;
+  icon: React.ReactNode;
   badge?: string;
-  type?: "divider";
 };
 
 export default function Sidebar() {
@@ -80,15 +47,14 @@ export default function Sidebar() {
   function handleLogout() {
     localStorage.removeItem("mb_auth");
     localStorage.removeItem("mb_role");
+    localStorage.removeItem("mb_unidade_id");
+    localStorage.removeItem("mb_unidade_nome");
+    localStorage.removeItem("mb_caixa");
     window.location.href = "/gestao/login";
   }
 
-  const isActive = (href: string, exact?: boolean) =>
-    exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
-
-  const mobileItems = (NAV_ITEMS as NavItem[]).filter(
-    (i) => !i.type && i.href && ["/gestao/fidelidade", "/gestao/fidelidade/caixa", "/gestao/clientes", "/gestao/relatorios"].includes(i.href)
-  );
+  const isActive = (href: string) =>
+    pathname === href || (href !== "/gestao/fidelidade" && pathname.startsWith(href));
 
   return (
     <>
@@ -112,17 +78,14 @@ export default function Sidebar() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-1">
-          {(NAV_ITEMS as NavItem[]).map((item, i) => {
-            if (item.type === "divider") {
-              return <div key={i} className="border-t border-gray-100 my-3" />;
-            }
-            const active = isActive(item.href!, item.exact);
+        <div className="flex-1 overflow-y-auto p-4 space-y-1.5">
+          {NAV_ITEMS.map((item) => {
+            const active = isActive(item.href);
             return (
               <Link
                 key={item.href}
-                href={item.href!}
-                className={`flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs font-black transition-all ${
+                href={item.href}
+                className={`flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-black transition-all ${
                   active
                     ? "bg-[#e6398f] text-white shadow-md shadow-pink-500/20"
                     : "text-gray-600 hover:text-gray-900 hover:bg-pink-50/50"
@@ -172,12 +135,12 @@ export default function Sidebar() {
         aria-label="Navegação mobile"
       >
         <div className="flex items-center justify-around px-2 py-2">
-          {mobileItems.map((item) => {
-            const active = isActive(item.href!, item.exact);
+          {NAV_ITEMS.map((item) => {
+            const active = isActive(item.href);
             return (
               <Link
                 key={item.href}
-                href={item.href!}
+                href={item.href}
                 className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-2xl transition-all ${
                   active
                     ? "text-[#e6398f] font-black"
@@ -185,7 +148,7 @@ export default function Sidebar() {
                 }`}
               >
                 {item.icon}
-                <span className="text-[10px]">{item.mobileLabel || item.label}</span>
+                <span className="text-[10px]">{item.mobileLabel}</span>
               </Link>
             );
           })}
