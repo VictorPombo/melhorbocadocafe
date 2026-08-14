@@ -39,6 +39,7 @@ import { UNIDADES_LOJA, type Premio, type Cliente } from "@/lib/fidelidade/types
 import { giroStore, cupomStore, clienteStore, MOCK_PREMIOS } from "@/lib/fidelidade/mock-data";
 import { QrCodeSvg } from "@/components/fidelidade/QrCodeSvg";
 import { Roleta } from "@/components/fidelidade/Roleta";
+import { RoletaMini } from "@/components/fidelidade/RoletaMini";
 import { PainelPublicoAlvo } from "@/components/gestao/PainelPublicoAlvo";
 
 export default function FidelidadeDashboardPage() {
@@ -1461,31 +1462,44 @@ export default function FidelidadeDashboardPage() {
                       />
                     </div>
 
-                    {/* Preview e Fatias da Roleta */}
-                    <div className="bg-pink-50/40 p-3 rounded-2xl border border-pink-100 flex flex-col sm:flex-row items-center gap-3">
-                      <div className="scale-65 -my-10 -mx-8 transform shrink-0">
-                        <Roleta
+                    {/* Preview e Fatias da Roleta com Enquadramento Perfeito */}
+                    <div className="bg-gradient-to-br from-pink-50/60 to-rose-50/30 p-3.5 sm:p-4 rounded-2xl border border-pink-100 flex flex-col md:flex-row items-center gap-4">
+                      {/* Container da Roleta com Tamanho Fixo e Proporcional */}
+                      <div className="w-36 h-36 sm:w-40 sm:h-40 shrink-0 flex items-center justify-center relative p-1 bg-white/80 rounded-2xl border border-pink-100 shadow-xs">
+                        <RoletaMini
                           premios={etapa.premios_roleta && etapa.premios_roleta.length > 0 ? etapa.premios_roleta : premios}
-                          posicaoSorteada={null}
-                          girando={false}
+                          className="w-full h-full"
                         />
                       </div>
 
-                      <div className="flex-1 space-y-2 w-full text-left">
-                        <p className="text-[10px] font-black text-gray-600 uppercase tracking-wider">
-                          Fatias & Prêmios desta Roleta:
-                        </p>
-                        <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
-                          {(etapa.premios_roleta && etapa.premios_roleta.length > 0 ? etapa.premios_roleta : premios).map((p, pIdx) => (
-                            <span
-                              key={p.id || pIdx}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-white border border-gray-200 text-gray-800 shadow-xs"
-                            >
-                              <span>{p.icone || "🎁"}</span>
-                              <span className="truncate max-w-[90px]">{p.nome}</span>
-                              <span className="text-[#e6398f] font-black">({p.probabilidade}%)</span>
+                      {/* Informações das Fatias e Botão de Ação */}
+                      <div className="flex-1 w-full space-y-2.5 text-left flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between gap-2 mb-1.5">
+                            <p className="text-[11px] font-black text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                              <span>🎯 Fatias & Prêmios desta Roleta:</span>
+                            </p>
+                            <span className="px-2 py-0.5 rounded-md bg-pink-100 text-[#e6398f] text-[10px] font-black">
+                              {(etapa.premios_roleta && etapa.premios_roleta.length > 0 ? etapa.premios_roleta : premios).length} Fatias
                             </span>
-                          ))}
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-1.5 max-h-28 overflow-y-auto pr-1">
+                            {(etapa.premios_roleta && etapa.premios_roleta.length > 0 ? etapa.premios_roleta : premios).map((p, pIdx) => (
+                              <div
+                                key={p.id || pIdx}
+                                className="flex items-center justify-between gap-1 px-2 py-1 rounded-lg text-[10px] font-bold bg-white border border-gray-200 text-gray-800 shadow-xs"
+                              >
+                                <span className="flex items-center gap-1 min-w-0 truncate">
+                                  <span className="shrink-0">{p.icone || "🎁"}</span>
+                                  <span className="truncate">{p.nome}</span>
+                                </span>
+                                <span className="text-[#e6398f] font-black shrink-0 text-[9px] bg-pink-50 px-1 py-0.2 rounded">
+                                  {p.probabilidade}%
+                                </span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
 
                         <button
@@ -1494,7 +1508,7 @@ export default function FidelidadeDashboardPage() {
                             setRoletaAlvoVisita(etapa.visita);
                             setTabAtual("premios");
                           }}
-                          className="w-full py-2 px-3 bg-gradient-to-r from-[#e6398f] to-[#b51e6c] hover:opacity-95 text-white text-xs font-extrabold rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                          className="w-full py-2.5 px-3.5 bg-gradient-to-r from-[#e6398f] to-[#b51e6c] hover:opacity-95 text-white text-xs font-extrabold rounded-xl shadow-md shadow-pink-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 mt-1"
                         >
                           <Sliders className="w-3.5 h-3.5" />
                           <span>Configurar Fatias da Roleta ({etapa.visita}ª Visita)</span>
@@ -1581,7 +1595,7 @@ export default function FidelidadeDashboardPage() {
                 </p>
               </div>
 
-              <div className="scale-90 transform -my-4">
+              <div className="w-full flex items-center justify-center py-2 overflow-hidden">
                 <Roleta
                   premios={premiosEmEdicao}
                   posicaoSorteada={null}
