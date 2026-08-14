@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ShieldCheck, Store, ShoppingCart, Lock, ArrowRight, Sparkles } from "lucide-react";
+import { ShieldCheck, Store, ShoppingCart, Lock, ArrowRight, Sparkles, Eye, EyeOff } from "lucide-react";
 import { UNIDADES_LOJA, UnidadeLoja } from "@/lib/fidelidade/types";
 
 type TipoPerfil = "admin" | "franquia" | "caixa";
@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [unidadeSelecionada, setUnidadeSelecionada] = useState<string>("tatuape");
   const [caixaSelecionado, setCaixaSelecionado] = useState<string>("Caixa 01");
   const [senha, setSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -257,10 +258,10 @@ export default function LoginPage() {
                   ? "Senha da Franquia"
                   : "PIN / Senha do Caixa"}
               </label>
-              <div className="relative">
+              <div className="relative flex items-center">
                 <input
                   id="senha"
-                  type="password"
+                  type={mostrarSenha ? "text" : "password"}
                   value={senha}
                   onChange={(e) => {
                     setSenha(e.target.value);
@@ -269,13 +270,25 @@ export default function LoginPage() {
                   placeholder={perfil === "caixa" ? "PIN (Ex: 1234)" : "••••••••"}
                   autoFocus
                   required
-                  className={`w-full px-4 py-3 rounded-xl border-2 text-sm font-bold text-gray-900 placeholder-gray-300 outline-none transition-all ${
+                  className={`w-full px-4 pr-11 py-3 rounded-xl border-2 text-sm font-bold text-gray-900 placeholder-gray-300 outline-none transition-all ${
                     erro
                       ? "border-red-300 bg-red-50 focus:border-red-500"
                       : "border-gray-200 focus:border-stone-900 bg-gray-50 focus:bg-white"
                   }`}
                 />
-                <Lock className="w-4 h-4 text-gray-400 absolute right-3.5 top-3.5" />
+                <button
+                  type="button"
+                  onClick={() => setMostrarSenha((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-200/50 cursor-pointer transition-colors flex items-center justify-center"
+                  title={mostrarSenha ? "Ocultar senha" : "Ver senha digitada"}
+                  aria-label={mostrarSenha ? "Ocultar senha" : "Ver senha digitada"}
+                >
+                  {mostrarSenha ? (
+                    <EyeOff className="w-4 h-4 text-[#e6398f]" />
+                  ) : (
+                    <Eye className="w-4 h-4 text-gray-400 hover:text-gray-700" />
+                  )}
+                </button>
               </div>
 
               {erro && (
