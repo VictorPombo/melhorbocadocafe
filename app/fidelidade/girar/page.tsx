@@ -446,28 +446,28 @@ function GirarContent() {
 
   // TELA PRINCIPAL DO CLIENTE COM TRILHA + IDENTIFICAÇÃO TELEFONE-PRIMEIRO
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-3 max-w-md mx-auto w-full">
-      {/* Header Compacto */}
-      <div className="text-center mb-1">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-pink-100/80 text-[#e6398f] rounded-full text-xs font-black mb-1">
+    <div className="flex-1 flex flex-col items-center justify-center p-3 sm:p-5 max-w-xl md:max-w-2xl mx-auto w-full">
+      {/* Header Compacto e Elegante */}
+      <div className="text-center mb-2">
+        <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-pink-100/90 text-[#e6398f] rounded-full text-xs font-black mb-1.5 shadow-2xs">
           <Sparkles className="w-3.5 h-3.5" />
           <span>Clube Fidelidade & Recompensas Melhor Bocado</span>
         </div>
-        <h1 className="text-lg font-black text-gray-900 tracking-tight">
+        <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
           Prêmios e Vantagens Exclusivas no Balcão! 🍩
         </h1>
       </div>
 
       {/* Indicador de Unidade / QR Code */}
       {codigoVinculo && (
-        <div className="w-full bg-stone-900 text-white rounded-2xl p-2 px-3.5 my-1.5 flex items-center justify-between shadow-md">
+        <div className="w-full bg-stone-900 text-white rounded-2xl p-2.5 px-4 my-2 flex items-center justify-between shadow-md">
           <div className="flex items-center gap-2 truncate">
             <QrCode className="w-4 h-4 text-amber-300 shrink-0" />
             <p className="text-xs font-bold truncate">
               Balcão: <span className="text-amber-300 font-extrabold">{UNIDADES_LOJA.find((u) => u.id === unidade)?.nome || "Tatuapé"}</span>
             </p>
           </div>
-          <span className="text-[10px] bg-green-500/20 text-green-300 font-extrabold px-2 py-0.5 rounded-full border border-green-500/30 shrink-0">
+          <span className="text-[11px] bg-green-500/20 text-green-300 font-extrabold px-2.5 py-0.5 rounded-full border border-green-500/30 shrink-0">
             ✓ 1 Recompensa Liberada
           </span>
         </div>
