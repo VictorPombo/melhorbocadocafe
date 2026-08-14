@@ -23,7 +23,9 @@ export default function GestaoTopBar() {
 
   useEffect(() => {
     setRole(localStorage.getItem("mb_role") || "admin");
-    setUnidadeNome(localStorage.getItem("mb_unidade_nome") || "Rede Consolidada");
+    const rawNome = localStorage.getItem("mb_unidade_nome") || "Rede Consolidada";
+    const nomeLimpo = rawNome.replace(/\(Matriz\)/gi, "").replace(/\s+/g, " ").trim();
+    setUnidadeNome(nomeLimpo);
     setUnidadeId(localStorage.getItem("mb_unidade_id") || "todas");
   }, []);
 
