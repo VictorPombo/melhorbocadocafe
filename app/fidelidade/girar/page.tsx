@@ -24,6 +24,7 @@ import {
   UserCheck,
   ChevronRight,
   Trophy,
+  RotateCw,
 } from "lucide-react";
 
 function GirarContent() {
@@ -40,8 +41,8 @@ function GirarContent() {
   // Etapa de Identificação:
   // "telefone": aguardando digitar o WhatsApp
   // "verificando": consultando o backend
-  // "reconhecido": cliente já cadastrado (só precisa clicar para resgatar/girar)
-  // "novo_cadastro": primeiro acesso (preenche nome e nascimento uma única vez)
+  // "reconhecido": cliente já cadastrado (1 clique para girar)
+  // "novo_cadastro": primeiro acesso (preenche nome e whatsapp)
   const [etapaIdentificacao, setEtapaIdentificacao] = useState<
     "telefone" | "verificando" | "reconhecido" | "novo_cadastro"
   >("telefone");
@@ -132,7 +133,7 @@ function GirarContent() {
         .then((data) => {
           if (!data.valido && data.motivo === "ja_utilizado") {
             setBloqueioFraude(true);
-            setErro("Este QR Code já foi utilizado nesta compra. Para girar novamente, solicite um novo QR Code ao atendente em sua próxima compra.");
+            setErro("Este QR Code já foi utilizado. Peça ao atendente do caixa para gerar um novo QR Code.");
           }
         })
         .catch(() => {});
@@ -233,7 +234,13 @@ function GirarContent() {
 
   // Etapa atual da trilha de visitas
   const etapaAtualVisita: EtapaTrilhaVisita =
-    trilha.find((t) => t.visita === (((qtdVisitasCliente - 1) % 10) + 1)) || trilha[0];
+    trilha.find((t) => t.visita === (((qtdVisitasCliente - 1) % Math.max(1, trilha.length)) + 1)) || trilha[0];
+
+  // Prêmios a serem exibidos na roleta (exclusivos da visita atual ou lista padrão)
+  const premiosDaRoleta =
+    etapaAtualVisita?.premios_roleta && etapaAtualVisita.premios_roleta.length > 0
+      ? etapaAtualVisita.premios_roleta
+      : premios;
 
   async function handleAcaoRecompensa(e: React.FormEvent) {
     e.preventDefault();
@@ -241,13 +248,13 @@ function GirarContent() {
     if (girando || loading) return;
 
     if (bloqueioFraude) {
-      setErro("Este QR Code já foi utilizado. Solicite um novo QR Code ao atendente.");
+      setErro("Este QR Code já foi utilizado. Peça ao atendente do caixa para gerar um novo QR Code.");
       return;
     }
 
     const zapDigits = whatsapp.replace(/\D/g, "");
     if (zapDigits.length < 10) {
-      setErro("Por favor, informe seu número de WhatsApp com DDD.");
+      setErro("Por favor, informe seu número de celular / WhatsApp com DDD.");
       setEtapaIdentificacao("telefone");
       return;
     }
@@ -255,16 +262,10 @@ function GirarContent() {
     let cleanNome = nome.trim();
     let cleanNasc = formatarDataNascimento(nascimento);
 
-    // Se for novo cadastro, valida nome e nascimento
+    // Se for novo cadastro e não digitou nome, solicita
     if (etapaIdentificacao === "novo_cadastro") {
       if (!cleanNome || cleanNome.length < 2) {
-        setErro("Por favor, informe seu nome completo.");
-        return;
-      }
-
-      const digitsNasc = nascimento.replace(/\D/g, "");
-      if (cleanNasc.length < 8 && digitsNasc.length < 6) {
-        setErro("Por favor, preencha sua data de nascimento (Ex: 01/09/2003).");
+        setErro("Por favor, digite seu nome.");
         return;
       }
     }
@@ -287,7 +288,7 @@ function GirarContent() {
         "mb_cliente_perfil",
         JSON.stringify({
           nome: cleanNome,
-          nascimento: cleanNasc,
+          nascimento: cleanNasc || "01/01/2000",
           whatsapp: zapDigits,
           unidade,
         })
@@ -316,22 +317,12 @@ function GirarContent() {
         if (data.ja_utilizado) {
           setBloqueioFraude(true);
         }
-        setErro(data.erro || "Não foi possível realizar o resgate.");
+        setErro(data.erro || "Não foi possível realizar o giro.");
         setLoading(false);
         return;
       }
 
-      // Se for modo Fixo Direto (sem roleta), conclui na hora!
-      if (data.modo === "fixo") {
-        setLoading(false);
-        setResultado(data);
-        try {
-          sessionStorage.setItem("mb_ultimo_resultado_giro", JSON.stringify(data));
-        } catch {}
-        return;
-      }
-
-      // Se for modo Roleta, dispara animação da roleta
+      // Dispara o giro da Roleta com animação
       const pos = data.premio?.posicao_roleta || 1;
       setPosicaoSorteada(pos);
       setGirando(true);
@@ -344,7 +335,7 @@ function GirarContent() {
       }
     } catch (err: any) {
       console.error("Erro na recompensa:", err);
-      setErro("Erro de conexão com o servidor. Tente novamente em instantes.");
+      setErro("Erro de conexão com o servidor. Tente novamente.");
       setLoading(false);
     }
   }
@@ -374,8 +365,8 @@ function GirarContent() {
     const unidadeObj = UNIDADES_LOJA.find((u) => u.id === resultado.unidade);
 
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4 max-w-md mx-auto w-full text-center">
-        <div className="w-full bg-white rounded-3xl p-6 border-2 border-pink-100 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-300">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 max-w-xl md:max-w-2xl mx-auto w-full text-center">
+        <div className="w-full bg-white rounded-3xl p-6 sm:p-8 border border-pink-100 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-300">
           <div className="text-5xl animate-bounce mb-1">
             {resultado.premio.icone || "🎉"}
           </div>
@@ -384,10 +375,10 @@ function GirarContent() {
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-pink-100 text-[#e6398f] rounded-full text-xs font-black uppercase tracking-wider mb-2">
               <Sparkles className="w-3 h-3" /> Parabéns, {resultado.cliente_nome.split(" ")[0]}!
             </span>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-              {resultado.modo === "fixo" ? "Recompensa Desbloqueada!" : "Você Ganhou na Roleta:"}
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+              Você Ganhou na Roleta:
             </h1>
-            <p className="text-2xl font-black text-[#e6398f] mt-1">
+            <p className="text-2xl sm:text-3xl font-black text-[#e6398f] mt-1">
               {resultado.premio.nome}
             </p>
           </div>
@@ -406,18 +397,18 @@ function GirarContent() {
               </span>
               <button
                 onClick={() => copiarCodigo(resultado.cupom.codigo_cupom)}
-                className="p-2 rounded-xl bg-white shadow-sm hover:bg-gray-50 text-gray-700 transition-colors"
+                className="p-2 rounded-xl bg-white shadow-sm hover:bg-gray-50 text-gray-700 transition-colors cursor-pointer"
                 title="Copiar código"
               >
                 {copiado ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
               </button>
             </div>
-            <p className="text-[10px] text-gray-500 mt-2 font-medium">
+            <p className="text-[11px] text-gray-500 mt-2 font-medium">
               Válido por 7 dias em qualquer unidade Melhor Bocado
             </p>
           </div>
 
-          <div className="bg-stone-900 text-white rounded-2xl p-3 text-xs flex items-center justify-center gap-2">
+          <div className="bg-stone-900 text-white rounded-2xl p-3.5 text-xs flex items-center justify-center gap-2">
             <Store className="w-4 h-4 text-amber-300 shrink-0" />
             <span className="font-medium">
               Apresente este código no caixa da unidade <strong>{unidadeObj?.nome || "Tatuapé"}</strong> para resgatar.
@@ -444,7 +435,7 @@ function GirarContent() {
     );
   }
 
-  // TELA PRINCIPAL DO CLIENTE COM TRILHA + IDENTIFICAÇÃO TELEFONE-PRIMEIRO
+  // TELA PRINCIPAL DO CLIENTE COM ROLETA + TRILHA + IDENTIFICAÇÃO
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-3 sm:p-5 max-w-xl md:max-w-2xl mx-auto w-full">
       {/* Header Compacto e Elegante */}
@@ -468,61 +459,60 @@ function GirarContent() {
             </p>
           </div>
           <span className="text-[11px] bg-green-500/20 text-green-300 font-extrabold px-2.5 py-0.5 rounded-full border border-green-500/30 shrink-0">
-            ✓ 1 Recompensa Liberada
+            {bloqueioFraude ? "⚠️ QR Code Utilizado" : "✓ 1 Giro Liberado"}
           </span>
         </div>
       )}
 
-      {/* Trilha de Fidelidade / Fidelômetro (sempre visível para motivar o cliente) */}
+      {/* Trilha de Fidelidade / Fidelômetro */}
       <TrilhaFidelometro trilha={trilha} visitaAtual={qtdVisitasCliente} />
 
-      {/* Se a visita atual for Roleta, exibe o componente da Roleta (exclusiva da visita ou padrão) */}
-      {etapaAtualVisita.modo === "roleta" && (
+      {/* A ROLETA DA SORTE SEMPRE VISÍVEL NO TOPO */}
+      <div className="w-full py-2 flex flex-col items-center justify-center">
         <Roleta
-          premios={
-            etapaAtualVisita.premios_roleta && etapaAtualVisita.premios_roleta.length > 0
-              ? etapaAtualVisita.premios_roleta
-              : premios
-          }
+          premios={premiosDaRoleta}
           posicaoSorteada={posicaoSorteada}
           girando={girando}
           onAnimacaoConcluida={handleAnimacaoConcluida}
         />
-      )}
+      </div>
 
-      {/* Trava Antifraude: Se o código já foi consumido */}
+      {/* AVISO SE O QR CODE JÁ FOI UTILIZADO */}
       {bloqueioFraude ? (
-        <div className="w-full bg-red-50 rounded-3xl p-5 border-2 border-red-200 text-center shadow-lg my-3 space-y-3">
-          <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto text-xl font-bold">
-            <AlertTriangle className="w-6 h-6" />
+        <div className="w-full bg-amber-50 rounded-3xl p-5 sm:p-6 border-2 border-amber-300 text-center shadow-lg my-3 space-y-3 animate-fade-in">
+          <div className="w-14 h-14 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center mx-auto text-2xl font-bold shadow-inner">
+            ⚠️
           </div>
-          <h3 className="text-base font-black text-red-900">
-            QR Code Já Utilizado!
+          <h3 className="text-base sm:text-lg font-black text-amber-950">
+            Este QR Code Já Foi Utilizado!
           </h3>
-          <p className="text-xs text-red-700 leading-relaxed font-medium">
-            Este código de compra já foi utilizado para desbloquear seu prêmio. Cada compra dá direito a 1 resgate exclusivo.
+          <p className="text-xs sm:text-sm text-amber-900 leading-relaxed font-medium">
+            Cada QR Code gerado no balcão dá direito a <strong>1 único giro da roleta por compra</strong>.
           </p>
-          <div className="pt-2">
+          <div className="p-3 bg-white rounded-2xl border border-amber-200 text-xs font-bold text-amber-900 shadow-xs">
+            👉 Por favor, <strong>peça ao atendente do caixa para gerar um novo QR Code</strong> para liberar seu próximo giro!
+          </div>
+          <div className="pt-1">
             <button
               onClick={() => router.push("/fidelidade/meus-cupons")}
-              className="w-full py-3 bg-red-600 text-white text-xs font-black rounded-xl hover:bg-red-700 transition-colors shadow-md"
+              className="w-full py-3 bg-stone-900 text-white text-xs font-black rounded-xl hover:bg-stone-800 transition-colors shadow-md cursor-pointer"
             >
-              Ver Meus Cupons Anteriores
+              🎁 Ver Meus Cupons Já Ganhos
             </button>
           </div>
         </div>
       ) : (
-        /* FLUXO INTELIGENTE: TELEFONE PRIMEIRO */
-        <div className="w-full bg-white rounded-3xl p-5 border border-gray-100 shadow-xl space-y-4 my-2">
+        /* FLUXO INTELIGENTE: IDENTIFICAÇÃO E GIRO DA ROLETA */
+        <div className="w-full bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-xl space-y-4 my-2">
           {/* PASSO 1: DIGITAÇÃO DO TELEFONE */}
           {etapaIdentificacao === "telefone" && (
             <form onSubmit={handleContinuarTelefone} className="space-y-3">
               <div className="text-center pb-1">
-                <h3 className="font-extrabold text-gray-900 text-sm flex items-center justify-center gap-1.5">
-                  <Phone className="w-4 h-4 text-[#e6398f]" /> Digite seu Celular / WhatsApp
+                <h3 className="font-extrabold text-gray-900 text-sm sm:text-base flex items-center justify-center gap-1.5">
+                  <Phone className="w-4 h-4 text-[#e6398f]" /> Digite seu Celular / WhatsApp para Girar
                 </h3>
-                <p className="text-[11px] text-gray-400 mt-0.5">
-                  Identificamos sua visita para liberar seu prêmio da trilha
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Identificamos sua visita e liberamos a roleta instantaneamente
                 </p>
               </div>
 
@@ -551,10 +541,10 @@ function GirarContent() {
               <button
                 type="submit"
                 disabled={whatsapp.replace(/\D/g, "").length < 10}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#e6398f] to-[#b51e6c] text-white font-extrabold text-sm shadow-md shadow-pink-500/20 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#e6398f] via-[#c22176] to-[#5c2d16] text-white font-black text-base sm:text-lg shadow-xl shadow-pink-500/30 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Continuar</span>
-                <ChevronRight className="w-4 h-4" />
+                <span>🎰 Girar Roleta da Sorte</span>
+                <ChevronRight className="w-5 h-5" />
               </button>
             </form>
           )}
@@ -567,7 +557,7 @@ function GirarContent() {
             </div>
           )}
 
-          {/* PASSO 2A: CLIENTE JÁ CADASTRADO (1 CLIQUE PARA DESBLOQUEAR / GIRAR) */}
+          {/* PASSO 2A: CLIENTE JÁ RECONHECIDO (1 CLIQUE PARA GIRAR) */}
           {etapaIdentificacao === "reconhecido" && (
             <form onSubmit={handleAcaoRecompensa} className="space-y-4">
               <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-4 border border-pink-200 text-center relative overflow-hidden">
@@ -609,17 +599,15 @@ function GirarContent() {
                     <span className="animate-spin text-xl">🍩</span> Girando a Roleta...
                   </span>
                 ) : loading ? (
-                  "Liberando prêmio..."
-                ) : etapaAtualVisita.modo === "fixo" ? (
-                  <span>Resgatar {etapaAtualVisita.premio_fixo?.nome || "Prêmio da Visita"}! 🎁</span>
+                  "Preparando o giro..."
                 ) : (
-                  <span>Girar a Roleta da Sorte! 🎰</span>
+                  <span>🎰 GIRAR A ROLETA AGORA!</span>
                 )}
               </button>
             </form>
           )}
 
-          {/* PASSO 2B: NOVO CLIENTE (PREENCHE NOME E NASCIMENTO 1 VEZ) */}
+          {/* PASSO 2B: NOVO CLIENTE (PREENCHE NOME 1 ÚNICA VEZ E GIRA) */}
           {etapaIdentificacao === "novo_cadastro" && (
             <form onSubmit={handleAcaoRecompensa} className="space-y-3.5">
               <div className="bg-amber-50 rounded-2xl p-3 border border-amber-200 flex items-center justify-between">
@@ -628,7 +616,7 @@ function GirarContent() {
                     ✨ Primeiro Acesso ({whatsapp})
                   </p>
                   <p className="text-[10px] text-amber-700">
-                    Complete seu cadastro 1 única vez para salvar seus prêmios
+                    Digite seu nome para salvar seu cupom
                   </p>
                 </div>
                 <button
@@ -640,10 +628,10 @@ function GirarContent() {
                 </button>
               </div>
 
-              {/* 1. Nome Completo */}
+              {/* Nome Completo */}
               <div>
                 <label htmlFor="nome" className="block text-[11px] font-extrabold text-gray-700 uppercase tracking-wider mb-1">
-                  Nome Completo *
+                  Seu Nome *
                 </label>
                 <input
                   id="nome"
@@ -661,10 +649,10 @@ function GirarContent() {
                 />
               </div>
 
-              {/* 2. Data de Nascimento */}
+              {/* Data de Nascimento (Opcional) */}
               <div>
                 <label htmlFor="nascimento" className="block text-[11px] font-extrabold text-gray-700 uppercase tracking-wider mb-1">
-                  Data de Nascimento *
+                  Data de Nascimento (Para ganhar presentes no seu aniversário)
                 </label>
                 <input
                   id="nascimento"
@@ -672,49 +660,22 @@ function GirarContent() {
                   inputMode="numeric"
                   value={nascimento}
                   onChange={(e) => handleNascimentoChange(e.target.value)}
-                  onBlur={(e) => handleNascimentoChange(e.target.value)}
-                  placeholder="DD/MM/AAAA (Ex: 01/09/2003)"
+                  placeholder="DD/MM/AAAA (Ex: 15/08/1995)"
                   maxLength={10}
-                  required
                   disabled={girando || loading}
                   className="w-full px-3.5 py-3 rounded-xl border-2 border-gray-200 focus:border-[#e6398f] bg-gray-50 text-gray-900 font-bold outline-none transition-all placeholder-gray-400 text-sm"
                 />
               </div>
 
-              {/* Se acessado sem QR code direto, exibe seleção limpa */}
-              {!codigoParam && !unidadeParam && (
-                <div>
-                  <label htmlFor="unidade" className="block text-[11px] font-extrabold text-gray-700 uppercase tracking-wider mb-1">
-                    Unidade *
-                  </label>
-                  <select
-                    id="unidade"
-                    value={unidade}
-                    onChange={(e) => {
-                      setUnidade(e.target.value);
-                      setErro("");
-                    }}
-                    disabled={girando || loading}
-                    className="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 focus:border-[#e6398f] bg-gray-50 text-gray-900 font-bold outline-none transition-all text-xs"
-                  >
-                    {UNIDADES_LOJA.map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {u.nome}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
               {erro && (
-                <div className="p-3 bg-red-50 rounded-xl border border-red-200 text-red-600 text-xs font-bold text-center">
+                <div className="p-2.5 bg-red-50 rounded-xl border border-red-200 text-red-600 text-xs font-bold text-center">
                   {erro}
                 </div>
               )}
 
               <button
                 type="submit"
-                disabled={girando || loading}
+                disabled={girando || loading || !nome.trim()}
                 className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#e6398f] via-[#c22176] to-[#5c2d16] text-white font-black text-lg shadow-xl shadow-pink-500/30 active:scale-[0.98] transition-all disabled:opacity-60 min-h-[54px] flex items-center justify-center gap-2 cursor-pointer"
               >
                 {girando ? (
@@ -722,11 +683,9 @@ function GirarContent() {
                     <span className="animate-spin text-xl">🍩</span> Girando a Roleta...
                   </span>
                 ) : loading ? (
-                  "Concluindo cadastro..."
-                ) : etapaAtualVisita.modo === "fixo" ? (
-                  <span>Concluir e Resgatar {etapaAtualVisita.premio_fixo?.nome || "Prêmio"}! 🎁</span>
+                  "Cadastrando e Girando..."
                 ) : (
-                  <span>Concluir Cadastro e Girar! 🎰</span>
+                  <span>🎰 GIRAR A ROLETA AGORA!</span>
                 )}
               </button>
             </form>
@@ -734,22 +693,20 @@ function GirarContent() {
         </div>
       )}
 
-      <div className="mt-2 text-center">
-        <p className="text-[10px] text-gray-400 font-medium">
-          Melhor Bocado • Trilha de Fidelidade & Roleta da Sorte • 1 Resgate por Compra
-        </p>
-      </div>
+      {/* Rodapé Informativo */}
+      <p className="text-center text-gray-400 text-[11px] mt-4 font-medium">
+        Melhor Bocado • Trilha de Fidelidade & Roleta da Sorte • 1 Resgate por Compra
+      </p>
     </div>
   );
 }
 
-export default function GirarPage() {
+export default function FidelidadeGirarPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex-1 flex items-center justify-center p-8 text-center text-gray-500">
-          <span className="animate-spin text-3xl mb-2">🍩</span>
-          <p className="font-bold text-sm">Carregando Clube de Fidelidade...</p>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-8 h-8 border-3 border-[#e6398f] border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

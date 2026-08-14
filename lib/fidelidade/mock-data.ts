@@ -431,7 +431,7 @@ export const automacaoLogStore = (globalForFidelidade.__mb_automacaoLogStore ??=
 
 /** Lojas e franquias cadastradas no sistema */
 export let unidadesStore: import("./types").UnidadeLoja[] = (globalForFidelidade.__mb_unidadesStore ??= [
-  { id: "tatuape", nome: "Tatuapé (Matriz)", cidade: "São Paulo - SP", bairro: "Tatuapé", ativa: true, caixas: ["Caixa 01", "Caixa 02", "Totem Autoatendimento"] },
+  { id: "tatuape", nome: "Tatuapé", cidade: "São Paulo - SP", bairro: "Tatuapé", ativa: true, caixas: ["Caixa 01", "Caixa 02", "Totem Autoatendimento"] },
   { id: "mooca", nome: "Mooca", cidade: "São Paulo - SP", bairro: "Mooca", ativa: true, caixas: ["Caixa 01", "Caixa 02"] },
   { id: "campo_belo", nome: "Campo Belo", cidade: "São Paulo - SP", bairro: "Campo Belo", ativa: true, caixas: ["Caixa 01"] },
   { id: "santana", nome: "Santana", cidade: "São Paulo - SP", bairro: "Santana", ativa: true, caixas: ["Caixa 01", "Caixa 02"] },

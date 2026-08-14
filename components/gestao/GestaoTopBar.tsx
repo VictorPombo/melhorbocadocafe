@@ -103,7 +103,7 @@ export default function GestaoTopBar() {
                 {isAdmin ? "Admin Geral" : isFranquia ? `Gestor (${unidadeNome})` : "Operador"}
               </p>
               <p className="text-[10px] text-gray-400 font-bold">
-                {isAdmin ? "Rede Matriz" : unidadeNome}
+                {isAdmin ? "Rede Consolidada" : unidadeNome}
               </p>
             </div>
 
