@@ -56,7 +56,7 @@ export default function GuiaApresentacaoPage() {
       id: "roleta",
       titulo: "2. Simulação da Roleta do Cliente (Mobile)",
       descricao: "Ambiente do cliente para escanear, cadastrar WhatsApp/idade e girar a roleta.",
-      path: "/fidelidade/girar?unidade=tatuape",
+      path: "/fidelidade/girar?codigo=TAT-DEMO-01&unidade=tatuape",
       badge: "Cliente Mobile",
       cor: "bg-purple-50 text-purple-700 border-purple-200",
     },

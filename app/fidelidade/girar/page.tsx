@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { getOrCreateVisitorId } from "@/lib/fidelidade/visitor";
 import { Roleta } from "@/components/fidelidade/Roleta";
 import { TrilhaFidelometro } from "@/components/fidelidade/TrilhaFidelometro";
@@ -429,6 +430,80 @@ function GirarContent() {
             >
               Ver todos os meus cupons
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Se o cliente acessou a URL diretamente sem escanear o QR Code gerado no balcão da loja
+  if (!codigoParam && !codigoVinculo) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-4 max-w-lg mx-auto w-full animate-fade-in">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-pink-100 shadow-2xl text-center space-y-5 w-full">
+          <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-pink-500 to-[#e6398f] flex items-center justify-center shadow-xl shadow-pink-500/25">
+            <QrCode className="w-10 h-10 sm:w-12 sm:h-12 text-white animate-pulse" />
+            <div className="absolute -top-2 -right-2 bg-amber-400 text-stone-950 text-[10px] font-black px-2 py-0.5 rounded-full shadow-md">
+              BALCÃO
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-50 text-[#e6398f] text-xs font-black">
+              <Sparkles className="w-3.5 h-3.5" /> Acesso Exclusivo por QR Code
+            </span>
+            <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+              Aponte a Câmera para o QR Code da Loja
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+              Para girar a <strong>Roleta de Prêmios</strong> e participar do Clube de Fidelidade Melhor Bocado, realize uma compra em uma de nossas unidades e aponte a câmera do seu celular para o <strong>QR Code na tela do caixa ou na comanda</strong>.
+            </p>
+          </div>
+
+          {/* Passo a Passo Ilustrado */}
+          <div className="bg-stone-50 rounded-2xl p-4 border border-stone-200/80 text-left space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 rounded-full bg-pink-100 text-[#e6398f] font-black text-xs flex items-center justify-center shrink-0">
+                1
+              </div>
+              <p className="text-xs font-bold text-gray-800">
+                Faça sua compra em qualquer unidade Melhor Bocado
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 rounded-full bg-pink-100 text-[#e6398f] font-black text-xs flex items-center justify-center shrink-0">
+                2
+              </div>
+              <p className="text-xs font-bold text-gray-800">
+                Escaneie o QR Code gerado pelo atendente no caixa
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 rounded-full bg-pink-100 text-[#e6398f] font-black text-xs flex items-center justify-center shrink-0">
+                3
+              </div>
+              <p className="text-xs font-bold text-gray-800">
+                Gire a roleta e retire seu prêmio na hora com o atendente!
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2 pt-2">
+            <Link
+              href="/fidelidade/meus-cupons"
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#e6398f] to-rose-600 text-white font-black text-xs sm:text-sm shadow-lg shadow-pink-500/25 hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Gift className="w-4 h-4" />
+              <span>Ver Meus Cupons Já Ganhos</span>
+            </Link>
+
+            <Link
+              href="/gestao/login"
+              className="w-full py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-[11px] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Store className="w-3.5 h-3.5" />
+              <span>Sou Atendente / Franquia (Gerar QR Code)</span>
+            </Link>
           </div>
         </div>
       </div>

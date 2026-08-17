@@ -62,31 +62,39 @@ export async function POST(req: NextRequest) {
     // 2. Trava Antifraude de Uso Único de QR Code / Código de Compra
     const vinculoCode = (codigo_vinculo || "").trim();
 
-    if (vinculoCode) {
-      const consumo = consumirCodigoVinculo(vinculoCode, unidade, currentClienteId);
-      if (!consumo.sucesso) {
-        if (consumo.motivo === "ja_utilizado") {
-          return NextResponse.json(
-            {
-              erro: "Este QR Code já foi utilizado nesta compra. Cada compra dá direito a 1 giro exclusivo. Para girar novamente, solicite um novo QR Code ao atendente em sua próxima compra!",
-              ja_utilizado: true,
-            },
-            { status: 400 }
-          );
-        }
-        if (consumo.motivo === "expirado") {
-          return NextResponse.json(
-            {
-              erro: "Este QR Code expirou o tempo de validade. Solicite um novo QR Code ao atendente.",
-              expirado: true,
-            },
-            { status: 400 }
-          );
-        }
+    if (!vinculoCode) {
+      return NextResponse.json(
+        {
+          erro: "QR Code obrigatório. Para girar a roleta, aponte a câmera do seu celular para o QR Code gerado no balcão da loja.",
+          requer_qrcode: true,
+        },
+        { status: 400 }
+      );
+    }
+
+    const consumo = consumirCodigoVinculo(vinculoCode, unidade, currentClienteId);
+    if (!consumo.sucesso) {
+      if (consumo.motivo === "ja_utilizado") {
+        return NextResponse.json(
+          {
+            erro: "Este QR Code já foi utilizado nesta compra. Cada compra dá direito a 1 giro exclusivo. Para girar novamente, solicite um novo QR Code ao atendente em sua próxima compra!",
+            ja_utilizado: true,
+          },
+          { status: 400 }
+        );
+      }
+      if (consumo.motivo === "expirado") {
+        return NextResponse.json(
+          {
+            erro: "Este QR Code expirou o tempo de validade. Solicite um novo QR Code ao atendente.",
+            expirado: true,
+          },
+          { status: 400 }
+        );
       }
     }
 
-    const finalVinculoCode = vinculoCode || "QR-" + Math.floor(1000 + Math.random() * 9000);
+    const finalVinculoCode = vinculoCode;
 
     // Tentar executar via Supabase RPC se configurado
     if (isSupabaseConfigured && supabase) {
