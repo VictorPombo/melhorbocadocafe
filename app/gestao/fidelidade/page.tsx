@@ -285,6 +285,14 @@ export default function FidelidadeDashboardPage() {
 
   // Carregar métricas reais, lojas, prêmios e trilha do backend
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get("tab");
+      if (tabParam && ["geral", "qrcode", "premios", "trilha", "publico"].includes(tabParam)) {
+        setTabAtual(tabParam as any);
+      }
+    }
+
     const role = localStorage.getItem("mb_role") || "admin";
     const unidId = localStorage.getItem("mb_unidade_id") || "todas";
     const unidNome = localStorage.getItem("mb_unidade_nome") || "Rede Consolidada";
