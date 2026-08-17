@@ -34,6 +34,9 @@ import {
   Disc,
   Smartphone,
   ShoppingCart,
+  Maximize2,
+  Minimize2,
+  X,
 } from "lucide-react";
 import { UNIDADES_LOJA, type Premio, type Cliente } from "@/lib/fidelidade/types";
 import { giroStore, cupomStore, clienteStore, MOCK_PREMIOS } from "@/lib/fidelidade/mock-data";
@@ -103,6 +106,18 @@ export default function FidelidadeDashboardPage() {
   } | null>(null);
   const [gerandoQr, setGerandoQr] = useState(false);
   const [copiadoLink, setCopiadoLink] = useState(false);
+  const [telaCheiaQr, setTelaCheiaQr] = useState(false);
+
+  // Fechar tela cheia com ESC
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && telaCheiaQr) {
+        setTelaCheiaQr(false);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [telaCheiaQr]);
 
   // Estados do Editor de Prêmios & Fatias da Roleta
   const [premios, setPremios] = useState<Premio[]>(MOCK_PREMIOS);
@@ -1191,12 +1206,26 @@ export default function FidelidadeDashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Display de Alta Resolução para Balcão ou Impressão */}
               <div className="lg:col-span-7 bg-gradient-to-b from-stone-900 via-stone-900 to-stone-950 text-white rounded-3xl p-8 border border-stone-800 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
+                {/* Botão de Tela Cheia no Topo Esquerdo */}
+                <div className="absolute top-4 left-4 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setTelaCheiaQr(true)}
+                    className="px-3 py-1.5 rounded-full bg-stone-800/90 hover:bg-stone-700 text-stone-200 border border-stone-700 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
+                    title="Expandir para Tela Cheia (Ideal para Tablet ou Monitor do Balcão)"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5 text-pink-400" />
+                    <span>Tela Cheia</span>
+                  </button>
+                </div>
+
+                {/* Badge de Status no Topo Direito */}
                 <div className="absolute top-4 right-4 flex items-center gap-2 bg-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full border border-green-500/30">
                   <span className="w-2 h-2 rounded-full bg-green-400 animate-ping" />
                   <span>Aguardando Leitura do Cliente</span>
                 </div>
 
-                <div className="text-4xl mb-2">🍩</div>
+                <div className="text-4xl mb-2 mt-4 sm:mt-0">🍩</div>
                 <span className="text-xs uppercase tracking-[0.2em] text-[#e6398f] font-black">
                   Melhor Bocado • Fidelidade
                 </span>
@@ -1207,9 +1236,23 @@ export default function FidelidadeDashboardPage() {
                   Aponte a câmera do seu celular para o QR Code abaixo. Cada compra dá direito a 1 giro com prêmios imediatos.
                 </p>
 
-                {/* QR Code SVG Gerado */}
-                <div className="p-4 bg-white rounded-3xl shadow-2xl border-4 border-amber-300">
-                  <QrCodeSvg value={qrCodeGerado.qr_url} size={240} />
+                {/* QR Code SVG Gerado com Botão de Recarregar Integrado */}
+                <div className="relative my-2 group">
+                  <div className="p-4 bg-white rounded-3xl shadow-2xl border-4 border-amber-300">
+                    <QrCodeSvg value={qrCodeGerado.qr_url} size={240} />
+                  </div>
+
+                  {/* Botão de Recarregar Compacto Próximo ao QR Code */}
+                  <button
+                    type="button"
+                    onClick={handleGerarQrCode}
+                    disabled={gerandoQr}
+                    title="Gerar / Recarregar novo QR Code de 1 giro"
+                    className="absolute -bottom-3 -right-3 px-3 py-1.5 rounded-2xl bg-gradient-to-r from-[#e6398f] to-rose-600 hover:from-[#d82a80] hover:to-rose-700 text-white font-extrabold text-xs shadow-xl shadow-pink-500/40 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5 border-2 border-stone-900"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${gerandoQr ? "animate-spin" : "group-hover:rotate-180 transition-transform duration-500"}`} />
+                    <span>Recarregar</span>
+                  </button>
                 </div>
 
                 {/* Código de Backup */}
@@ -1226,6 +1269,82 @@ export default function FidelidadeDashboardPage() {
                   Unidade: <strong className="text-white uppercase">{qrCodeGerado.loja}</strong> • Terminal: <strong className="text-white">{qrCodeGerado.caixa}</strong>
                 </p>
               </div>
+
+              {/* Modal Display Kiosk de Tela Cheia */}
+              {telaCheiaQr && (
+                <div className="fixed inset-0 z-50 bg-gradient-to-b from-stone-950 via-stone-900 to-stone-950 flex flex-col items-center justify-center p-4 sm:p-8 text-white overflow-y-auto animate-fade-in backdrop-blur-2xl">
+                  {/* Botões de Ação Topo */}
+                  <div className="fixed top-6 right-6 flex items-center gap-3 z-50">
+                    <button
+                      type="button"
+                      onClick={handleGerarQrCode}
+                      disabled={gerandoQr}
+                      className="px-4 py-2 rounded-2xl bg-gradient-to-r from-[#e6398f] to-rose-600 text-white font-extrabold text-xs shadow-lg shadow-pink-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer border border-pink-400/30"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${gerandoQr ? "animate-spin" : ""}`} />
+                      <span>Novo QR Code</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setTelaCheiaQr(false)}
+                      className="px-4 py-2 rounded-2xl bg-stone-800/90 hover:bg-stone-700 text-white font-bold text-xs border border-stone-700 shadow-lg flex items-center gap-2 transition-all cursor-pointer active:scale-95"
+                    >
+                      <Minimize2 className="w-4 h-4 text-gray-300" />
+                      <span>Sair da Tela Cheia</span>
+                      <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-stone-700 rounded font-mono text-stone-300">ESC</kbd>
+                    </button>
+                  </div>
+
+                  {/* Conteúdo Central do Totem */}
+                  <div className="flex flex-col items-center text-center max-w-lg w-full my-auto py-6">
+                    <div className="text-5xl mb-3">🍩</div>
+                    <span className="text-sm uppercase tracking-[0.25em] text-[#e6398f] font-black">
+                      Melhor Bocado • Fidelidade
+                    </span>
+                    <h1 className="text-3xl sm:text-4xl font-black mt-1 mb-2 tracking-tight">
+                      Escaneie & Gire a Roleta!
+                    </h1>
+                    <p className="text-xs sm:text-sm text-stone-300 max-w-md mb-6 leading-relaxed">
+                      Aponte a câmera do seu celular para o QR Code abaixo. Cada compra dá direito a 1 giro com prêmios imediatos.
+                    </p>
+
+                    {/* QR Code Grande com Botão de Recarga ao Lado */}
+                    <div className="relative group my-2">
+                      <div className="p-6 bg-white rounded-3xl shadow-2xl border-4 border-amber-300">
+                        <QrCodeSvg value={qrCodeGerado.qr_url} size={280} />
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleGerarQrCode}
+                        disabled={gerandoQr}
+                        title="Recarregar QR Code"
+                        className="absolute -bottom-4 -right-4 px-4 py-2 rounded-2xl bg-gradient-to-r from-[#e6398f] to-rose-600 hover:from-[#d82a80] hover:to-rose-700 text-white font-black text-xs shadow-2xl shadow-pink-500/50 active:scale-95 transition-all cursor-pointer flex items-center gap-2 border-2 border-stone-950"
+                      >
+                        <RefreshCw className={`w-4 h-4 ${gerandoQr ? "animate-spin" : "group-hover:rotate-180 transition-transform duration-500"}`} />
+                        <span>Recarregar</span>
+                      </button>
+                    </div>
+
+                    {/* Código de Backup */}
+                    <div className="mt-8 bg-stone-800/90 px-8 py-3.5 rounded-2xl border border-stone-700 shadow-xl">
+                      <p className="text-[11px] text-amber-300 font-extrabold uppercase tracking-widest">
+                        Código de Compra (Backup)
+                      </p>
+                      <p className="text-3xl sm:text-4xl font-mono font-black tracking-[0.35em] text-white mt-1">
+                        {qrCodeGerado.codigo}
+                      </p>
+                    </div>
+
+                    <div className="mt-6 flex items-center gap-4 text-xs text-stone-400">
+                      <span>Unidade: <strong className="text-white uppercase">{qrCodeGerado.loja}</strong></span>
+                      <span>•</span>
+                      <span>Terminal: <strong className="text-white">{qrCodeGerado.caixa}</strong></span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Controles do Balconista & Ações */}
               <div className="lg:col-span-5 space-y-4">
