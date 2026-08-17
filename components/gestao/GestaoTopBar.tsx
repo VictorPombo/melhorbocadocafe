@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Store,
@@ -50,10 +51,23 @@ export default function GestaoTopBar() {
   const isCaixa = role === "caixa";
 
   return (
-    <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-gray-100 px-4 lg:px-8 py-3 transition-all">
+    <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-gray-100 px-4 lg:px-8 py-2.5 transition-all">
       <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto">
-        {/* Lado Esquerdo: Identificação da Loja e Perfil */}
+        {/* Lado Esquerdo: Logo Oficial + Identificação da Loja */}
         <div className="flex items-center gap-3">
+          <Link href="/gestao/fidelidade" className="flex items-center group shrink-0" title="Melhor Bocado Café">
+            <Image
+              src="/logo.png"
+              alt="Melhor Bocado Café"
+              width={100}
+              height={40}
+              className="h-7 w-auto transition-transform group-hover:scale-105"
+              priority
+            />
+          </Link>
+
+          <div className="h-5 w-[1px] bg-gray-200 hidden sm:block" />
+
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-stone-900 text-white text-xs font-black shadow-xs">
             {isAdmin ? (
               <>

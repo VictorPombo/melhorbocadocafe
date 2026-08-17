@@ -3,7 +3,24 @@ import AuthGuard from "@/components/gestao/AuthGuard";
 import GestaoClientLayout from "@/components/gestao/GestaoClientLayout";
 
 export const metadata: Metadata = {
-  title: "Painel | Melhor Bocado",
+  title: "Painel de Gestão | Melhor Bocado Café",
+  description: "Painel de gestão da rede Melhor Bocado Café e Sistema de Fidelidade.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
+  openGraph: {
+    title: "Painel de Gestão | Melhor Bocado Café",
+    description: "Painel de gestão da rede Melhor Bocado Café e Sistema de Fidelidade.",
+    images: [
+      {
+        url: "/logo.png",
+        width: 800,
+        height: 800,
+        alt: "Melhor Bocado Café",
+      },
+    ],
+  },
   robots: { index: false, follow: false },
 };
 

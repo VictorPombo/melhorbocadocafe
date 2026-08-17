@@ -6,6 +6,22 @@ import { Gift, RotateCw } from "lucide-react";
 export const metadata: Metadata = {
   title: "Melhor Bocado — Programa de Fidelidade & Roleta",
   description: "Gire a roleta e ganhe prêmios exclusivos na Melhor Bocado!",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
+  openGraph: {
+    title: "Melhor Bocado — Programa de Fidelidade & Roleta",
+    description: "Gire a roleta e ganhe prêmios e descontos exclusivos na Melhor Bocado Café!",
+    images: [
+      {
+        url: "/logo.png",
+        width: 800,
+        height: 800,
+        alt: "Melhor Bocado Café",
+      },
+    ],
+  },
   robots: { index: false, follow: false },
 };
 

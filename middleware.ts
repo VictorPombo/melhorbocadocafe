@@ -15,6 +15,13 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/images") ||
     pathname.startsWith("/favicon.ico") ||
     pathname.startsWith("/logo.png") ||
+    pathname.startsWith("/apple-touch-icon.png") ||
+    pathname.startsWith("/og-image.png") ||
+    pathname.endsWith(".png") ||
+    pathname.endsWith(".jpg") ||
+    pathname.endsWith(".jpeg") ||
+    pathname.endsWith(".svg") ||
+    pathname.endsWith(".ico") ||
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml"
   ) {

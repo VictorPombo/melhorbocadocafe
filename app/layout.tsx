@@ -17,14 +17,45 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://melhorbocadocafe.vercel.app"),
   title: {
     default: "Melhor Bocado — Programa de Fidelidade & Roleta da Sorte",
     template: `%s | ${LOJA.nomeCurto}`,
   },
   description: "Sistema oficial de fidelidade, roleta de prêmios e recompensas da Melhor Bocado Café.",
+  icons: {
+    icon: [
+      { url: "/logo.png", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
+  openGraph: {
+    title: "Melhor Bocado Café — Fidelidade & Roleta de Prêmios",
+    description: "Gire a roleta e ganhe prêmios e descontos exclusivos a cada compra na Melhor Bocado Café!",
+    url: "https://melhorbocadocafe.vercel.app",
+    siteName: "Melhor Bocado Café",
+    images: [
+      {
+        url: "/logo.png",
+        width: 800,
+        height: 800,
+        alt: "Melhor Bocado Café Logo",
+      },
+    ],
+    locale: "pt_BR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Melhor Bocado Café — Fidelidade & Roleta de Prêmios",
+    description: "Sistema oficial de fidelidade, roleta de prêmios e recompensas da Melhor Bocado Café.",
+    images: ["/logo.png"],
+  },
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
   },
 };
 

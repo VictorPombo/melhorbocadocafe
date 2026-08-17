@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { UNIDADES_LOJA } from "@/lib/fidelidade/types";
 import { Maximize2, Minimize2, X, Sparkles, ArrowLeft, LogOut, QrCode } from "lucide-react";
 
@@ -215,9 +216,21 @@ export default function CaixaFidelidadePage() {
       }`}
     >
       {/* Header do Caixa / Terminal */}
-      <header className="px-6 py-4 bg-stone-900/95 backdrop-blur-md border-b border-stone-800 flex items-center justify-between sticky top-0 z-40 shadow-lg">
-        <div className="flex items-center gap-3">
-          <span className="text-3xl">🍩</span>
+      <header className="px-6 py-3.5 bg-stone-900/95 backdrop-blur-md border-b border-stone-800 flex items-center justify-between sticky top-0 z-40 shadow-lg">
+        <div className="flex items-center gap-3.5">
+          <Link href="/gestao/fidelidade" className="flex items-center group shrink-0" title="Melhor Bocado">
+            <Image
+              src="/logo.png"
+              alt="Melhor Bocado"
+              width={100}
+              height={40}
+              className="h-8 w-auto transition-transform group-hover:scale-105"
+              priority
+            />
+          </Link>
+
+          <div className="h-6 w-[1px] bg-stone-800 hidden sm:block" />
+
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-black text-lg text-white tracking-tight">
