@@ -119,6 +119,122 @@ export default function FidelidadeDashboardPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [telaCheiaQr]);
 
+  // Estados do Gerenciador de Terminais da Unidade
+  const [modalTerminaisAberta, setModalTerminaisAberta] = useState(false);
+  const [novoTerminalNome, setNovoTerminalNome] = useState("");
+  const [salvandoTerminais, setSalvandoTerminais] = useState(false);
+  const [mensagemTerminais, setMensagemTerminais] = useState<string | null>(null);
+
+  // Obter lista dinâmica de terminais da loja ativa
+  const lojaAlvoId = userRole === "franquia" ? (userUnidadeId || "tatuape") : (unidadeAtiva || "tatuape");
+  const unidadeSelecionadaObj = unidades.find((u) => u.id === lojaAlvoId);
+  const listaTerminais = unidadeSelecionadaObj?.caixas && unidadeSelecionadaObj.caixas.length > 0
+    ? unidadeSelecionadaObj.caixas
+    : ["Caixa 01 (Principal)", "Caixa 02", "Totem Autoatendimento", "Tablet Balcão"];
+
+  // Sincronizar caixa ativo se a lista mudar
+  useEffect(() => {
+    if (listaTerminais.length > 0 && !listaTerminais.includes(caixaAtivo)) {
+      setCaixaAtivo(listaTerminais[0]);
+    }
+  }, [listaTerminais, caixaAtivo]);
+
+  // Adicionar novo terminal
+  async function handleAdicionarTerminal() {
+    if (!novoTerminalNome.trim()) return;
+    const nomeLimpo = novoTerminalNome.trim();
+    const novosCaixas = [...listaTerminais, nomeLimpo];
+
+    setSalvandoTerminais(true);
+    try {
+      const res = await fetch("/api/fidelidade/unidades", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: lojaAlvoId, dados: { caixas: novosCaixas } }),
+      });
+      const data = await res.json();
+      if (data.sucesso && data.unidades) {
+        setUnidades(data.unidades);
+      } else {
+        setUnidades((prev) =>
+          prev.map((u) => (u.id === lojaAlvoId ? { ...u, caixas: novosCaixas } : u))
+        );
+      }
+      setNovoTerminalNome("");
+      setMensagemTerminais("Terminal adicionado com sucesso!");
+      setTimeout(() => setMensagemTerminais(null), 3000);
+    } catch {
+      setUnidades((prev) =>
+        prev.map((u) => (u.id === lojaAlvoId ? { ...u, caixas: novosCaixas } : u))
+      );
+      setNovoTerminalNome("");
+    } finally {
+      setSalvandoTerminais(false);
+    }
+  }
+
+  // Remover terminal
+  async function handleRemoverTerminal(idxParaRemover: number) {
+    if (listaTerminais.length <= 1) {
+      alert("A unidade precisa ter pelo menos 1 terminal configurado.");
+      return;
+    }
+    const novosCaixas = listaTerminais.filter((_, idx) => idx !== idxParaRemover);
+
+    setSalvandoTerminais(true);
+    try {
+      const res = await fetch("/api/fidelidade/unidades", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: lojaAlvoId, dados: { caixas: novosCaixas } }),
+      });
+      const data = await res.json();
+      if (data.sucesso && data.unidades) {
+        setUnidades(data.unidades);
+      } else {
+        setUnidades((prev) =>
+          prev.map((u) => (u.id === lojaAlvoId ? { ...u, caixas: novosCaixas } : u))
+        );
+      }
+      if (caixaAtivo === listaTerminais[idxParaRemover]) {
+        setCaixaAtivo(novosCaixas[0] || "Caixa 01");
+      }
+      setMensagemTerminais("Terminal removido com sucesso!");
+      setTimeout(() => setMensagemTerminais(null), 3000);
+    } catch {
+      setUnidades((prev) =>
+        prev.map((u) => (u.id === lojaAlvoId ? { ...u, caixas: novosCaixas } : u))
+      );
+    } finally {
+      setSalvandoTerminais(false);
+    }
+  }
+
+  // Renomear terminal
+  async function handleRenomearTerminal(idx: number, novoNome: string) {
+    if (!novoNome.trim()) return;
+    const novosCaixas = [...listaTerminais];
+    novosCaixas[idx] = novoNome.trim();
+
+    try {
+      await fetch("/api/fidelidade/unidades", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: lojaAlvoId, dados: { caixas: novosCaixas } }),
+      });
+      setUnidades((prev) =>
+        prev.map((u) => (u.id === lojaAlvoId ? { ...u, caixas: novosCaixas } : u))
+      );
+      if (caixaAtivo === listaTerminais[idx]) {
+        setCaixaAtivo(novosCaixas[idx]);
+      }
+    } catch {
+      setUnidades((prev) =>
+        prev.map((u) => (u.id === lojaAlvoId ? { ...u, caixas: novosCaixas } : u))
+      );
+    }
+  }
+
   // Estados do Editor de Prêmios & Fatias da Roleta
   const [premios, setPremios] = useState<Premio[]>(MOCK_PREMIOS);
   const [salvandoPremios, setSalvandoPremios] = useState(false);
@@ -1172,22 +1288,46 @@ export default function FidelidadeDashboardPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-                  Terminal / Caixa
-                </label>
-                <select
-                  value={caixaAtivo}
-                  onChange={(e) => {
-                    setCaixaAtivo(e.target.value);
-                    setQrCodeGerado(null);
-                  }}
-                  className="px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-gray-50 text-gray-900 font-bold text-sm focus:border-[#e6398f] outline-none"
-                >
-                  <option value="caixa_1">Caixa 01 (Principal)</option>
-                  <option value="caixa_2">Caixa 02</option>
-                  <option value="tablet_mesa">Tablet Balcão</option>
-                  <option value="totem">Totem Autoatendimento</option>
-                </select>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    Terminal / Caixa
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setModalTerminaisAberta(true)}
+                    className="text-[11px] text-[#e6398f] hover:text-pink-700 font-black flex items-center gap-1 cursor-pointer transition-colors"
+                    title="Adicionar, renomear ou remover terminais desta unidade"
+                  >
+                    <Sliders className="w-3 h-3" />
+                    <span>Editar Terminais</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <select
+                    value={caixaAtivo}
+                    onChange={(e) => {
+                      setCaixaAtivo(e.target.value);
+                      setQrCodeGerado(null);
+                    }}
+                    className="px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-gray-50 text-gray-900 font-bold text-sm focus:border-[#e6398f] outline-none min-w-[200px] cursor-pointer"
+                  >
+                    {listaTerminais.map((term, idx) => (
+                      <option key={idx} value={term}>
+                        {term}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={() => setModalTerminaisAberta(true)}
+                    className="p-2.5 rounded-xl border-2 border-gray-200 hover:border-pink-300 bg-gray-50 hover:bg-pink-50 text-gray-600 hover:text-[#e6398f] transition-all cursor-pointer shadow-xs"
+                    title="Gerenciar terminais e pontos de venda"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1200,6 +1340,113 @@ export default function FidelidadeDashboardPage() {
               <span>Gerar Novo QR Code de 1 Giro</span>
             </button>
           </div>
+
+          {/* Modal Gerenciador de Terminais da Unidade */}
+          {modalTerminaisAberta && (
+            <div className="fixed inset-0 z-50 bg-stone-900/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+              <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-gray-100 space-y-5">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                  <div>
+                    <h3 className="font-black text-gray-900 text-base flex items-center gap-2">
+                      <Store className="w-5 h-5 text-[#e6398f]" />
+                      Terminais & Caixas da Loja
+                    </h3>
+                    <p className="text-xs text-gray-400">
+                      Unidade: <strong className="text-gray-700">{unidadeSelecionadaObj?.nome || userUnidadeNome}</strong>
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setModalTerminaisAberta(false)}
+                    className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {mensagemTerminais && (
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl flex items-center gap-2 animate-fade-in">
+                    <Check className="w-4 h-4 text-emerald-600" />
+                    <span>{mensagemTerminais}</span>
+                  </div>
+                )}
+
+                {/* Formulário de Adicionar Novo Terminal */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-700 block">
+                    + Adicionar Novo Terminal / Ponto de Atendimento:
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={novoTerminalNome}
+                      onChange={(e) => setNovoTerminalNome(e.target.value)}
+                      placeholder="Ex: Caixa 03, Tablet Mesa 05, Totem..."
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-xs font-bold text-gray-800 outline-none focus:border-[#e6398f]"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleAdicionarTerminal();
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAdicionarTerminal}
+                      disabled={salvandoTerminais || !novoTerminalNome.trim()}
+                      className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#e6398f] to-rose-600 text-white font-black text-xs shadow-md shadow-pink-500/20 active:scale-95 disabled:opacity-50 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>{salvandoTerminais ? "..." : "Adicionar"}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Lista de Terminais Cadastrados com Edição e Exclusão */}
+                <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
+                    Terminais Ativos ({listaTerminais.length}):
+                  </label>
+                  {listaTerminais.map((term, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 bg-gray-50 rounded-2xl border border-gray-200 flex items-center justify-between gap-3 group hover:bg-white hover:border-pink-200 hover:shadow-xs transition-all"
+                    >
+                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                        <span className="w-6 h-6 rounded-full bg-pink-100 text-[#e6398f] font-black text-xs flex items-center justify-center shrink-0">
+                          {idx + 1}
+                        </span>
+                        <input
+                          type="text"
+                          defaultValue={term}
+                          onBlur={(e) => handleRenomearTerminal(idx, e.target.value)}
+                          className="w-full text-xs font-bold text-gray-800 bg-transparent border-b border-transparent focus:border-[#e6398f] outline-none py-0.5"
+                          title="Clique para renomear"
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoverTerminal(idx)}
+                        disabled={listaTerminais.length <= 1}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-30 transition-colors cursor-pointer"
+                        title={listaTerminais.length <= 1 ? "Mínimo de 1 terminal" : "Remover terminal"}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-400">
+                  <span>💡 Clique no nome do terminal para renomear</span>
+                  <button
+                    type="button"
+                    onClick={() => setModalTerminaisAberta(false)}
+                    className="px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs transition-all cursor-pointer"
+                  >
+                    Concluir
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Exibição da Comanda / Display para o Cliente */}
           {qrCodeGerado ? (
