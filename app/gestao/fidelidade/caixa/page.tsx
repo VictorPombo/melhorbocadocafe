@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { UNIDADES_LOJA } from "@/lib/fidelidade/types";
-import { Maximize2, Minimize2, X, Sparkles, ArrowLeft, LogOut } from "lucide-react";
+import { Maximize2, Minimize2, X, Sparkles, ArrowLeft, LogOut, QrCode } from "lucide-react";
 
 export default function CaixaFidelidadePage() {
   const [unidade, setUnidade] = useState("tatuape");
@@ -256,6 +256,16 @@ export default function CaixaFidelidadePage() {
             )}
           </div>
 
+          {/* Botão Gerar Novo QR Code de Balcão */}
+          <Link
+            href="/gestao/fidelidade?tab=qrcode"
+            className="px-3.5 py-1.5 bg-gradient-to-r from-[#e6398f] to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white text-xs font-black rounded-xl shadow-md shadow-pink-500/25 transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+            title="Ir para o Gerador de QR Code do Balcão"
+          >
+            <QrCode className="w-3.5 h-3.5" />
+            <span>Gerar QR Code</span>
+          </Link>
+
           {/* Botão de Tela Cheia / Kiosk */}
           <button
             type="button"
@@ -426,8 +436,15 @@ export default function CaixaFidelidadePage() {
             )}
           </div>
 
-          <div className="mt-8 pt-4 border-t border-stone-800 text-xs text-stone-500 text-center">
-            Ao confirmar o resgate, a validação é computada instantaneamente no relatório gerencial.
+          <div className="mt-8 pt-4 border-t border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-400">
+            <span>Ao confirmar o resgate, a validação é computada instantaneamente no relatório gerencial.</span>
+            <Link
+              href="/gestao/fidelidade?tab=qrcode"
+              className="px-3.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-stone-700 transition-all cursor-pointer shrink-0"
+            >
+              <QrCode className="w-3.5 h-3.5 text-[#e6398f]" />
+              <span>Gerar Novo QR Code →</span>
+            </Link>
           </div>
         </div>
 
