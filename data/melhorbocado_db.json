@@ -1,7 +1,83 @@
 {
   "clientes": [],
-  "giros": [],
-  "cupons": [],
+  "giros": [
+    {
+      "id": "51096fa3-062e-43fd-9c08-dbec93c20e46",
+      "visitor_id": "ea44e6a3-4f67-431e-aadb-4b24aa6983ee",
+      "cliente_id": "cli_xr9a9ko1msxr5jci",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "TAT-REAL-001",
+      "unidade": "tatuape",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-17T21:35:08.463478+00:00"
+    },
+    {
+      "id": "d341eac4-ffbb-495e-8f9d-6891225cb346",
+      "visitor_id": "vis_prod_launch_02",
+      "cliente_id": "cli_s59vw92xmsxqvj6y",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "MOO-REAL-001",
+      "unidade": "mooca",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-17T21:27:21.590797+00:00"
+    }
+  ],
+  "cupons": [
+    {
+      "id": "54cae75c-0532-422e-b1db-6a83b1012655",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "cli_xr9a9ko1msxr5jci",
+      "codigo_cupom": "MB-JUA0",
+      "giro_id": "",
+      "premio_id": "Café Expresso Grátis",
+      "unidade": "tatuape",
+      "visita_numero": 1,
+      "criado_em": "2026-08-17T21:35:08.645072+00:00",
+      "expira_em": "2026-08-24T21:35:07.519+00:00",
+      "utilizado_em": "2026-08-17T21:35:24.426+00:00",
+      "premio": {
+        "id": "Café Expresso Grátis",
+        "nome": "Café Expresso Grátis",
+        "tipo": "produto",
+        "valor": 0,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "☕",
+        "cor_fatia": "#e6398f"
+      }
+    },
+    {
+      "id": "9bfa1a8e-cd7d-41e5-a3dc-266d28a646ee",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "cli_s59vw92xmsxqvj6y",
+      "codigo_cupom": "MB-TIJY",
+      "giro_id": "",
+      "premio_id": "Café Expresso Grátis",
+      "unidade": "mooca",
+      "visita_numero": 1,
+      "criado_em": "2026-08-17T21:27:22.089076+00:00",
+      "expira_em": "2026-08-24T21:27:21.055+00:00",
+      "utilizado_em": "2026-08-17T21:30:06.782+00:00",
+      "premio": {
+        "id": "Café Expresso Grátis",
+        "nome": "Café Expresso Grátis",
+        "tipo": "produto",
+        "valor": 0,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "☕",
+        "cor_fatia": "#e6398f"
+      }
+    }
+  ],
   "codigos": [
     {
       "id": "cv_zsuim4klmstf5898",
@@ -337,5 +413,5 @@
       "icone": "🔄"
     }
   ],
-  "atualizado_em": "2026-08-14T23:13:38.591Z"
+  "atualizado_em": "2026-08-17T21:36:03.625Z"
 }

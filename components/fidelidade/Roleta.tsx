@@ -217,7 +217,7 @@ export function Roleta({
   });
 
   return (
-    <div className="relative w-full max-w-[270px] xs:max-w-[290px] sm:max-w-[340px] aspect-square mx-auto my-2 sm:my-3 select-none drop-shadow-2xl flex items-center justify-center p-1.5 touch-none overscroll-none overflow-hidden">
+    <div className="relative w-full max-w-[270px] xs:max-w-[290px] sm:max-w-[340px] aspect-square mx-auto my-2 sm:my-3 select-none drop-shadow-2xl flex items-center justify-center p-1.5 overflow-hidden">
       {/* Moldura Externa de Ouro & Chocolate da Doceria */}
       <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#3a1a08] via-[#78350f] via-[#e6398f] to-[#fbbf24] p-2.5 sm:p-3.5 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
         {/* Luzes LED Animadas na Moldura */}
@@ -248,7 +248,7 @@ export function Roleta({
       {/* Disco Giratório da Roleta (viewBox 0 0 200 200 com renderização circular estrita) */}
       <div
         ref={wheelRef}
-        className="w-full h-full rounded-full shadow-inner overflow-hidden border-[3px] sm:border-[5px] border-amber-200 relative bg-amber-950 aspect-square touch-none"
+        className="w-full h-full rounded-full shadow-inner overflow-hidden border-[3px] sm:border-[5px] border-amber-200 relative bg-amber-950 aspect-square"
       >
         <svg
           viewBox="0 0 200 200"
