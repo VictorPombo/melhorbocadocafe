@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { UNIDADES_LOJA } from "@/lib/fidelidade/types";
+import { Maximize2, Minimize2, X, Sparkles, ArrowLeft, LogOut } from "lucide-react";
 
 export default function CaixaFidelidadePage() {
   const [unidade, setUnidade] = useState("tatuape");
@@ -11,6 +12,18 @@ export default function CaixaFidelidadePage() {
   const [resgatando, setResgatando] = useState(false);
   const [erroMsg, setErroMsg] = useState("");
   const [sucessoMsg, setSucessoMsg] = useState("");
+  const [telaCheia, setTelaCheia] = useState(false);
+
+  // Listener para fechar tela cheia com ESC
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && telaCheia) {
+        setTelaCheia(false);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [telaCheia]);
 
   const [validacaoData, setValidacaoData] = useState<{
     cupom: {
@@ -174,20 +187,31 @@ export default function CaixaFidelidadePage() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-950 text-white flex flex-col relative font-sans">
+    <div
+      className={`min-h-screen bg-stone-950 text-white flex flex-col font-sans transition-all ${
+        telaCheia ? "fixed inset-0 z-50 overflow-y-auto" : "relative"
+      }`}
+    >
       {/* Header do Caixa / Terminal */}
-      <header className="px-6 py-4 bg-stone-900 border-b border-stone-800 flex items-center justify-between">
+      <header className="px-6 py-4 bg-stone-900/95 backdrop-blur-md border-b border-stone-800 flex items-center justify-between sticky top-0 z-40 shadow-lg">
         <div className="flex items-center gap-3">
           <span className="text-3xl">🍩</span>
           <div>
-            <h1 className="font-extrabold text-lg text-white tracking-tight">
-              Terminal do Balconista — Resgate de Cupons
-            </h1>
-            <p className="text-xs text-stone-400">Melhor Bocado Fidelidade</p>
+            <div className="flex items-center gap-2">
+              <h1 className="font-black text-lg text-white tracking-tight">
+                Terminal do Balconista — Resgate de Cupons
+              </h1>
+              {telaCheia && (
+                <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full bg-pink-500/20 border border-pink-500/40 text-pink-300 text-[10px] font-black uppercase tracking-wider">
+                  ⛶ Kiosk Balcão
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-stone-400">Melhor Bocado Fidelidade • Ponto de Atendimento</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {/* Seletor de Unidade Ativa */}
           <div className="flex items-center gap-2 bg-stone-800 px-3 py-1.5 rounded-xl border border-stone-700">
             <span className="text-xs text-stone-400 font-bold">Unidade:</span>
@@ -210,6 +234,30 @@ export default function CaixaFidelidadePage() {
             )}
           </div>
 
+          {/* Botão de Tela Cheia / Kiosk */}
+          <button
+            type="button"
+            onClick={() => setTelaCheia(!telaCheia)}
+            className={`px-3.5 py-1.5 text-xs font-black rounded-xl border transition-all flex items-center gap-1.5 shadow-md active:scale-95 cursor-pointer ${
+              telaCheia
+                ? "bg-pink-600 hover:bg-pink-700 text-white border-pink-500"
+                : "bg-stone-800 hover:bg-stone-700 text-stone-200 hover:text-white border-stone-700"
+            }`}
+            title={telaCheia ? "Sair da Tela Cheia (ESC)" : "Expandir Terminal para Tela Cheia (Ideal para Tablet / Monitor do Caixa)"}
+          >
+            {telaCheia ? (
+              <>
+                <Minimize2 className="w-3.5 h-3.5 text-white" />
+                <span>Sair Tela Cheia</span>
+              </>
+            ) : (
+              <>
+                <Maximize2 className="w-3.5 h-3.5 text-pink-400" />
+                <span>Tela Cheia</span>
+              </>
+            )}
+          </button>
+
           <Link
             href="/gestao/fidelidade"
             className="px-3.5 py-1.5 bg-[#e6398f]/20 hover:bg-[#e6398f]/30 text-pink-300 text-xs font-extrabold rounded-xl border border-pink-500/30 transition-all flex items-center gap-1.5"
@@ -219,7 +267,7 @@ export default function CaixaFidelidadePage() {
 
           <button
             onClick={handleSair}
-            className="px-3 py-1.5 bg-stone-800 text-stone-400 text-xs font-bold rounded-lg hover:bg-stone-700 hover:text-white transition-all"
+            className="px-3 py-1.5 bg-stone-800 text-stone-400 text-xs font-bold rounded-lg hover:bg-stone-700 hover:text-white transition-all cursor-pointer"
           >
             Sair
           </button>
