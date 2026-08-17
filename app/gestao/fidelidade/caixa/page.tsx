@@ -57,15 +57,27 @@ export default function CaixaFidelidadePage() {
   const [todosResgates, setTodosResgates] = useState<ItemResgateCaixa[]>([]);
   const [listaUnidades, setListaUnidades] = useState(UNIDADES_LOJA);
   const [userRole, setUserRole] = useState<string>("admin");
+  const [unidadeNome, setUnidadeNome] = useState<string>("Campo Belo");
 
   // Carregar histórico inicial de resgates reais e unidade logada
   useEffect(() => {
-    const role = localStorage.getItem("mb_role") || "admin";
+    function obterCookie(nomeCookie: string): string | null {
+      if (typeof document === "undefined") return null;
+      const match = document.cookie.match(new RegExp("(^| )" + nomeCookie + "=([^;]+)"));
+      return match ? decodeURIComponent(match[2]) : null;
+    }
+
+    const role = localStorage.getItem("mb_role") || obterCookie("mb_role") || "admin";
     setUserRole(role);
 
-    const savedUnidade = localStorage.getItem("mb_unidade_id");
-    if (savedUnidade && savedUnidade !== "todas") {
-      setUnidade(savedUnidade);
+    const savedUnidadeId = localStorage.getItem("mb_unidade_id") || obterCookie("mb_unidade_id");
+    const savedUnidadeNome = localStorage.getItem("mb_unidade_nome") || obterCookie("mb_unidade_nome");
+
+    if (savedUnidadeId && savedUnidadeId !== "todas") {
+      setUnidade(savedUnidadeId);
+    }
+    if (savedUnidadeNome) {
+      setUnidadeNome(savedUnidadeNome.replace(/\(Matriz\)/gi, "").trim());
     }
 
     fetch("/api/fidelidade/unidades")
@@ -73,6 +85,11 @@ export default function CaixaFidelidadePage() {
       .then((data) => {
         if (data.sucesso && Array.isArray(data.unidades)) {
           setListaUnidades(data.unidades);
+          // Se tiver salvo a unidade por id, atualiza o nome
+          if (savedUnidadeId) {
+            const achou = data.unidades.find((u: any) => u.id === savedUnidadeId);
+            if (achou) setUnidadeNome(achou.nome);
+          }
         }
       })
       .catch(() => {});
@@ -87,14 +104,19 @@ export default function CaixaFidelidadePage() {
               cliente: r.cliente,
               premio: r.premio,
               dataHora: r.dataHora || r.hora,
-              unidadeId: r.unidade_id || "tatuape",
-              unidadeNome: r.unidade || "Tatuapé",
+              unidadeId: r.unidade_id || r.unidadeId || "tatuape",
+              unidadeNome: r.unidade || r.unidadeNome || "Tatuapé",
             }))
           );
         }
       })
       .catch(() => {});
   }, []);
+
+  const nomeDaLojaExibida =
+    listaUnidades.find((u) => u.id.toLowerCase() === unidade.toLowerCase())?.nome ||
+    unidadeNome ||
+    "Unidade";
 
   // Buscar dados do cupom no endpoint de validação
   async function handleBuscarCupom(e: React.FormEvent) {
@@ -229,7 +251,7 @@ export default function CaixaFidelidadePage() {
               </select>
             ) : (
               <span className="text-amber-400 font-extrabold text-xs">
-                {listaUnidades.find((u) => u.id === unidade)?.nome || "Tatuapé"}
+                {nomeDaLojaExibida}
               </span>
             )}
           </div>
@@ -417,13 +439,17 @@ export default function CaixaFidelidadePage() {
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             </h3>
             <p className="text-[11px] text-stone-400 mt-1">
-              Caixa da Unidade: <strong className="text-amber-400">{listaUnidades.find(u => u.id === unidade)?.nome || "Tatuapé"}</strong>
+              Caixa da Unidade: <strong className="text-amber-400">{nomeDaLojaExibida}</strong>
             </p>
           </div>
 
           {(() => {
             const resgatesDaUnidade = todosResgates.filter(
-              (item) => item.unidadeId.toLowerCase() === unidade.toLowerCase()
+              (item) =>
+                item.unidadeId.toLowerCase() === unidade.toLowerCase() ||
+                item.unidadeNome.toLowerCase() === nomeDaLojaExibida.toLowerCase() ||
+                item.unidadeNome.toLowerCase().includes(unidade.toLowerCase()) ||
+                unidade.toLowerCase().includes(item.unidadeId.toLowerCase())
             );
 
             if (resgatesDaUnidade.length === 0) {
