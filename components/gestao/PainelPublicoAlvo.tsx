@@ -13,6 +13,7 @@ import {
   Phone,
   ArrowUpDown,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import type { Cliente } from "@/lib/fidelidade/types";
 import { UNIDADES_LOJA } from "@/lib/fidelidade/types";
@@ -259,19 +260,30 @@ export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
           </p>
         </div>
 
-        {/* Unidade Principal */}
-        <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
-          <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 mb-3">
-            <Store className="w-5 h-5" />
+        {/* 4º Card: Apenas Admin visualiza comparação de filiais, Franquia visualiza métrica exclusiva */}
+        {userRole === "admin" ? (
+          <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
+            <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 mb-3">
+              <Store className="w-5 h-5" />
+            </div>
+            <p className="text-xs font-bold text-gray-500">Maior Volume de Giros</p>
+            <p className="text-2xl font-black text-gray-900 mt-0.5">Tatuapé</p>
+            <p className="text-[11px] text-gray-400 mt-1">Líder em scans de balcão</p>
           </div>
-          <p className="text-xs font-bold text-gray-500">Maior Volume de Giros</p>
-          <p className="text-2xl font-black text-gray-900 mt-0.5">Tatuapé</p>
-          <p className="text-[11px] text-gray-400 mt-1">Líder em scans de balcão</p>
-        </div>
+        ) : (
+          <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
+            <div className="w-10 h-10 rounded-2xl bg-pink-50 flex items-center justify-center text-[#e6398f] mb-3">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <p className="text-xs font-bold text-gray-500">Engajamento Local</p>
+            <p className="text-2xl font-black text-gray-900 mt-0.5">100%</p>
+            <p className="text-[11px] text-emerald-600 font-bold mt-1">Base exclusiva da sua loja</p>
+          </div>
+        )}
       </div>
 
       {/* Gráficos de Faixas Etárias, Frequência e Unidades */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className={`grid grid-cols-1 ${userRole === "admin" ? "lg:grid-cols-3" : "lg:grid-cols-2"} gap-6`}>
         {/* Distribuição por Faixa Etária (Idade) */}
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
@@ -332,35 +344,37 @@ export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
           </div>
         </div>
 
-        {/* Cadastros por Unidade / Filial */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-black text-gray-900 text-sm flex items-center gap-2">
-              <Store className="w-4 h-4 text-emerald-600" />
-              Cadastros por Loja
-            </h3>
-            <span className="text-[11px] text-gray-400 font-bold">Unidades</span>
-          </div>
+        {/* Cadastros por Unidade / Filial (Apenas Admin) */}
+        {userRole === "admin" && (
+          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-black text-gray-900 text-sm flex items-center gap-2">
+                <Store className="w-4 h-4 text-emerald-600" />
+                Cadastros por Loja
+              </h3>
+              <span className="text-[11px] text-gray-400 font-bold">Unidades</span>
+            </div>
 
-          <div className="space-y-3.5 pt-1">
-            {distribuicaoUnidades.map((item) => (
-              <div key={item.id} className="space-y-1">
-                <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-gray-700">{item.nome}</span>
-                  <span className="text-gray-500">
-                    {item.total} ({item.percentual}%)
-                  </span>
+            <div className="space-y-3.5 pt-1">
+              {distribuicaoUnidades.map((item) => (
+                <div key={item.id} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span className="text-gray-700">{item.nome}</span>
+                    <span className="text-gray-500">
+                      {item.total} ({item.percentual}%)
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden flex">
+                    <div
+                      className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                      style={{ width: `${Math.max(item.percentual, item.total > 0 ? 8 : 0)}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden flex">
-                  <div
-                    className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${Math.max(item.percentual, item.total > 0 ? 8 : 0)}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Tabela de Base de Clientes Cadastrados na Roleta */}
