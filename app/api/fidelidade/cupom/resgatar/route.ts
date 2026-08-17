@@ -20,13 +20,37 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const resultado = resgatarCupomPorBalconista(
+    let resultado = resgatarCupomPorBalconista(
       codigo_cupom,
       balconista || "Operador Balcão",
       unidade
     );
 
     if (!resultado.sucesso) {
+      const dbRes = await resgatarCupomDb(codigo_cupom, unidade || "tatuape");
+      if (dbRes) {
+        if (!dbRes.sucesso && dbRes.motivo === "ja_utilizado") {
+          return NextResponse.json(
+            { erro: "Este cupom já foi utilizado.", cupom: dbRes.cupom },
+            { status: 400 }
+          );
+        }
+        if (dbRes.sucesso && dbRes.cupom) {
+          const premio = buscarPremioPorId(dbRes.cupom.premio_id) || {
+            nome: dbRes.cupom.premio_nome,
+            tipo: dbRes.cupom.premio_tipo,
+            valor: dbRes.cupom.premio_valor,
+            icone: dbRes.cupom.premio_icone,
+          };
+          return NextResponse.json({
+            sucesso: true,
+            mensagem: "Cupom resgatado com sucesso via Banco de Dados!",
+            cupom: dbRes.cupom,
+            premio,
+          });
+        }
+      }
+
       return NextResponse.json(
         { erro: resultado.mensagem, cupom: resultado.cupom },
         { status: 400 }

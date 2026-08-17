@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buscarCupomPorCodigo, buscarPremioPorId } from "@/lib/fidelidade/mock-data";
 import { UNIDADES_LOJA, type UnidadeLoja } from "@/lib/fidelidade/types";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export async function GET(req: NextRequest) {
   try {
@@ -19,7 +20,35 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const cupom = buscarCupomPorCodigo(codigo);
+    const cleanCodigo = codigo.toUpperCase().trim();
+    let cupom = buscarCupomPorCodigo(cleanCodigo);
+
+    // Se não estiver na memória desta lambda, busca no banco Supabase
+    if (!cupom && isSupabaseConfigured && supabase) {
+      const { data: dbCupom } = await supabase
+        .from("mb_cupons")
+        .select("*, mb_clientes(nome, nascimento)")
+        .eq("codigo_cupom", cleanCodigo)
+        .maybeSingle();
+
+      if (dbCupom) {
+        cupom = {
+          id: dbCupom.id,
+          codigo_cupom: dbCupom.codigo_cupom,
+          premio_id: dbCupom.premio_id,
+          cliente_id: dbCupom.cliente_id,
+          cliente_nome: dbCupom.mb_clientes?.nome || "Cliente Fidelidade",
+          cliente_nascimento: dbCupom.mb_clientes?.nascimento || null,
+          unidade: dbCupom.unidade,
+          visita_numero: dbCupom.visita_numero || 1,
+          criado_em: dbCupom.criado_em,
+          expira_em: dbCupom.expira_em,
+          status: dbCupom.utilizado ? "utilizado" : "disponivel",
+          utilizado_em: dbCupom.utilizado_em,
+          balconista_resgatou: dbCupom.utilizado_unidade,
+        } as any;
+      }
+    }
 
     if (!cupom) {
       return NextResponse.json(
