@@ -65,6 +65,7 @@ export async function salvarClienteDb(cliente: {
 }
 
 export async function salvarGiroDb(giro: {
+  id?: string;
   visitor_id: string;
   codigo_vinculo?: string;
   premio_id: string;
@@ -77,18 +78,21 @@ export async function salvarGiroDb(giro: {
   if (!isSupabaseConfigured || !supabase) return null;
 
   try {
+    const payload: any = {
+      visitor_id: giro.visitor_id,
+      codigo_vinculo: giro.codigo_vinculo,
+      premio_id: giro.premio_id,
+      cliente_id: giro.cliente_id,
+      unidade: giro.unidade,
+      nome: giro.nome,
+      nascimento: giro.nascimento,
+      whatsapp: giro.whatsapp.replace(/\D/g, ""),
+    };
+    if (giro.id) payload.id = giro.id;
+
     const { data, error } = await supabase
       .from("mb_giros")
-      .insert({
-        visitor_id: giro.visitor_id,
-        codigo_vinculo: giro.codigo_vinculo,
-        premio_id: giro.premio_id,
-        cliente_id: giro.cliente_id,
-        unidade: giro.unidade,
-        nome: giro.nome,
-        nascimento: giro.nascimento,
-        whatsapp: giro.whatsapp.replace(/\D/g, ""),
-      })
+      .insert(payload)
       .select()
       .single();
 
@@ -118,24 +122,27 @@ export async function salvarCupomDb(cupom: {
   if (!isSupabaseConfigured || !supabase) return null;
 
   try {
+    const payload: any = {
+      codigo_cupom: cupom.codigo_cupom,
+      cliente_id: cupom.cliente_id,
+      giro_id: cupom.giro_id,
+      premio_id: cupom.premio_id,
+      premio_nome: cupom.premio_nome,
+      premio_tipo: cupom.premio_tipo,
+      premio_valor: cupom.premio_valor || 0,
+      premio_icone: cupom.premio_icone,
+      premio_cor: cupom.premio_cor,
+      unidade: cupom.unidade,
+      visita_numero: cupom.visita_numero,
+      origem_cupom: cupom.origem_cupom || "roleta",
+      expira_em: cupom.expira_em,
+      utilizado: false,
+    };
+    if (cupom.id) payload.id = cupom.id;
+
     const { data, error } = await supabase
       .from("mb_cupons")
-      .insert({
-        codigo_cupom: cupom.codigo_cupom,
-        cliente_id: cupom.cliente_id,
-        giro_id: cupom.giro_id,
-        premio_id: cupom.premio_id,
-        premio_nome: cupom.premio_nome,
-        premio_tipo: cupom.premio_tipo,
-        premio_valor: cupom.premio_valor || 0,
-        premio_icone: cupom.premio_icone,
-        premio_cor: cupom.premio_cor,
-        unidade: cupom.unidade,
-        visita_numero: cupom.visita_numero,
-        origem_cupom: cupom.origem_cupom || "roleta",
-        expira_em: cupom.expira_em,
-        utilizado: false,
-      })
+      .insert(payload)
       .select()
       .single();
 
