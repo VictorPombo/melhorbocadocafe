@@ -1,0 +1,216 @@
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import type { Cliente, Cupom, Giro, Premio, EtapaTrilhaVisita, UnidadeLoja } from "./types";
+
+// =============================================================================
+// Supabase Database Service para o Melhor Bocado Café
+// Garante persistência permanente de clientes, giros, cupons e resgates.
+// =============================================================================
+
+export async function salvarClienteDb(cliente: {
+  nome: string;
+  whatsapp: string;
+  nascimento?: string;
+  visitor_id?: string;
+  unidade_origem?: string;
+  total_visitas?: number;
+}): Promise<any> {
+  if (!isSupabaseConfigured || !supabase) return null;
+
+  try {
+    const zapClean = cliente.whatsapp.replace(/\D/g, "");
+    const { data: existente } = await supabase
+      .from("mb_clientes")
+      .select("*")
+      .eq("whatsapp", zapClean)
+      .maybeSingle();
+
+    if (existente) {
+      const { data, error } = await supabase
+        .from("mb_clientes")
+        .update({
+          nome: cliente.nome || existente.nome,
+          nascimento: cliente.nascimento || existente.nascimento,
+          visitor_id: cliente.visitor_id || existente.visitor_id,
+          total_visitas: (existente.total_visitas || 1) + 1,
+          ultima_visita_em: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", existente.id)
+        .select()
+        .single();
+
+      if (!error && data) return data;
+    } else {
+      const { data, error } = await supabase
+        .from("mb_clientes")
+        .insert({
+          nome: cliente.nome,
+          whatsapp: zapClean,
+          nascimento: cliente.nascimento || "01/01/2000",
+          visitor_id: cliente.visitor_id,
+          total_visitas: cliente.total_visitas || 1,
+          total_resgates: 0,
+          unidade_origem: cliente.unidade_origem || "tatuape",
+          tags: ["Novo Cliente", "1º Giro"],
+        })
+        .select()
+        .single();
+
+      if (!error && data) return data;
+    }
+  } catch (err) {
+    console.error("[Supabase] Erro ao salvar cliente:", err);
+  }
+  return null;
+}
+
+export async function salvarGiroDb(giro: {
+  visitor_id: string;
+  codigo_vinculo?: string;
+  premio_id: string;
+  cliente_id?: string;
+  unidade: string;
+  nome: string;
+  nascimento: string;
+  whatsapp: string;
+}): Promise<any> {
+  if (!isSupabaseConfigured || !supabase) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from("mb_giros")
+      .insert({
+        visitor_id: giro.visitor_id,
+        codigo_vinculo: giro.codigo_vinculo,
+        premio_id: giro.premio_id,
+        cliente_id: giro.cliente_id,
+        unidade: giro.unidade,
+        nome: giro.nome,
+        nascimento: giro.nascimento,
+        whatsapp: giro.whatsapp.replace(/\D/g, ""),
+      })
+      .select()
+      .single();
+
+    if (!error && data) return data;
+  } catch (err) {
+    console.error("[Supabase] Erro ao registrar giro:", err);
+  }
+  return null;
+}
+
+export async function salvarCupomDb(cupom: {
+  id?: string;
+  codigo_cupom: string;
+  cliente_id?: string;
+  giro_id?: string;
+  premio_id: string;
+  premio_nome: string;
+  premio_tipo: string;
+  premio_valor?: number;
+  premio_icone?: string;
+  premio_cor?: string;
+  unidade: string;
+  visita_numero: number;
+  origem_cupom?: string;
+  expira_em: string;
+}): Promise<any> {
+  if (!isSupabaseConfigured || !supabase) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from("mb_cupons")
+      .insert({
+        codigo_cupom: cupom.codigo_cupom,
+        cliente_id: cupom.cliente_id,
+        giro_id: cupom.giro_id,
+        premio_id: cupom.premio_id,
+        premio_nome: cupom.premio_nome,
+        premio_tipo: cupom.premio_tipo,
+        premio_valor: cupom.premio_valor || 0,
+        premio_icone: cupom.premio_icone,
+        premio_cor: cupom.premio_cor,
+        unidade: cupom.unidade,
+        visita_numero: cupom.visita_numero,
+        origem_cupom: cupom.origem_cupom || "roleta",
+        expira_em: cupom.expira_em,
+        utilizado: false,
+      })
+      .select()
+      .single();
+
+    if (!error && data) return data;
+  } catch (err) {
+    console.error("[Supabase] Erro ao salvar cupom:", err);
+  }
+  return null;
+}
+
+export async function resgatarCupomDb(codigoCupom: string, unidadeResgate: string): Promise<any> {
+  if (!isSupabaseConfigured || !supabase) return null;
+
+  try {
+    const { data: cupom, error } = await supabase
+      .from("mb_cupons")
+      .select("*")
+      .eq("codigo_cupom", codigoCupom.toUpperCase().trim())
+      .single();
+
+    if (error || !cupom) return null;
+
+    if (cupom.utilizado) {
+      return { sucesso: false, motivo: "ja_utilizado", cupom };
+    }
+
+    const { data: cupomAtualizado, error: errUpdate } = await supabase
+      .from("mb_cupons")
+      .update({
+        utilizado: true,
+        utilizado_em: new Date().toISOString(),
+        utilizado_unidade: unidadeResgate,
+      })
+      .eq("id", cupom.id)
+      .select()
+      .single();
+
+    if (!errUpdate && cupomAtualizado) {
+      // Incrementa total de resgates do cliente
+      if (cupom.cliente_id) {
+        const { data: cliente } = await supabase
+          .from("mb_clientes")
+          .select("total_resgates")
+          .eq("id", cupom.cliente_id)
+          .single();
+
+        if (cliente) {
+          await supabase
+            .from("mb_clientes")
+            .update({ total_resgates: (cliente.total_resgates || 0) + 1 })
+            .eq("id", cupom.cliente_id);
+        }
+      }
+      return { sucesso: true, cupom: cupomAtualizado };
+    }
+  } catch (err) {
+    console.error("[Supabase] Erro ao resgatar cupom:", err);
+  }
+  return null;
+}
+
+export async function buscarClientePorWhatsappDb(whatsapp: string): Promise<any> {
+  if (!isSupabaseConfigured || !supabase) return null;
+
+  try {
+    const zapClean = whatsapp.replace(/\D/g, "");
+    const { data, error } = await supabase
+      .from("mb_clientes")
+      .select("*")
+      .eq("whatsapp", zapClean)
+      .maybeSingle();
+
+    if (!error && data) return data;
+  } catch (err) {
+    console.error("[Supabase] Erro ao buscar cliente:", err);
+  }
+  return null;
+}

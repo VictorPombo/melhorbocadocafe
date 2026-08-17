@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { resgatarCupomPorBalconista, buscarPremioPorId } from "@/lib/fidelidade/mock-data";
+import { resgatarCupomDb } from "@/lib/fidelidade/supabase-service";
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,6 +31,13 @@ export async function POST(req: NextRequest) {
         { erro: resultado.mensagem, cupom: resultado.cupom },
         { status: 400 }
       );
+    }
+
+    // Sincroniza resgate no Supabase
+    try {
+      await resgatarCupomDb(codigo_cupom, unidade || "tatuape");
+    } catch (dbErr) {
+      console.error("[Database] Erro ao sincronizar resgate no Supabase:", dbErr);
     }
 
     const premio = resultado.cupom ? buscarPremioPorId(resultado.cupom.premio_id) : null;

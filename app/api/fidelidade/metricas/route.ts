@@ -1,8 +1,3 @@
-// =============================================================================
-// API: Métricas Reais e Consolidadas em Tempo Real do Sistema de Fidelidade
-// GET /api/fidelidade/metricas
-// =============================================================================
-
 import { NextResponse } from "next/server";
 import {
   giroStore,
@@ -11,15 +6,65 @@ import {
   premiosRoletaStore,
 } from "@/lib/fidelidade/mock-data";
 import { UNIDADES_LOJA, type UnidadeLoja } from "@/lib/fidelidade/types";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const totalGiros = giroStore.length;
+    let dbClientes: any[] = [];
+    let dbGiros: any[] = [];
+    let dbCupons: any[] = [];
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const [resClientes, resGiros, resCupons] = await Promise.all([
+          supabase.from("mb_clientes").select("*"),
+          supabase.from("mb_giros").select("*"),
+          supabase.from("mb_cupons").select("*"),
+        ]);
+
+        if (resClientes.data) dbClientes = resClientes.data;
+        if (resGiros.data) dbGiros = resGiros.data;
+        if (resCupons.data) dbCupons = resCupons.data;
+      } catch (err) {
+        console.error("[Metricas] Fallback para store em memória:", err);
+      }
+    }
+
+    // Unifica clientes da memória e do banco
+    const mapClientes = new Map<string, any>();
+    clienteStore.forEach((c) => {
+      const zap = (c.whatsapp || "").replace(/\D/g, "");
+      if (zap) mapClientes.set(zap, c);
+    });
+    dbClientes.forEach((c) => {
+      const zap = (c.whatsapp || "").replace(/\D/g, "");
+      if (zap) {
+        mapClientes.set(zap, {
+          id: c.id,
+          nome: c.nome,
+          whatsapp: c.whatsapp,
+          nascimento: c.nascimento,
+          qtd_compras: c.total_visitas || 1,
+          qtd_resgates: c.total_resgates || 0,
+          unidade_cadastro: c.unidade_origem || "tatuape",
+          loja_preferida: c.unidade_origem || "tatuape",
+          tags: c.tags || ["Fidelizado"],
+          primeira_compra: c.primeira_visita_em || c.created_at,
+          ultima_compra: c.ultima_visita_em || c.updated_at,
+          origem: "Supabase DB",
+        });
+      }
+    });
+    const listaClientesFinal = Array.from(mapClientes.values());
+
     const cuponsUtilizados = cupomStore.filter((c) => c.status === "utilizado");
-    const totalResgates = cuponsUtilizados.length;
-    const totalClientes = clienteStore.length;
+    const cuponsDbUtilizados = dbCupons.filter((c) => c.utilizado);
+    const totalResgates = Math.max(cuponsUtilizados.length, cuponsDbUtilizados.length);
+
+    const totalGiros = Math.max(giroStore.length, dbGiros.length);
+    const totalClientes = listaClientesFinal.length;
 
     const taxaResgateGeral =
       totalGiros > 0 ? Math.round((totalResgates / totalGiros) * 100) : 0;
@@ -121,13 +166,13 @@ export async function GET() {
       sucesso: true,
       totalGiros,
       totalResgates,
-      totalClientes: clienteStore.length,
+      totalClientes: listaClientesFinal.length,
       taxaResgate: taxaResgateGeral,
       metricasUnidades,
       frequenciaVisitas,
       resgatesRecentes,
       historicoCompleto,
-      clientes: clienteStore,
+      clientes: listaClientesFinal,
     });
   } catch (err: any) {
     return NextResponse.json(

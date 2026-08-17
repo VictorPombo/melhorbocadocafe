@@ -15,6 +15,7 @@ import {
   buscarCodigoVinculo,
 } from "@/lib/fidelidade/mock-data";
 import { sortearPremio } from "@/lib/fidelidade/sorteio";
+import { salvarClienteDb, salvarGiroDb, salvarCupomDb } from "@/lib/fidelidade/supabase-service";
 
 export async function POST(req: NextRequest) {
   try {
@@ -189,6 +190,47 @@ export async function POST(req: NextRequest) {
       zapInput,
       origemCupom
     );
+
+    // Persistência no Supabase (Database Postgres Real)
+    try {
+      await salvarClienteDb({
+        nome,
+        whatsapp: zapInput,
+        nascimento,
+        visitor_id,
+        unidade_origem: unidade,
+        total_visitas: visitaNumero,
+      });
+
+      await salvarGiroDb({
+        visitor_id,
+        codigo_vinculo: finalVinculoCode,
+        premio_id: premioFinal.id,
+        cliente_id: currentClienteId,
+        unidade,
+        nome,
+        nascimento,
+        whatsapp: zapInput,
+      });
+
+      await salvarCupomDb({
+        codigo_cupom: cupom.codigo_cupom,
+        cliente_id: currentClienteId,
+        giro_id: giro.id,
+        premio_id: premioFinal.id,
+        premio_nome: premioFinal.nome,
+        premio_tipo: premioFinal.tipo,
+        premio_valor: premioFinal.valor,
+        premio_icone: premioFinal.icone,
+        premio_cor: premioFinal.cor_fatia,
+        unidade,
+        visita_numero: visitaNumero,
+        origem_cupom: origemCupom,
+        expira_em: cupom.expira_em,
+      });
+    } catch (dbErr) {
+      console.error("[Database] Erro ao sincronizar giro com Supabase:", dbErr);
+    }
 
     return NextResponse.json({
       sucesso: true,

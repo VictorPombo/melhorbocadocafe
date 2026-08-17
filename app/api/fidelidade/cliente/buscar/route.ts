@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { buscarClientePorWhatsapp } from "@/lib/fidelidade/mock-data";
+import { buscarClientePorWhatsappDb } from "@/lib/fidelidade/supabase-service";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,7 +21,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const cliente = buscarClientePorWhatsapp(cleanDigits);
+    let cliente = buscarClientePorWhatsapp(cleanDigits);
+
+    if (!cliente) {
+      const dbCliente = await buscarClientePorWhatsappDb(cleanDigits);
+      if (dbCliente) {
+        return NextResponse.json({
+          encontrado: true,
+          cliente: {
+            id: dbCliente.id,
+            nome: dbCliente.nome,
+            whatsapp: dbCliente.whatsapp,
+            nascimento: dbCliente.nascimento,
+            qtd_compras: dbCliente.total_visitas || 1,
+            unidade: dbCliente.unidade_origem || "tatuape",
+          },
+        });
+      }
+    }
 
     if (cliente) {
       return NextResponse.json({
@@ -58,7 +76,24 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const cliente = buscarClientePorWhatsapp(cleanDigits);
+    let cliente = buscarClientePorWhatsapp(cleanDigits);
+
+    if (!cliente) {
+      const dbCliente = await buscarClientePorWhatsappDb(cleanDigits);
+      if (dbCliente) {
+        return NextResponse.json({
+          encontrado: true,
+          cliente: {
+            id: dbCliente.id,
+            nome: dbCliente.nome,
+            whatsapp: dbCliente.whatsapp,
+            nascimento: dbCliente.nascimento,
+            qtd_compras: dbCliente.total_visitas || 1,
+            unidade: dbCliente.unidade_origem || "tatuape",
+          },
+        });
+      }
+    }
 
     if (cliente) {
       return NextResponse.json({
