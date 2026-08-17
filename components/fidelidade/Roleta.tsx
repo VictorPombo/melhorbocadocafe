@@ -217,17 +217,17 @@ export function Roleta({
   });
 
   return (
-    <div className="relative w-full max-w-[320px] sm:max-w-[360px] aspect-square mx-auto my-4 select-none drop-shadow-2xl flex items-center justify-center p-2">
+    <div className="relative w-full max-w-[270px] xs:max-w-[290px] sm:max-w-[340px] aspect-square mx-auto my-2 sm:my-3 select-none drop-shadow-2xl flex items-center justify-center p-1.5 touch-none overscroll-none overflow-hidden">
       {/* Moldura Externa de Ouro & Chocolate da Doceria */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#3a1a08] via-[#78350f] via-[#e6398f] to-[#fbbf24] p-3 sm:p-3.5 shadow-[0_15px_40px_rgba(0,0,0,0.35)]">
+      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#3a1a08] via-[#78350f] via-[#e6398f] to-[#fbbf24] p-2.5 sm:p-3.5 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
         {/* Luzes LED Animadas na Moldura */}
         <div className="relative w-full h-full rounded-full border-2 border-amber-300/60" suppressHydrationWarning>
           {leds.map((led, idx) => (
             <div
               key={idx}
-              className={`absolute w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full -translate-x-1/2 -translate-y-1/2 border border-white transition-all duration-150 ${
+              className={`absolute w-2 h-2 sm:w-3 sm:h-3 rounded-full -translate-x-1/2 -translate-y-1/2 border border-white transition-all duration-150 ${
                 (idx % 2 === 0 ? ledActive : !ledActive)
-                  ? "bg-amber-300 shadow-[0_0_12px_#fde047] scale-110"
+                  ? "bg-amber-300 shadow-[0_0_10px_#fde047] scale-110"
                   : "bg-amber-100/50 shadow-inner scale-90"
               }`}
               style={{ left: `${led.x}%`, top: `${led.y}%` }}
@@ -238,21 +238,21 @@ export function Roleta({
       </div>
 
       {/* Ponteiro / Seta Dourada de Alta Precisão no Topo */}
-      <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)] pointer-events-none">
-        <div className="w-6 h-6 rounded-full bg-gradient-to-b from-amber-100 via-amber-400 to-amber-600 border-2 border-amber-50 shadow-md flex items-center justify-center">
-          <div className="w-2 h-2 rounded-full bg-amber-950" />
+      <div className="absolute -top-4 sm:-top-5 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)] pointer-events-none">
+        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-b from-amber-100 via-amber-400 to-amber-600 border-2 border-amber-50 shadow-md flex items-center justify-center">
+          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-950" />
         </div>
-        <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[22px] border-t-amber-400 -mt-1.5" />
+        <div className="w-0 h-0 border-l-[10px] sm:border-l-[12px] border-l-transparent border-r-[10px] sm:border-r-[12px] border-r-transparent border-t-[18px] sm:border-t-[22px] border-t-amber-400 -mt-1" />
       </div>
 
       {/* Disco Giratório da Roleta (viewBox 0 0 200 200 com renderização circular estrita) */}
       <div
         ref={wheelRef}
-        className="w-full h-full rounded-full shadow-inner overflow-hidden border-[4px] sm:border-[5px] border-amber-200 relative bg-amber-950 aspect-square"
+        className="w-full h-full rounded-full shadow-inner overflow-hidden border-[3px] sm:border-[5px] border-amber-200 relative bg-amber-950 aspect-square touch-none"
       >
         <svg
           viewBox="0 0 200 200"
-          className="w-full h-full transform -rotate-90 block"
+          className="w-full h-full transform -rotate-90 block pointer-events-none"
           style={{ aspectRatio: "1 / 1" }}
           suppressHydrationWarning
         >

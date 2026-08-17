@@ -512,29 +512,29 @@ function GirarContent() {
 
   // TELA PRINCIPAL DO CLIENTE COM ROLETA + TRILHA + IDENTIFICAÇÃO
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-3 sm:p-5 max-w-xl md:max-w-2xl mx-auto w-full">
+    <div className="flex-1 flex flex-col items-center justify-start p-2.5 sm:p-4 max-w-md sm:max-w-lg mx-auto w-full overflow-x-hidden touch-pan-y">
       {/* Header Compacto e Elegante */}
-      <div className="text-center mb-2">
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-pink-100/90 text-[#e6398f] rounded-full text-xs font-black mb-1.5 shadow-2xs">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Clube Fidelidade & Recompensas Melhor Bocado</span>
+      <div className="text-center mb-1 w-full">
+        <div className="inline-flex items-center gap-1 px-3 py-0.5 bg-pink-100/90 text-[#e6398f] rounded-full text-[11px] font-black mb-1 shadow-2xs">
+          <Sparkles className="w-3 h-3" />
+          <span>Clube Fidelidade Melhor Bocado</span>
         </div>
-        <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
-          Prêmios e Vantagens Exclusivas no Balcão! 🍩
+        <h1 className="text-lg sm:text-2xl font-black text-gray-900 tracking-tight leading-tight">
+          Prêmios e Vantagens no Balcão! 🍩
         </h1>
       </div>
 
       {/* Indicador de Unidade / QR Code */}
       {codigoVinculo && (
-        <div className="w-full bg-stone-900 text-white rounded-2xl p-2.5 px-4 my-2 flex items-center justify-between shadow-md">
+        <div className="w-full bg-stone-900 text-white rounded-2xl p-2 px-3.5 my-1.5 flex items-center justify-between shadow-md">
           <div className="flex items-center gap-2 truncate">
-            <QrCode className="w-4 h-4 text-amber-300 shrink-0" />
-            <p className="text-xs font-bold truncate">
+            <QrCode className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+            <p className="text-[11px] sm:text-xs font-bold truncate">
               Balcão: <span className="text-amber-300 font-extrabold">{UNIDADES_LOJA.find((u) => u.id === unidade)?.nome || "Tatuapé"}</span>
             </p>
           </div>
-          <span className="text-[11px] bg-green-500/20 text-green-300 font-extrabold px-2.5 py-0.5 rounded-full border border-green-500/30 shrink-0">
-            {bloqueioFraude ? "⚠️ QR Code Utilizado" : "✓ 1 Giro Liberado"}
+          <span className="text-[10px] sm:text-[11px] bg-green-500/20 text-green-300 font-extrabold px-2 py-0.5 rounded-full border border-green-500/30 shrink-0">
+            {bloqueioFraude ? "⚠️ QR Utilizado" : "✓ 1 Giro Liberado"}
           </span>
         </div>
       )}
@@ -543,7 +543,7 @@ function GirarContent() {
       <TrilhaFidelometro trilha={trilha} visitaAtual={qtdVisitasCliente} />
 
       {/* A ROLETA DA SORTE SEMPRE VISÍVEL NO TOPO */}
-      <div className="w-full py-2 flex flex-col items-center justify-center">
+      <div className="w-full py-1 sm:py-2 flex flex-col items-center justify-center">
         <Roleta
           premios={premiosDaRoleta}
           posicaoSorteada={posicaoSorteada}

@@ -53,17 +53,18 @@ export function TrilhaFidelometro({ trilha, visitaAtual }: TrilhaFidelometroProp
       </div>
 
       {/* Stepper Horizontal com Apenas Números e Tooltips Inteligentes */}
-      <div className="relative pt-6 pb-2 px-2">
-        {/* Barra de Progresso Traseira */}
-        <div className="absolute top-[38px] left-6 right-6 h-1.5 bg-stone-100 rounded-full z-0 overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-emerald-500 via-[#e6398f] to-amber-500 rounded-full transition-all duration-700 ease-out shadow-xs"
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
+      <div className="relative pt-6 pb-2 px-1 sm:px-2 overflow-x-auto no-scrollbar touch-pan-x">
+        <div className="min-w-[280px] relative">
+          {/* Barra de Progresso Traseira */}
+          <div className="absolute top-[14px] left-4 right-4 h-1.5 bg-stone-100 rounded-full z-0 overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-emerald-500 via-[#e6398f] to-amber-500 rounded-full transition-all duration-700 ease-out shadow-xs"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
 
-        {/* Nós dos Números */}
-        <div className="relative z-10 flex items-center justify-between gap-1 overflow-visible">
+          {/* Nós dos Números */}
+          <div className="relative z-10 flex items-center justify-between gap-1 overflow-visible">
           {etapasOrdenadas.map((etapa) => {
             const isPassada = etapa.visita < visitaAtual;
             const isAtual = etapa.visita === visitaAtual;
@@ -131,6 +132,7 @@ export function TrilhaFidelometro({ trilha, visitaAtual }: TrilhaFidelometroProp
               </div>
             );
           })}
+          </div>
         </div>
       </div>
 
