@@ -25,6 +25,12 @@ export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
   const [busca, setBusca] = useState("");
   const [filtroUnidade, setFiltroUnidade] = useState("todos");
   const [filtroFaixa, setFiltroFaixa] = useState("todos");
+  const [userRole, setUserRole] = useState("admin");
+
+  React.useEffect(() => {
+    const role = localStorage.getItem("mb_role") || "admin";
+    setUserRole(role);
+  }, []);
 
   // Função para calcular idade precisa a partir da string DD/MM/AAAA ou ISO
   function calcularIdade(nascStr: string): number {
@@ -383,18 +389,20 @@ export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
               />
             </div>
 
-            <select
-              value={filtroUnidade}
-              onChange={(e) => setFiltroUnidade(e.target.value)}
-              className="px-3 py-1.5 rounded-xl border border-gray-200 text-xs bg-gray-50 font-bold text-gray-700 outline-none"
-            >
-              <option value="todos">Todas as Lojas</option>
-              {UNIDADES_LOJA.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.nome}
-                </option>
-              ))}
-            </select>
+            {userRole === "admin" && (
+              <select
+                value={filtroUnidade}
+                onChange={(e) => setFiltroUnidade(e.target.value)}
+                className="px-3 py-1.5 rounded-xl border border-gray-200 text-xs bg-gray-50 font-bold text-gray-700 outline-none cursor-pointer"
+              >
+                <option value="todos">Todas as Lojas</option>
+                {UNIDADES_LOJA.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.nome}
+                  </option>
+                ))}
+              </select>
+            )}
 
             <select
               value={filtroFaixa}

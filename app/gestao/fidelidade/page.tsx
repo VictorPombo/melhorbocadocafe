@@ -911,116 +911,213 @@ export default function FidelidadeDashboardPage() {
             />
           </div>
 
-          {/* Comparativo de Unidades & Frequência de Visitas */}
+          {/* Comparativo de Unidades (Apenas Admin) / Resumo Exclusivo (Franquia) & Frequência de Visitas */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Desempenho por Unidade */}
-            <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="font-extrabold text-gray-900 text-base flex items-center gap-2">
-                    <Store className="w-5 h-5 text-[#e6398f]" />
-                    Métricas por Unidade (Isolamento Total por Loja)
-                  </h3>
-                  <p className="text-xs text-gray-400">Cada filial opera seus próprios QR Codes e contabiliza seus giros</p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {metricasData.metricasUnidades.map((u) => (
-                  <div key={u.id} className="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between">
-                    <div>
-                      <p className="font-black text-gray-900 text-sm">{u.nome}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {u.scans} {u.scans === 1 ? "giro" : "giros"} • <strong className="text-green-600">{u.resgates} resgates</strong>
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="w-32 bg-gray-200 rounded-full h-3 overflow-hidden hidden sm:block">
-                        <div
-                          className="bg-gradient-to-r from-[#e6398f] to-green-500 h-full rounded-full transition-all duration-500"
-                          style={{ width: `${Math.max(u.taxa, u.scans > 0 ? 8 : 0)}%` }}
-                        />
-                      </div>
-                      <span className="text-sm font-black text-gray-800 min-w-[50px] text-right">
-                        {u.taxa}% resg.
-                      </span>
-                    </div>
+            {/* Desempenho por Unidade (Exclusivo Admin) ou Desempenho Exclusivo da Franquia */}
+            {userRole === "admin" ? (
+              <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="font-extrabold text-gray-900 text-base flex items-center gap-2">
+                      <Store className="w-5 h-5 text-[#e6398f]" />
+                      Métricas por Unidade (Rede Consolidada)
+                    </h3>
+                    <p className="text-xs text-gray-400">Comparativo operacional de giros e resgates entre filiais da rede</p>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Frequência e Visitas dos Clientes */}
-            <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between">
-              <div>
-                <h3 className="font-extrabold text-gray-900 text-base mb-1 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-purple-600" />
-                  Frequência de Visitas & Recorrência
-                </h3>
-                <p className="text-xs text-gray-400 mb-6">Classificação dos clientes reais pelo histórico de giros</p>
+                </div>
 
                 <div className="space-y-4">
-                  {metricasData.frequenciaVisitas.map((f, i) => (
-                    <div key={i} className="space-y-1">
-                      <div className="flex justify-between text-xs font-bold text-gray-700">
-                        <span>{f.nivel}</span>
-                        <span>{f.qtd} clientes ({f.percentual}%)</span>
+                  {metricasData.metricasUnidades.map((u) => (
+                    <div key={u.id} className="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+                      <div>
+                        <p className="font-black text-gray-900 text-sm">{u.nome}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {u.scans} {u.scans === 1 ? "giro" : "giros"} • <strong className="text-green-600">{u.resgates} resgates</strong>
+                        </p>
                       </div>
-                      <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
-                        <div className={`${f.cor} h-full rounded-full transition-all duration-500`} style={{ width: `${Math.max(f.percentual, f.qtd > 0 ? 6 : 0)}%` }} />
+
+                      <div className="flex items-center gap-4">
+                        <div className="w-32 bg-gray-200 rounded-full h-3 overflow-hidden hidden sm:block">
+                          <div
+                            className="bg-gradient-to-r from-[#e6398f] to-green-500 h-full rounded-full transition-all duration-500"
+                            style={{ width: `${Math.max(u.taxa, u.scans > 0 ? 8 : 0)}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-black text-gray-800 min-w-[50px] text-right">
+                          {u.taxa}% resg.
+                        </span>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
+            ) : (
+              /* Visão 100% Exclusiva e Isolada da Franquia */
+              <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-amber-200/80 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center text-lg font-black">
+                        🏪
+                      </div>
+                      <div>
+                        <h3 className="font-black text-gray-900 text-base">
+                          Desempenho da Unidade ({userUnidadeNome})
+                        </h3>
+                        <p className="text-xs text-gray-500">Métricas exclusivas contabilizadas no balcão da sua loja</p>
+                      </div>
+                    </div>
+                    <span className="px-3 py-1 bg-emerald-50 text-emerald-800 font-extrabold text-xs rounded-xl border border-emerald-200">
+                      ✓ Operação Ativa
+                    </span>
+                  </div>
 
-              <div className="mt-6 pt-4 border-t border-gray-100 bg-pink-50/50 p-4 rounded-2xl border border-pink-100 text-xs text-pink-950 font-medium">
-                💡 <strong>Deduplicação Ativa:</strong> Clientes identificados pelo Celular/WhatsApp têm seus giros e visitas unificados automaticamente.
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 my-4">
+                    <div className="p-3.5 rounded-2xl bg-pink-50/60 border border-pink-100">
+                      <p className="text-[10px] font-bold text-gray-500 uppercase">Giros no Balcão</p>
+                      <p className="text-xl font-black text-[#e6398f] mt-0.5">
+                        {metricasData.metricasUnidades.find((m) => m.id === userUnidadeId)?.scans || 0}
+                      </p>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-100">
+                      <p className="text-[10px] font-bold text-gray-500 uppercase">Cupons Baixados</p>
+                      <p className="text-xl font-black text-emerald-700 mt-0.5">
+                        {metricasData.metricasUnidades.find((m) => m.id === userUnidadeId)?.resgates || 0}
+                      </p>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-purple-50/60 border border-purple-100 col-span-2 sm:col-span-1">
+                      <p className="text-[10px] font-bold text-gray-500 uppercase">Taxa de Conversão</p>
+                      <p className="text-xl font-black text-purple-700 mt-0.5">
+                        {metricasData.metricasUnidades.find((m) => m.id === userUnidadeId)?.taxa || 0}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-2 p-3.5 bg-stone-50 rounded-2xl border border-stone-200 text-xs text-stone-600 flex items-center gap-2">
+                  <span className="text-base">🔒</span>
+                  <span>Isolamento Total: Seus clientes, giros e cupons são 100% confidenciais desta unidade.</span>
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Frequência e Visitas dos Clientes (Calculada por Unidade ou Rede) */}
+            {(() => {
+              const clientesDaUnidade = userRole === "franquia" && userUnidadeId && userUnidadeId !== "todas"
+                ? metricasData.clientes.filter((c) => {
+                    const u = (c.loja_preferida || c.unidade_cadastro || "").toLowerCase();
+                    return u === userUnidadeId.toLowerCase() || u.includes(userUnidadeId.toLowerCase());
+                  })
+                : metricasData.clientes;
+
+              const totalCli = clientesDaUnidade.length;
+              const g1 = clientesDaUnidade.filter((c) => c.qtd_compras === 1).length;
+              const g2 = clientesDaUnidade.filter((c) => c.qtd_compras >= 2 && c.qtd_compras <= 4).length;
+              const g3 = clientesDaUnidade.filter((c) => c.qtd_compras >= 5 && c.qtd_compras <= 9).length;
+              const g4 = clientesDaUnidade.filter((c) => c.qtd_compras >= 10).length;
+
+              const freqList = [
+                { nivel: "1ª Compra / 1º Giro", qtd: g1, percentual: totalCli > 0 ? Math.round((g1 / totalCli) * 100) : 0, cor: "bg-blue-500" },
+                { nivel: "2 a 4 Compras (Recorrente)", qtd: g2, percentual: totalCli > 0 ? Math.round((g2 / totalCli) * 100) : 0, cor: "bg-[#e6398f]" },
+                { nivel: "5 a 9 Compras (Frequente)", qtd: g3, percentual: totalCli > 0 ? Math.round((g3 / totalCli) * 100) : 0, cor: "bg-purple-500" },
+                { nivel: "10+ Compras (VIP / Fiel)", qtd: g4, percentual: totalCli > 0 ? Math.round((g4 / totalCli) * 100) : 0, cor: "bg-amber-500" },
+              ];
+
+              return (
+                <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-extrabold text-gray-900 text-base mb-1 flex items-center gap-2">
+                      <Users className="w-5 h-5 text-purple-600" />
+                      <span>Frequência de Visitas & Recorrência</span>
+                    </h3>
+                    <p className="text-xs text-gray-400 mb-6">
+                      {userRole === "franquia"
+                        ? `Classificação dos clientes da unidade ${userUnidadeNome}`
+                        : "Classificação dos clientes reais pelo histórico de giros"}
+                    </p>
+
+                    <div className="space-y-4">
+                      {freqList.map((f, i) => (
+                        <div key={i} className="space-y-1">
+                          <div className="flex justify-between text-xs font-bold text-gray-700">
+                            <span>{f.nivel}</span>
+                            <span>{f.qtd} clientes ({f.percentual}%)</span>
+                          </div>
+                          <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                            <div className={`${f.cor} h-full rounded-full transition-all duration-500`} style={{ width: `${Math.max(f.percentual, f.qtd > 0 ? 6 : 0)}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-gray-100 bg-pink-50/50 p-4 rounded-2xl border border-pink-100 text-xs text-pink-950 font-medium">
+                    💡 <strong>Deduplicação Ativa:</strong> Clientes identificados pelo Celular/WhatsApp têm seus giros e visitas unificados automaticamente.
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
-          {/* Feed de Resgates em Tempo Real */}
+          {/* Feed de Resgates em Tempo Real (Filtrado por Unidade para Franquia) */}
           <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-extrabold text-gray-900 text-base flex items-center gap-2">
                 <Clock className="w-5 h-5 text-green-600" />
-                Feed de Resgates nos Caixas (Tempo Real)
+                <span>
+                  {userRole === "franquia"
+                    ? `Feed de Resgates nos Caixas (${userUnidadeNome})`
+                    : "Feed de Resgates nos Caixas (Tempo Real)"}
+                </span>
               </h3>
               <span className="text-xs text-green-600 font-bold flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> Sincronizado
               </span>
             </div>
 
-            {metricasData.resgatesRecentes.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {metricasData.resgatesRecentes.map((r) => (
-                  <div key={r.id} className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-gray-900">{r.cliente}</span>
-                        <span className="px-2 py-0.5 bg-pink-100 text-[#e6398f] font-extrabold text-[10px] rounded-md">
-                          {r.visita}
-                        </span>
+            {(() => {
+              const resgatesFiltrados = userRole === "franquia" && userUnidadeId && userUnidadeId !== "todas"
+                ? metricasData.resgatesRecentes.filter(
+                    (r) =>
+                      r.unidade.toLowerCase() === userUnidadeId.toLowerCase() ||
+                      r.unidade.toLowerCase().includes(userUnidadeId.toLowerCase()) ||
+                      r.unidade.toLowerCase().includes((userUnidadeNome || "").toLowerCase())
+                  )
+                : metricasData.resgatesRecentes;
+
+              return resgatesFiltrados.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {resgatesFiltrados.map((r) => (
+                    <div key={r.id} className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-gray-900">{r.cliente}</span>
+                          <span className="px-2 py-0.5 bg-pink-100 text-[#e6398f] font-extrabold text-[10px] rounded-md">
+                            {r.visita}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          Unidade {r.unidade} • <strong className="text-gray-700">{r.premio}</strong>
+                        </p>
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Unidade {r.unidade} • <strong className="text-gray-700">{r.premio}</strong>
-                      </p>
+                      <div className="text-right">
+                        <span className="font-mono text-xs font-bold text-amber-600">{r.codigo}</span>
+                        <p className="text-[10px] text-gray-400">{r.hora}</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span className="font-mono text-xs font-bold text-amber-600">{r.codigo}</span>
-                      <p className="text-[10px] text-gray-400">{r.hora}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-8 text-center bg-gray-50/60 rounded-2xl border border-dashed border-gray-200 space-y-1">
-                <p className="text-xs font-bold text-gray-700">Aguardando primeiros resgates do dia nos caixas</p>
-                <p className="text-[11px] text-gray-400">Assim que um cliente apresentar o código e o caixa validar, o registro aparecerá aqui instantaneamente.</p>
-              </div>
-            )}
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center bg-gray-50/60 rounded-2xl border border-dashed border-gray-200 space-y-1">
+                  <p className="text-xs font-bold text-gray-700">Aguardando primeiros resgates do dia no caixa</p>
+                  <p className="text-[11px] text-gray-400">
+                    Assim que um cliente apresentar o código e o caixa validar, o registro aparecerá aqui instantaneamente.
+                  </p>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}
