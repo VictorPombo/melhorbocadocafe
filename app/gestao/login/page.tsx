@@ -84,16 +84,30 @@ export default function LoginPage() {
       }
 
       if (authed) {
+        // Grava no localStorage para a interface cliente
         localStorage.setItem("mb_auth", "true");
         localStorage.setItem("mb_role", roleToSave);
         localStorage.setItem("mb_unidade_id", unidadeIdToSave);
         localStorage.setItem("mb_unidade_nome", unidadeNomeToSave);
         localStorage.setItem("mb_caixa", caixaSelecionado);
 
+        // Grava cookies para o Next.js Middleware validar no servidor (7 dias de validade)
+        const maxAge = 7 * 24 * 60 * 60;
+        document.cookie = `mb_auth=true; path=/; max-age=${maxAge}; SameSite=Lax`;
+        document.cookie = `mb_role=${encodeURIComponent(roleToSave)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+        document.cookie = `mb_unidade_id=${encodeURIComponent(unidadeIdToSave)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+        document.cookie = `mb_unidade_nome=${encodeURIComponent(unidadeNomeToSave)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+        document.cookie = `mb_caixa=${encodeURIComponent(caixaSelecionado)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectTo = urlParams.get("redirect");
+
         if (roleToSave === "caixa") {
-          router.replace("/gestao/fidelidade/caixa");
+          window.location.href = "/gestao/fidelidade/caixa";
+        } else if (redirectTo && redirectTo.startsWith("/gestao") && redirectTo !== "/gestao/login") {
+          window.location.href = redirectTo;
         } else {
-          router.replace("/gestao/fidelidade");
+          window.location.href = "/gestao/fidelidade";
         }
       } else {
         setLoading(false);

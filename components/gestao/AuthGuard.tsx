@@ -11,19 +11,31 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const isLoginPage = pathname === "/gestao/login";
     const isAuthed = localStorage.getItem("mb_auth") === "true";
-    const role = localStorage.getItem("mb_role") || "proprietario";
+    const role = localStorage.getItem("mb_role");
 
+    // 1. Não autenticado tentando acessar página protegida
     if (!isAuthed && !isLoginPage) {
-      router.replace("/gestao/login");
-    } else {
-      setAuthorized(true);
+      setAuthorized(false);
+      const redirectParam = encodeURIComponent(pathname);
+      window.location.href = `/gestao/login?redirect=${redirectParam}`;
+      return;
     }
+
+    // 2. Perfil "Caixa" tentando acessar outras áreas além do caixa
+    if (isAuthed && role === "caixa" && !pathname.startsWith("/gestao/fidelidade/caixa")) {
+      router.replace("/gestao/fidelidade/caixa");
+      return;
+    }
+
+    // 3. Usuário autorizado
+    setAuthorized(true);
   }, [pathname, router]);
 
-  if (!authorized) {
+  if (!authorized && pathname !== "/gestao/login") {
     return (
-      <div className="min-h-screen bg-[#fdf4f9] flex items-center justify-center">
-        <div className="w-8 h-8 border-3 border-[#e6398f] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-stone-900 flex flex-col items-center justify-center gap-4 text-white">
+        <div className="w-10 h-10 border-4 border-[#e6398f] border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-bold text-gray-300">Validando credenciais de segurança...</p>
       </div>
     );
   }

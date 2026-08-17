@@ -35,6 +35,13 @@ export default function GestaoTopBar() {
     localStorage.removeItem("mb_unidade_id");
     localStorage.removeItem("mb_unidade_nome");
     localStorage.removeItem("mb_caixa");
+
+    document.cookie = "mb_auth=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "mb_role=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "mb_unidade_id=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "mb_unidade_nome=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "mb_caixa=; path=/; max-age=0; SameSite=Lax";
+
     window.location.href = "/gestao/login";
   }
 
