@@ -62,6 +62,7 @@ function GirarContent() {
   const [bloqueioFraude, setBloqueioFraude] = useState(false);
   const [premios, setPremios] = useState<Premio[]>(MOCK_PREMIOS);
   const [trilha, setTrilha] = useState<EtapaTrilhaVisita[]>(MOCK_TRILHA_VISITAS);
+  const [listaUnidades, setListaUnidades] = useState<typeof UNIDADES_LOJA>(UNIDADES_LOJA);
   const [copiado, setCopiado] = useState(false);
 
   const [resultado, setResultado] = useState<{
@@ -75,7 +76,7 @@ function GirarContent() {
     cupom: { id: string; codigo_cupom: string; expira_em: string };
   } | null>(null);
 
-  // Carregar prêmios e trilha de visitas do backend
+  // Carregar prêmios, trilha de visitas e unidades do backend
   useEffect(() => {
     fetch("/api/fidelidade/premios")
       .then((res) => res.json())
@@ -91,6 +92,15 @@ function GirarContent() {
       .then((data) => {
         if (data.sucesso && Array.isArray(data.trilha)) {
           setTrilha(data.trilha);
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/fidelidade/unidades")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.sucesso && Array.isArray(data.unidades)) {
+          setListaUnidades(data.unidades);
         }
       })
       .catch(() => {});
@@ -363,7 +373,12 @@ function GirarContent() {
 
   // TELA DE VITÓRIA / RESGATE DE CUPOM
   if (resultado) {
-    const unidadeObj = UNIDADES_LOJA.find((u) => u.id === resultado.unidade);
+    const cleanKey = (resultado.unidade || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const unidadeObj = listaUnidades.find((u) => {
+      const cleanId = u.id.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const cleanNome = u.nome.toLowerCase().replace(/[^a-z0-9]/g, "");
+      return cleanId === cleanKey || cleanNome.includes(cleanKey) || cleanKey.includes(cleanId);
+    }) || UNIDADES_LOJA.find((u) => u.id === resultado.unidade);
 
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-4 max-w-xl md:max-w-2xl mx-auto w-full text-center">
@@ -530,17 +545,35 @@ function GirarContent() {
           <div className="flex items-center gap-2 truncate">
             <QrCode className="w-3.5 h-3.5 text-amber-300 shrink-0" />
             <p className="text-[11px] sm:text-xs font-bold truncate">
-              Balcão: <span className="text-amber-300 font-extrabold">{UNIDADES_LOJA.find((u) => u.id === unidade)?.nome || "Tatuapé"}</span>
+              Balcão: <span className="text-amber-300 font-extrabold">{(() => {
+                const cleanKey = (unidade || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+                const encontrada = listaUnidades.find((u) => {
+                  const cleanId = u.id.toLowerCase().replace(/[^a-z0-9]/g, "");
+                  const cleanNome = u.nome.toLowerCase().replace(/[^a-z0-9]/g, "");
+                  return cleanId === cleanKey || cleanNome.includes(cleanKey) || cleanKey.includes(cleanId);
+                });
+                return encontrada?.nome || (unidade ? unidade.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Melhor Bocado");
+              })()}</span>
             </p>
           </div>
-          <span className="text-[10px] sm:text-[11px] bg-green-500/20 text-green-300 font-extrabold px-2 py-0.5 rounded-full border border-green-500/30 shrink-0">
-            {bloqueioFraude ? "⚠️ QR Utilizado" : "✓ 1 Giro Liberado"}
+          <span className="text-[10px] sm:text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border shrink-0">
+            {bloqueioFraude ? (
+              <span className="bg-red-500/20 text-red-300 border border-red-500/30 px-2 py-0.5 rounded-full">⚠️ QR Utilizado</span>
+            ) : etapaIdentificacao === "telefone" || etapaIdentificacao === "verificando" ? (
+              <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full">📱 Digite seu Celular</span>
+            ) : (
+              <span className="bg-green-500/20 text-green-300 border border-green-500/30 px-2 py-0.5 rounded-full">✓ 1 Giro Liberado</span>
+            )}
           </span>
         </div>
       )}
 
       {/* Trilha de Fidelidade / Fidelômetro */}
-      <TrilhaFidelometro trilha={trilha} visitaAtual={qtdVisitasCliente} />
+      <TrilhaFidelometro
+        trilha={trilha}
+        visitaAtual={qtdVisitasCliente}
+        identificado={etapaIdentificacao === "reconhecido" || etapaIdentificacao === "novo_cadastro"}
+      />
 
       {/* A ROLETA DA SORTE SEMPRE VISÍVEL NO TOPO */}
       <div className="w-full py-1 sm:py-2 flex flex-col items-center justify-center">

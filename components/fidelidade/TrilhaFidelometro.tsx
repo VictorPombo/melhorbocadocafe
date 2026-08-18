@@ -7,9 +7,10 @@ import { Sparkles, RotateCcw, Check } from "lucide-react";
 interface TrilhaFidelometroProps {
   trilha: EtapaTrilhaVisita[];
   visitaAtual: number; // 1 a N
+  identificado?: boolean;
 }
 
-export function TrilhaFidelometro({ trilha, visitaAtual }: TrilhaFidelometroProps) {
+export function TrilhaFidelometro({ trilha, visitaAtual, identificado = true }: TrilhaFidelometroProps) {
   const etapasOrdenadas = [...trilha].sort((a, b) => a.visita - b.visita);
   const [etapaSelecionadaNum, setEtapaSelecionadaNum] = useState<number>(visitaAtual || 1);
   const [etapaHoverNum, setEtapaHoverNum] = useState<number | null>(null);
@@ -30,7 +31,11 @@ export function TrilhaFidelometro({ trilha, visitaAtual }: TrilhaFidelometroProp
 
   const totalEtapas = Math.max(1, etapasOrdenadas.length);
   const progressPct =
-    totalEtapas <= 1 ? 100 : Math.min(100, Math.max(0, ((visitaAtual - 1) / (totalEtapas - 1)) * 100));
+    !identificado
+      ? 0
+      : totalEtapas <= 1
+      ? 100
+      : Math.min(100, Math.max(0, ((visitaAtual - 1) / (totalEtapas - 1)) * 100));
 
   return (
     <div className="w-full bg-white/95 backdrop-blur-md rounded-3xl p-3.5 sm:p-5 border border-pink-100/80 shadow-md space-y-3.5 my-2 transition-all">
@@ -41,8 +46,16 @@ export function TrilhaFidelometro({ trilha, visitaAtual }: TrilhaFidelometroProp
             📍 Trilha de Fidelidade
           </span>
           <p className="text-xs sm:text-sm font-extrabold text-stone-800">
-            Sua <span className="text-[#e6398f] font-black">{visitaAtual}ª Visita</span>
-            <span className="text-stone-400 font-medium ml-1">de {totalEtapas}</span>
+            {identificado ? (
+              <>
+                Sua <span className="text-[#e6398f] font-black">{visitaAtual}ª Visita</span>
+                <span className="text-stone-400 font-medium ml-1">de {totalEtapas}</span>
+              </>
+            ) : (
+              <span className="text-stone-700 font-extrabold">
+                {totalEtapas} Visitas com Recompensas
+              </span>
+            )}
           </p>
         </div>
 
@@ -52,8 +65,8 @@ export function TrilhaFidelometro({ trilha, visitaAtual }: TrilhaFidelometroProp
         </div>
       </div>
 
-      {/* Stepper Horizontal com Apenas Números e Tooltips Inteligentes */}
-      <div className="relative pt-6 pb-2 px-1 sm:px-2 overflow-x-auto no-scrollbar touch-pan-x">
+      {/* Stepper Horizontal com Apenas Números e Tooltips Inteligentes (com padding superior para nunca cortar o balão) */}
+      <div className="relative pt-8 pb-2 px-1 sm:px-2 overflow-x-auto overflow-y-visible no-scrollbar touch-pan-x">
         <div className="min-w-[280px] relative">
           {/* Barra de Progresso Traseira */}
           <div className="absolute top-[14px] left-4 right-4 h-1.5 bg-stone-100 rounded-full z-0 overflow-hidden">
@@ -66,8 +79,8 @@ export function TrilhaFidelometro({ trilha, visitaAtual }: TrilhaFidelometroProp
           {/* Nós dos Números */}
           <div className="relative z-10 flex items-center justify-between gap-1 overflow-visible">
           {etapasOrdenadas.map((etapa) => {
-            const isPassada = etapa.visita < visitaAtual;
-            const isAtual = etapa.visita === visitaAtual;
+            const isPassada = identificado && etapa.visita < visitaAtual;
+            const isAtual = identificado && etapa.visita === visitaAtual;
             const isSelected = etapa.visita === etapaSelecionadaNum;
             const isHovered = etapa.visita === etapaHoverNum;
 
@@ -88,20 +101,20 @@ export function TrilhaFidelometro({ trilha, visitaAtual }: TrilhaFidelometroProp
                 onMouseEnter={() => setEtapaHoverNum(etapa.visita)}
                 onMouseLeave={() => setEtapaHoverNum(null)}
               >
-                {/* TOOLTIP FLUTUANTE NO HOVER */}
+                {/* TOOLTIP FLUTUANTE NO HOVER (dentro da área com padding) */}
                 <div
-                  className={`absolute -top-11 left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-200 z-30 ${
+                  className={`absolute -top-8 left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-200 z-30 ${
                     isHovered
-                      ? "opacity-100 scale-100 -translate-y-1"
-                      : "opacity-0 scale-95 translate-y-0 group-hover:opacity-100 group-hover:scale-100 group-hover:-translate-y-1"
+                      ? "opacity-100 scale-100"
+                      : "opacity-0 scale-95 pointer-events-none group-hover:opacity-100 group-hover:scale-100"
                   }`}
                 >
-                  <div className="bg-stone-900 text-white text-[10px] sm:text-[11px] font-extrabold px-2.5 py-1 rounded-xl shadow-xl whitespace-nowrap border border-stone-700 flex items-center gap-1.5">
+                  <div className="bg-stone-900 text-white text-[10px] sm:text-[11px] font-extrabold px-2.5 py-0.5 rounded-xl shadow-xl whitespace-nowrap border border-stone-700 flex items-center gap-1.5">
                     <span>{premioIcone}</span>
                     <span>{etapa.visita}ª: {premioNomeCurto}</span>
                   </div>
                   {/* Setinha apontando para o nó */}
-                  <div className="w-2 h-2 bg-stone-900 rotate-45 mx-auto -mt-1 border-r border-b border-stone-700" />
+                  <div className="w-1.5 h-1.5 bg-stone-900 rotate-45 mx-auto -mt-1 border-r border-b border-stone-700" />
                 </div>
 
                 {/* BOTÃO DO NÚMERO DA VISITA */}

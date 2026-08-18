@@ -55,6 +55,39 @@
       "visita_numero": 1,
       "venda_id": null,
       "criado_em": "2026-08-18T17:39:23.456277+00:00"
+    },
+    {
+      "id": "0cd0bdf3-b8dc-49b5-9364-54460c214035",
+      "visitor_id": "1d96d3ec-3176-4b19-8815-0456ac87b98a",
+      "cliente_id": "cli_q4l5hz4cmsyypv0a",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "1037",
+      "unidade": "itaim_bibi",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-18T17:54:39.686131+00:00"
+    },
+    {
+      "id": "e4f67656-a899-4a4a-88c8-cf15b0b12435",
+      "visitor_id": "1d96d3ec-3176-4b19-8815-0456ac87b98a",
+      "cliente_id": "cli_9eoovgbcmsyyp5ry",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "1037",
+      "unidade": "itaim_bibi",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-18T17:54:07.284944+00:00"
+    },
+    {
+      "id": "c29f1f34-ffd0-4a4c-a11f-b2370a675537",
+      "visitor_id": "1d96d3ec-3176-4b19-8815-0456ac87b98a",
+      "cliente_id": "cli_a0duy8momsyykme1",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "1037",
+      "unidade": "itaim_bibi",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-18T17:50:35.914668+00:00"
     }
   ],
   "cupons": [
@@ -185,6 +218,84 @@
         "limite_diario": null,
         "limite_mensal": null,
         "icone": "☕",
+        "cor_fatia": "#e6398f"
+      }
+    },
+    {
+      "id": "10734f2c-06dc-46c2-9fe6-bde5f5e3f5e9",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "cli_q4l5hz4cmsyypv0a",
+      "codigo_cupom": "MB-MKAZ",
+      "giro_id": "",
+      "premio_id": "5% de Desconto",
+      "unidade": "itaim_bibi",
+      "visita_numero": 2,
+      "criado_em": "2026-08-18T17:54:39.859838+00:00",
+      "expira_em": "2026-08-25T17:54:39.222+00:00",
+      "utilizado_em": null,
+      "premio": {
+        "id": "5% de Desconto",
+        "nome": "5% de Desconto",
+        "tipo": "desconto",
+        "valor": 5,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "🏷️",
+        "cor_fatia": "#e6398f"
+      }
+    },
+    {
+      "id": "c2061f49-201f-41cf-8183-dda208847cc5",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "cli_9eoovgbcmsyyp5ry",
+      "codigo_cupom": "MB-3Z8J",
+      "giro_id": "",
+      "premio_id": "Café Expresso Grátis",
+      "unidade": "itaim_bibi",
+      "visita_numero": 2,
+      "criado_em": "2026-08-18T17:54:07.492443+00:00",
+      "expira_em": "2026-08-25T17:54:06.539+00:00",
+      "utilizado_em": null,
+      "premio": {
+        "id": "Café Expresso Grátis",
+        "nome": "Café Expresso Grátis",
+        "tipo": "produto",
+        "valor": 0,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "☕",
+        "cor_fatia": "#e6398f"
+      }
+    },
+    {
+      "id": "611041f5-a50e-479a-b601-ebc913118aff",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "cli_a0duy8momsyykme1",
+      "codigo_cupom": "MB-L3FQ",
+      "giro_id": "",
+      "premio_id": "Capuccino Pequeno",
+      "unidade": "itaim_bibi",
+      "visita_numero": 2,
+      "criado_em": "2026-08-18T17:50:36.195553+00:00",
+      "expira_em": "2026-08-25T17:50:35.042+00:00",
+      "utilizado_em": null,
+      "premio": {
+        "id": "Capuccino Pequeno",
+        "nome": "Capuccino Pequeno",
+        "tipo": "produto",
+        "valor": 0,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "🥤",
         "cor_fatia": "#e6398f"
       }
     }
@@ -524,5 +635,5 @@
       "icone": "🔄"
     }
   ],
-  "atualizado_em": "2026-08-18T17:45:01.421Z"
+  "atualizado_em": "2026-08-18T17:56:06.544Z"
 }
