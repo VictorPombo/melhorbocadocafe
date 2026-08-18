@@ -74,6 +74,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${fredoka.variable} ${inter.variable}`}>
+      <head>
+        <link rel="icon" type="image/png" sizes="32x32" href="/logo.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/logo.png" />
+        <link rel="shortcut icon" href="/logo.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
+      </head>
       <body className="bg-white text-gray-900 antialiased min-h-screen">
         <main>{children}</main>
       </body>

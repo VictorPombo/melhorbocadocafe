@@ -55,13 +55,13 @@ export default function GestaoTopBar() {
       <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto">
         {/* Lado Esquerdo: Logo Oficial + Identificação da Loja */}
         <div className="flex items-center gap-3">
-          <Link href="/gestao/fidelidade" className="flex items-center group shrink-0" title="Melhor Bocado Café">
+          <Link href="/gestao/fidelidade" className="flex items-center gap-2 group shrink-0" title="Melhor Bocado Café">
             <Image
               src="/logo.png"
               alt="Melhor Bocado Café"
-              width={100}
-              height={40}
-              className="h-7 w-auto transition-transform group-hover:scale-105"
+              width={120}
+              height={48}
+              className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105"
               priority
             />
           </Link>
