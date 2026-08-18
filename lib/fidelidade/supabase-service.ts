@@ -280,13 +280,29 @@ export async function buscarCuponsPorClienteWhatsappDb(
     const zapClean = (whatsapp || "").replace(/\D/g, "");
     if (!zapClean || zapClean.length < 8) return null;
 
+    const zapSem55 = zapClean.startsWith("55") && zapClean.length > 10 ? zapClean.slice(2) : zapClean;
+    const zapCom55 = zapClean.startsWith("55") ? zapClean : `55${zapClean}`;
+    const ultimos9 = zapClean.slice(-9);
     const ultimos8 = zapClean.slice(-8);
+
+    const zapVariants = Array.from(new Set([zapClean, zapSem55, zapCom55]));
+    const filterParts = [
+      ...zapVariants.map((z) => `cliente_whatsapp.eq.${z}`),
+      `cliente_whatsapp.like.%${ultimos9}`,
+      `cliente_whatsapp.like.%${ultimos8}`,
+    ].join(",");
+
+    const clienteFilterParts = [
+      ...zapVariants.map((z) => `whatsapp.eq.${z}`),
+      `whatsapp.like.%${ultimos9}`,
+      `whatsapp.like.%${ultimos8}`,
+    ].join(",");
 
     // 1. Busca cliente por whatsapp
     const { data: cliente } = await supabase
       .from("mb_clientes")
       .select("*")
-      .or(`whatsapp.eq.${zapClean},whatsapp.like.%${ultimos8}`)
+      .or(clienteFilterParts)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -295,7 +311,7 @@ export async function buscarCuponsPorClienteWhatsappDb(
     const { data: cuponsPorZap } = await supabase
       .from("mb_cupons")
       .select("*")
-      .or(`cliente_whatsapp.eq.${zapClean},cliente_whatsapp.like.%${ultimos8}`)
+      .or(filterParts)
       .order("criado_em", { ascending: false });
 
     let todosCupons = cuponsPorZap || [];

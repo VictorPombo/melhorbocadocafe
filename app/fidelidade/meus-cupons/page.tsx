@@ -32,6 +32,15 @@ function MeusCuponsContent() {
       if (data.sucesso) {
         setCupons(data.cupons || []);
         setNomeCliente(data.cliente_nome || "");
+        try {
+          localStorage.setItem("mb_cliente_whatsapp", cleanWpp);
+          const savedPerfil = localStorage.getItem("mb_cliente_perfil");
+          const parsed = savedPerfil ? JSON.parse(savedPerfil) : {};
+          localStorage.setItem(
+            "mb_cliente_perfil",
+            JSON.stringify({ ...parsed, whatsapp: cleanWpp, nome: data.cliente_nome || parsed.nome || "Cliente" })
+          );
+        } catch {}
       } else {
         setCupons([]);
       }
@@ -51,6 +60,13 @@ function MeusCuponsContent() {
     }
 
     try {
+      const directZap = localStorage.getItem("mb_cliente_whatsapp");
+      if (directZap) {
+        setWhatsapp(formatarTelefone(directZap));
+        buscarCuponsZap(directZap);
+        return;
+      }
+
       const saved = localStorage.getItem("mb_cliente_perfil");
       if (saved) {
         const parsed = JSON.parse(saved);

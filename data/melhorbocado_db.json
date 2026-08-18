@@ -154,6 +154,17 @@
       "visita_numero": 1,
       "venda_id": null,
       "criado_em": "2026-08-18T19:56:41.161486+00:00"
+    },
+    {
+      "id": "giro_z4lx0da0msz62avp",
+      "visitor_id": "804baffa-6738-4582-b61a-1831ed60a074",
+      "cliente_id": "6e8dc057-757e-474d-baa5-b65806614cf2",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "1369",
+      "unidade": "tatuape",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-18T21:20:17.700065+00:00"
     }
   ],
   "cupons": [
@@ -530,6 +541,34 @@
         "icone": "☕",
         "cor_fatia": "#e6398f"
       }
+    },
+    {
+      "id": "cup_qb9fybv6msz62avq",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "6e8dc057-757e-474d-baa5-b65806614cf2",
+      "codigo_cupom": "MB-ESCA",
+      "giro_id": "",
+      "premio_id": "Café Expresso Grátis",
+      "unidade": "tatuape",
+      "visita_numero": 1,
+      "cliente_nome": "Sami Keila",
+      "cliente_whatsapp": "11992268026",
+      "criado_em": "2026-08-18T21:20:16.79+00:00",
+      "expira_em": "2026-08-25T21:20:16.79+00:00",
+      "utilizado_em": null,
+      "premio": {
+        "id": "Café Expresso Grátis",
+        "nome": "Café Expresso Grátis",
+        "tipo": "produto",
+        "valor": 0,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "☕",
+        "cor_fatia": "#e6398f"
+      }
     }
   ],
   "codigos": [
@@ -867,5 +906,5 @@
       "icone": "🔄"
     }
   ],
-  "atualizado_em": "2026-08-18T20:59:55.764Z"
+  "atualizado_em": "2026-08-18T21:21:50.716Z"
 }
