@@ -73,6 +73,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validação de uso único no banco de dados Supabase
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data: giroExistente } = await supabase
+          .from("mb_giros")
+          .select("id, criado_em")
+          .eq("codigo_vinculo", vinculoCode)
+          .maybeSingle();
+
+        if (giroExistente) {
+          return NextResponse.json(
+            {
+              erro: "Este QR Code já foi utilizado nesta compra. Cada compra dá direito a 1 giro exclusivo. Para girar novamente, solicite um novo QR Code ao atendente em sua próxima compra!",
+              ja_utilizado: true,
+            },
+            { status: 400 }
+          );
+        }
+      } catch (err) {
+        console.error("[Girar API] Erro ao validar trava do QR Code no Supabase:", err);
+      }
+    }
+
     const consumo = consumirCodigoVinculo(vinculoCode, unidade, currentClienteId);
     if (!consumo.sucesso) {
       if (consumo.motivo === "ja_utilizado") {

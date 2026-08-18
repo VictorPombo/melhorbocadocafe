@@ -135,16 +135,28 @@ function GirarContent() {
 
     // 3. Validação do QR Code se fornecido
     if (codigoParam) {
+      // Checagem local instantânea
+      try {
+        if (localStorage.getItem(`mb_qr_utilizado_${codigoParam}`)) {
+          setBloqueioFraude(true);
+          setErro("Este QR Code já foi utilizado. Peça ao atendente do caixa para gerar um novo QR Code.");
+        }
+      } catch {}
+
+      // Checagem remota no banco Supabase
       fetch("/api/fidelidade/codigo-vinculo/validar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ codigo: codigoParam, loja: unidadeParam || "tatuape" }),
+        body: JSON.stringify({ codigo: codigoParam, loja: unidadeParam || "pinheiros" }),
       })
         .then((res) => res.json())
         .then((data) => {
           if (!data.valido && data.motivo === "ja_utilizado") {
             setBloqueioFraude(true);
             setErro("Este QR Code já foi utilizado. Peça ao atendente do caixa para gerar um novo QR Code.");
+            try {
+              localStorage.setItem(`mb_qr_utilizado_${codigoParam}`, "true");
+            } catch {}
           }
         })
         .catch(() => {});
@@ -337,6 +349,12 @@ function GirarContent() {
       const pos = data.premio?.posicao_roleta || 1;
       setPosicaoSorteada(pos);
       setGirando(true);
+
+      if (codigoVinculo) {
+        try {
+          localStorage.setItem(`mb_qr_utilizado_${codigoVinculo}`, "true");
+        } catch {}
+      }
 
       (window as any).__resultadoRoleta = data;
 
