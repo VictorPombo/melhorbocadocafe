@@ -20,18 +20,46 @@ import { UNIDADES_LOJA } from "@/lib/fidelidade/types";
 
 interface PainelPublicoAlvoProps {
   clientes: Cliente[];
+  unidadeFranquiaId?: string;
+  unidadeFranquiaNome?: string;
+  role?: string;
 }
 
-export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
+export function PainelPublicoAlvo({
+  clientes,
+  unidadeFranquiaId,
+  unidadeFranquiaNome,
+  role,
+}: PainelPublicoAlvoProps) {
   const [busca, setBusca] = useState("");
   const [filtroUnidade, setFiltroUnidade] = useState("todos");
   const [filtroFaixa, setFiltroFaixa] = useState("todos");
-  const [userRole, setUserRole] = useState("admin");
+  const [userRole, setUserRole] = useState(role || "admin");
+  const [userUnidadeId, setUserUnidadeId] = useState(unidadeFranquiaId || "todas");
+  const [userUnidadeNome, setUserUnidadeNome] = useState(unidadeFranquiaNome || "Franquia");
 
   React.useEffect(() => {
-    const role = localStorage.getItem("mb_role") || "admin";
-    setUserRole(role);
-  }, []);
+    const r = role || localStorage.getItem("mb_role") || "admin";
+    const uid = unidadeFranquiaId || localStorage.getItem("mb_unidade_id") || "todas";
+    const unome = unidadeFranquiaNome || localStorage.getItem("mb_unidade_nome") || "Franquia";
+    setUserRole(r);
+    setUserUnidadeId(uid);
+    setUserUnidadeNome(unome);
+  }, [role, unidadeFranquiaId, unidadeFranquiaNome]);
+
+  const isFranquia = userRole === "franquia" && userUnidadeId && userUnidadeId !== "todas";
+  const targetUnidadeId = (userUnidadeId || "tatuape").toLowerCase();
+
+  // Base de clientes estritamente isolada para a unidade da franquia logada
+  const clientesBase = useMemo(() => {
+    if (isFranquia) {
+      return clientes.filter((c) => {
+        const u = (c.unidade_cadastro || c.loja_preferida || "tatuape").toLowerCase();
+        return u === targetUnidadeId || u.includes(targetUnidadeId);
+      });
+    }
+    return clientes;
+  }, [clientes, isFranquia, targetUnidadeId]);
 
   // Função para calcular idade precisa a partir da string DD/MM/AAAA ou ISO
   function calcularIdade(nascStr: string): number {
@@ -72,7 +100,7 @@ export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
 
   // Estatísticas agregadas a partir dos clientes da roleta
   const metricas = useMemo(() => {
-    const total = clientes.length;
+    const total = clientesBase.length;
     if (total === 0) {
       return {
         total: 0,
@@ -87,7 +115,7 @@ export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
     let qtdComIdade = 0;
     let recorrentes = 0;
 
-    clientes.forEach((c) => {
+    clientesBase.forEach((c) => {
       const idade = calcularIdade(c.nascimento);
       if (idade > 0 && idade < 110) {
         somaIdade += idade;
@@ -108,7 +136,7 @@ export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
       recorrentes,
       novos: total - recorrentes,
     };
-  }, [clientes]);
+  }, [clientesBase]);
 
   // Distribuição por Faixa Etária
   const distribuicaoFaixas = useMemo(() => {
@@ -120,10 +148,10 @@ export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
       { id: "55+ anos", rotulo: "55+ anos", min: 55, max: 120, cor: "bg-amber-500" },
     ];
 
-    const total = clientes.length || 1;
+    const total = clientesBase.length || 1;
 
     return faixas.map((f) => {
-      const count = clientes.filter((c) => {
+      const count = clientesBase.filter((c) => {
         const idade = calcularIdade(c.nascimento);
         return idade >= f.min && idade <= f.max;
       }).length;
@@ -134,11 +162,11 @@ export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
         percentual: pct,
       };
     });
-  }, [clientes]);
+  }, [clientesBase]);
 
   // Distribuição por Frequência de Giros / Visitas
   const distribuicaoFrequencia = useMemo(() => {
-    const total = clientes.length || 1;
+    const total = clientesBase.length || 1;
     const niveis = [
       { rotulo: "1 Visita (Novo Cliente)", min: 1, max: 1, cor: "bg-blue-500" },
       { rotulo: "2 a 4 Visitas (Recorrente)", min: 2, max: 4, cor: "bg-[#e6398f]" },
@@ -147,7 +175,7 @@ export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
     ];
 
     return niveis.map((n) => {
-      const count = clientes.filter((c) => c.qtd_compras >= n.min && c.qtd_compras <= n.max).length;
+      const count = clientesBase.filter((c) => c.qtd_compras >= n.min && c.qtd_compras <= n.max).length;
       const pct = Math.round((count / total) * 100);
       return {
         ...n,
@@ -155,13 +183,13 @@ export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
         percentual: pct,
       };
     });
-  }, [clientes]);
+  }, [clientesBase]);
 
   // Distribuição por Unidade de Cadastro
   const distribuicaoUnidades = useMemo(() => {
-    const total = clientes.length || 1;
+    const total = clientesBase.length || 1;
     return UNIDADES_LOJA.map((u) => {
-      const count = clientes.filter(
+      const count = clientesBase.filter(
         (c) => (c.unidade_cadastro || c.loja_preferida || "tatuape") === u.id
       ).length;
       const pct = Math.round((count / total) * 100);
@@ -172,17 +200,18 @@ export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
         percentual: pct,
       };
     });
-  }, [clientes]);
+  }, [clientesBase]);
 
   // Lista de Clientes Filtrada para Consulta
   const clientesFiltrados = useMemo(() => {
-    return clientes.filter((c) => {
+    return clientesBase.filter((c) => {
       const matchBusca =
         !busca ||
         c.nome.toLowerCase().includes(busca.toLowerCase()) ||
         (c.whatsapp && c.whatsapp.includes(busca.replace(/\D/g, "")));
 
       const matchUnidade =
+        isFranquia ||
         filtroUnidade === "todos" ||
         (c.unidade_cadastro || c.loja_preferida || "tatuape") === filtroUnidade;
 
@@ -192,7 +221,7 @@ export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
 
       return matchBusca && matchUnidade && matchFaixa;
     });
-  }, [clientes, busca, filtroUnidade, filtroFaixa]);
+  }, [clientesBase, busca, filtroUnidade, filtroFaixa, isFranquia]);
 
   return (
     <div className="space-y-6">
@@ -202,15 +231,21 @@ export function PainelPublicoAlvo({ clientes }: PainelPublicoAlvoProps) {
           <div className="flex items-center gap-2 text-pink-400 font-bold text-xs uppercase tracking-wider mb-1">
             <Users className="w-4 h-4" /> Inteligência de Público-Alvo
           </div>
-          <h2 className="text-2xl font-black">Dados Demográficos Coletados na Roleta</h2>
+          <h2 className="text-2xl font-black">
+            {isFranquia
+              ? `Dados Demográficos • Unidade ${userUnidadeNome}`
+              : "Dados Demográficos Coletados na Roleta (Rede)"}
+          </h2>
           <p className="text-stone-400 text-xs mt-1 max-w-2xl">
-            Painel analítico alimentado diretamente pelos cadastros realizados pelos clientes ao girarem a roleta nas lojas.
+            {isFranquia
+              ? `Visualizando exclusivamente cadastros e dados demográficos dos clientes da unidade ${userUnidadeNome}.`
+              : "Painel analítico consolidado alimentado diretamente pelos cadastros realizados pelos clientes ao girarem a roleta nas lojas."}
           </p>
         </div>
 
         <div className="bg-white/10 px-5 py-3 rounded-2xl border border-white/10 text-center shrink-0">
           <span className="text-[11px] uppercase tracking-wider text-stone-400 block font-bold">
-            Base Coletada
+            {isFranquia ? `Base ${userUnidadeNome}` : "Base Coletada (Rede)"}
           </span>
           <span className="text-2xl font-black text-pink-400">
             {metricas.total} <span className="text-xs text-white font-normal">clientes únicos</span>

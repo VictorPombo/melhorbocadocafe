@@ -2322,7 +2322,12 @@ export default function FidelidadeDashboardPage() {
       {/* ========================================================================= */}
       {tabAtual === "publico" && (
         <div className="space-y-6 animate-fade-in">
-          <PainelPublicoAlvo clientes={metricasData.clientes} />
+          <PainelPublicoAlvo
+            clientes={metricasData.clientes}
+            unidadeFranquiaId={userUnidadeId}
+            unidadeFranquiaNome={userUnidadeNome}
+            role={userRole}
+          />
         </div>
       )}
 
