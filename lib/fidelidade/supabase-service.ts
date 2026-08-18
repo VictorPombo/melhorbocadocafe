@@ -107,6 +107,8 @@ export async function salvarCupomDb(cupom: {
   id?: string;
   codigo_cupom: string;
   cliente_id?: string;
+  cliente_nome?: string;
+  cliente_whatsapp?: string;
   giro_id?: string;
   premio_id: string;
   premio_nome: string;
@@ -122,17 +124,20 @@ export async function salvarCupomDb(cupom: {
   if (!isSupabaseConfigured || !supabase) return null;
 
   try {
+    const zapClean = (cupom.cliente_whatsapp || "").replace(/\D/g, "");
     const payload: any = {
       codigo_cupom: cupom.codigo_cupom,
-      cliente_id: cupom.cliente_id,
-      giro_id: cupom.giro_id,
+      cliente_id: cupom.cliente_id || null,
+      cliente_nome: cupom.cliente_nome || "Cliente",
+      cliente_whatsapp: zapClean,
+      giro_id: cupom.giro_id || null,
       premio_id: cupom.premio_id,
       premio_nome: cupom.premio_nome,
       premio_tipo: cupom.premio_tipo,
       premio_valor: cupom.premio_valor || 0,
       premio_icone: cupom.premio_icone,
       premio_cor: cupom.premio_cor,
-      unidade: cupom.unidade,
+      unidade: cupom.unidade === "itaim_bibi" ? "pinheiros" : cupom.unidade,
       visita_numero: cupom.visita_numero,
       origem_cupom: cupom.origem_cupom || "roleta",
       expira_em: cupom.expira_em,
@@ -142,7 +147,7 @@ export async function salvarCupomDb(cupom: {
 
     const { data, error } = await supabase
       .from("mb_cupons")
-      .insert(payload)
+      .upsert(payload, { onConflict: "codigo_cupom" })
       .select()
       .single();
 
@@ -231,61 +236,73 @@ export async function buscarCuponsPorClienteWhatsappDb(
     const zapClean = (whatsapp || "").replace(/\D/g, "");
     if (!zapClean || zapClean.length < 8) return null;
 
+    const ultimos8 = zapClean.slice(-8);
+
     // 1. Busca cliente por whatsapp
     const { data: cliente } = await supabase
       .from("mb_clientes")
       .select("*")
-      .or(`whatsapp.eq.${zapClean},whatsapp.like.%${zapClean.slice(-8)}%`)
+      .or(`whatsapp.eq.${zapClean},whatsapp.like.%${ultimos8}`)
+      .order("created_at", { ascending: false })
+      .limit(1)
       .maybeSingle();
 
-    // 2. Busca giros associados a este whatsapp
-    const { data: giros } = await supabase
-      .from("mb_giros")
-      .select("id, cliente_id, visitor_id")
-      .or(`whatsapp.eq.${zapClean},whatsapp.like.%${zapClean.slice(-8)}%`);
-
-    const clienteIds = new Set<string>();
-    const giroIds = new Set<string>();
-
-    if (cliente?.id) clienteIds.add(cliente.id);
-    if (cliente?.visitor_id) clienteIds.add(cliente.visitor_id);
-    clienteIds.add(`cli_${zapClean}`);
-
-    (giros || []).forEach((g: any) => {
-      if (g.cliente_id) clienteIds.add(g.cliente_id);
-      if (g.visitor_id) clienteIds.add(g.visitor_id);
-      if (g.id) giroIds.add(g.id);
-    });
-
-    const idList = Array.from(clienteIds);
-    const gList = Array.from(giroIds);
-
-    // 3. Busca todos os cupons correspondentes
-    let query = supabase
+    // 2. Busca cupons pelo WhatsApp diretamente na coluna indexada
+    const { data: cuponsPorZap } = await supabase
       .from("mb_cupons")
       .select("*")
+      .or(`cliente_whatsapp.eq.${zapClean},cliente_whatsapp.like.%${ultimos8}`)
       .order("criado_em", { ascending: false });
 
-    if (idList.length > 0 && gList.length > 0) {
-      query = query.or(`cliente_id.in.(${idList.join(",")}),giro_id.in.(${gList.join(",")})`);
-    } else if (idList.length > 0) {
-      query = query.in("cliente_id", idList);
-    } else if (gList.length > 0) {
-      query = query.in("giro_id", gList);
-    } else {
-      return { cliente: cliente || null, cupons: [] };
+    let todosCupons = cuponsPorZap || [];
+
+    // Se não encontrou por zap direto, busca pelos IDs de cliente e giros
+    if (todosCupons.length === 0) {
+      const { data: giros } = await supabase
+        .from("mb_giros")
+        .select("id, cliente_id, visitor_id")
+        .or(`whatsapp.eq.${zapClean},whatsapp.like.%${ultimos8}`);
+
+      const clienteIds = new Set<string>();
+      const giroIds = new Set<string>();
+
+      if (cliente?.id) clienteIds.add(cliente.id);
+      if (cliente?.visitor_id) clienteIds.add(cliente.visitor_id);
+      clienteIds.add(`cli_${zapClean}`);
+
+      (giros || []).forEach((g: any) => {
+        if (g.cliente_id) clienteIds.add(g.cliente_id);
+        if (g.visitor_id) clienteIds.add(g.visitor_id);
+        if (g.id) giroIds.add(g.id);
+      });
+
+      const idList = Array.from(clienteIds);
+      const gList = Array.from(giroIds);
+
+      if (idList.length > 0 || gList.length > 0) {
+        let query = supabase
+          .from("mb_cupons")
+          .select("*")
+          .order("criado_em", { ascending: false });
+
+        if (idList.length > 0 && gList.length > 0) {
+          query = query.or(`cliente_id.in.(${idList.join(",")}),giro_id.in.(${gList.join(",")})`);
+        } else if (idList.length > 0) {
+          query = query.in("cliente_id", idList);
+        } else if (gList.length > 0) {
+          query = query.in("giro_id", gList);
+        }
+
+        const { data: cuponsFallback } = await query;
+        if (cuponsFallback && cuponsFallback.length > 0) {
+          todosCupons = cuponsFallback;
+        }
+      }
     }
 
-    const { data: cuponsDb, error } = await query;
+    const nomeCliente = cliente?.nome || todosCupons[0]?.cliente_nome || "Cliente";
 
-    if (error) {
-      console.error("[Supabase] Erro ao buscar cupons por whatsapp:", error);
-      return null;
-    }
-
-    const nomeCliente = cliente?.nome || "Cliente";
-
-    const cupons = (cuponsDb || []).map((c: any) => ({
+    const cupons = todosCupons.map((c: any) => ({
       id: c.id,
       codigo_cupom: c.codigo_cupom,
       premio_id: c.premio_id,
@@ -297,8 +314,8 @@ export async function buscarCuponsPorClienteWhatsappDb(
         icone: c.premio_icone || "🎁",
         cor_fatia: c.premio_cor || "#e6398f",
       },
-      cliente_nome: nomeCliente,
-      cliente_whatsapp: zapClean,
+      cliente_nome: c.cliente_nome || nomeCliente,
+      cliente_whatsapp: c.cliente_whatsapp || zapClean,
       unidade: c.unidade === "itaim_bibi" ? "pinheiros" : c.unidade,
       visita_numero: c.visita_numero || 1,
       origem_cupom: c.origem_cupom || "roleta",

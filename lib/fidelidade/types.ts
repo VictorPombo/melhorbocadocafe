@@ -166,6 +166,7 @@ export interface Cupom {
   premio_id: string;
   giro_id: string;
   origem?: "roleta" | "trilha_fixa";
+  origem_cupom?: "roleta" | "trilha_fixa" | string;
   /** Código alfanumérico do cupom exibido ao cliente */
   codigo_cupom: string;
   status: StatusCupom;

@@ -193,7 +193,7 @@ export async function POST(req: NextRequest) {
 
     // Persistência no Supabase (Database Postgres Real)
     try {
-      await salvarClienteDb({
+      const dbCliente = await salvarClienteDb({
         nome,
         whatsapp: zapInput,
         nascimento,
@@ -202,11 +202,14 @@ export async function POST(req: NextRequest) {
         total_visitas: visitaNumero,
       });
 
+      const effectiveClienteId = dbCliente?.id || currentClienteId;
+
       await salvarGiroDb({
+        id: giro.id,
         visitor_id,
         codigo_vinculo: finalVinculoCode,
         premio_id: premioFinal.id,
-        cliente_id: currentClienteId,
+        cliente_id: effectiveClienteId,
         unidade,
         nome,
         nascimento,
@@ -214,8 +217,11 @@ export async function POST(req: NextRequest) {
       });
 
       await salvarCupomDb({
+        id: cupom.id,
         codigo_cupom: cupom.codigo_cupom,
-        cliente_id: currentClienteId,
+        cliente_id: effectiveClienteId,
+        cliente_nome: nome,
+        cliente_whatsapp: zapInput,
         giro_id: giro.id,
         premio_id: premioFinal.id,
         premio_nome: premioFinal.nome,

@@ -119,21 +119,27 @@ export async function salvarCupomSupabase(cupom: Cupom): Promise<void> {
   if (!isSupabaseConfigured || !supabase) return;
 
   try {
+    const zapClean = (cupom.cliente_whatsapp || "").replace(/\D/g, "");
     await supabase.from("mb_cupons").upsert(
       {
         codigo_cupom: cupom.codigo_cupom,
-        cliente_nome: cupom.cliente_nome,
-        cliente_whatsapp: (cupom.cliente_whatsapp || "").replace(/\D/g, ""),
+        cliente_id: cupom.cliente_id || null,
+        giro_id: cupom.giro_id || null,
+        cliente_nome: cupom.cliente_nome || "Cliente",
+        cliente_whatsapp: zapClean,
+        premio_id: cupom.premio_id,
         premio_nome: cupom.premio?.nome || cupom.premio_id,
         premio_tipo: cupom.premio?.tipo || "produto",
         premio_valor: cupom.premio?.valor || 0,
         premio_icone: cupom.premio?.icone || "🎁",
-        unidade: cupom.unidade || "tatuape",
+        premio_cor: cupom.premio?.cor_fatia || "#e6398f",
+        unidade: cupom.unidade === "itaim_bibi" ? "pinheiros" : cupom.unidade || "tatuape",
         visita_numero: cupom.visita_numero || 1,
-        status: cupom.status || "disponivel",
+        origem_cupom: cupom.origem_cupom || "roleta",
+        utilizado: cupom.status === "utilizado",
         expira_em: cupom.expira_em,
         utilizado_em: cupom.utilizado_em || null,
-        unidade_resgate: cupom.unidade || null,
+        utilizado_unidade: cupom.status === "utilizado" ? (cupom.unidade || null) : null,
         criado_em: cupom.criado_em || new Date().toISOString(),
       },
       { onConflict: "codigo_cupom" }
