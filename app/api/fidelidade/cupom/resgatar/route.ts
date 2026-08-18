@@ -1,12 +1,13 @@
 // =============================================================================
-// API: Resgatar cupom no Caixa pelo Balconista
+// API: Resgatar cupom no Caixa pelo Balconista (Supabase Primary)
 // POST /api/fidelidade/cupom/resgatar
-// Body: { codigo_cupom, balconista? }
+// Body: { codigo_cupom, balconista?, unidade? }
 // =============================================================================
 
 import { NextRequest, NextResponse } from "next/server";
 import { resgatarCupomPorBalconista, buscarPremioPorId } from "@/lib/fidelidade/mock-data";
 import { resgatarCupomDb } from "@/lib/fidelidade/supabase-service";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,48 +21,61 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let resultado = resgatarCupomPorBalconista(
-      codigo_cupom,
-      balconista || "Operador Balcão",
-      unidade
-    );
+    const cleanCodigo = codigo_cupom.toUpperCase().trim();
+    const targetUnidade = unidade || "santana";
 
-    if (!resultado.sucesso) {
-      const dbRes = await resgatarCupomDb(codigo_cupom, unidade || "tatuape");
+    // 1. Supabase como fonte primária
+    if (isSupabaseConfigured && supabase) {
+      const dbRes = await resgatarCupomDb(cleanCodigo, targetUnidade);
       if (dbRes) {
         if (!dbRes.sucesso && dbRes.motivo === "ja_utilizado") {
           return NextResponse.json(
-            { erro: "Este cupom já foi utilizado.", cupom: dbRes.cupom },
+            { erro: "Este cupom já foi utilizado anteriormente.", cupom: dbRes.cupom },
+            { status: 400 }
+          );
+        }
+        if (!dbRes.sucesso && dbRes.motivo === "expirado") {
+          return NextResponse.json(
+            { erro: "Este cupom está expirado e não pode mais ser resgatado.", cupom: dbRes.cupom },
             { status: 400 }
           );
         }
         if (dbRes.sucesso && dbRes.cupom) {
-          const premio = buscarPremioPorId(dbRes.cupom.premio_id) || {
-            nome: dbRes.cupom.premio_nome,
-            tipo: dbRes.cupom.premio_tipo,
-            valor: dbRes.cupom.premio_valor,
-            icone: dbRes.cupom.premio_icone,
+          const premio = {
+            id: dbRes.cupom.premio_id,
+            nome: dbRes.cupom.premio_nome || "Prêmio Fidelidade",
+            tipo: dbRes.cupom.premio_tipo || "produto",
+            valor: Number(dbRes.cupom.premio_valor || 0),
+            icone: dbRes.cupom.premio_icone || "☕",
           };
+
+          // Também atualiza mock em memória se existir
+          try {
+            resgatarCupomPorBalconista(cleanCodigo, balconista || "Balcão", targetUnidade);
+          } catch {}
+
           return NextResponse.json({
             sucesso: true,
-            mensagem: "Cupom resgatado com sucesso via Banco de Dados!",
+            mensagem: "Cupom resgatado com sucesso!",
             cupom: dbRes.cupom,
             premio,
           });
         }
       }
+    }
 
+    // 2. Fallback de memória local
+    const resultado = resgatarCupomPorBalconista(
+      cleanCodigo,
+      balconista || "Operador Balcão",
+      targetUnidade
+    );
+
+    if (!resultado.sucesso) {
       return NextResponse.json(
         { erro: resultado.mensagem, cupom: resultado.cupom },
         { status: 400 }
       );
-    }
-
-    // Sincroniza resgate no Supabase
-    try {
-      await resgatarCupomDb(codigo_cupom, unidade || "tatuape");
-    } catch (dbErr) {
-      console.error("[Database] Erro ao sincronizar resgate no Supabase:", dbErr);
     }
 
     const premio = resultado.cupom ? buscarPremioPorId(resultado.cupom.premio_id) : null;

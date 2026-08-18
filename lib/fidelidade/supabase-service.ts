@@ -166,16 +166,25 @@ export async function resgatarCupomDb(codigoCupom: string, unidadeResgate: strin
   if (!isSupabaseConfigured || !supabase) return null;
 
   try {
+    const cleanCodigo = codigoCupom.toUpperCase().trim();
+    const codigoComPrefixo = cleanCodigo.startsWith("MB-") ? cleanCodigo : `MB-${cleanCodigo}`;
+    const codigoSemPrefixo = cleanCodigo.replace("MB-", "");
+
     const { data: cupom, error } = await supabase
       .from("mb_cupons")
       .select("*")
-      .eq("codigo_cupom", codigoCupom.toUpperCase().trim())
-      .single();
+      .or(`codigo_cupom.eq.${codigoComPrefixo},codigo_cupom.eq.${codigoSemPrefixo},codigo_cupom.eq.${cleanCodigo}`)
+      .limit(1)
+      .maybeSingle();
 
     if (error || !cupom) return null;
 
     if (cupom.utilizado) {
       return { sucesso: false, motivo: "ja_utilizado", cupom };
+    }
+
+    if (cupom.expira_em && new Date(cupom.expira_em) < new Date()) {
+      return { sucesso: false, motivo: "expirado", cupom };
     }
 
     const { data: cupomAtualizado, error: errUpdate } = await supabase
@@ -196,7 +205,7 @@ export async function resgatarCupomDb(codigoCupom: string, unidadeResgate: strin
           .from("mb_clientes")
           .select("total_resgates")
           .eq("id", cupom.cliente_id)
-          .single();
+          .maybeSingle();
 
         if (cliente) {
           await supabase

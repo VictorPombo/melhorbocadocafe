@@ -99,6 +99,17 @@
       "visita_numero": 1,
       "venda_id": null,
       "criado_em": "2026-08-18T17:57:33.906698+00:00"
+    },
+    {
+      "id": "giro_ayv94oxcmsz2imbp",
+      "visitor_id": "fb823781-a348-4cd4-9314-2f39b722f7f2",
+      "cliente_id": "095a0755-d9d8-4bd0-8303-a21159ad06e5",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "2839",
+      "unidade": "santana",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-18T19:41:00.05644+00:00"
     }
   ],
   "cupons": [
@@ -333,6 +344,34 @@
         "limite_diario": null,
         "limite_mensal": null,
         "icone": "🍩",
+        "cor_fatia": "#e6398f"
+      }
+    },
+    {
+      "id": "cup_76lgtbn7msz2imbq",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "095a0755-d9d8-4bd0-8303-a21159ad06e5",
+      "codigo_cupom": "MB-LER0",
+      "giro_id": "",
+      "premio_id": "Café Expresso Grátis",
+      "unidade": "santana",
+      "visita_numero": 1,
+      "cliente_nome": "Victor Teste",
+      "cliente_whatsapp": "55119763776",
+      "criado_em": "2026-08-18T19:40:59.654+00:00",
+      "expira_em": "2026-08-25T19:40:59.654+00:00",
+      "utilizado_em": null,
+      "premio": {
+        "id": "Café Expresso Grátis",
+        "nome": "Café Expresso Grátis",
+        "tipo": "produto",
+        "valor": 0,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "☕",
         "cor_fatia": "#e6398f"
       }
     }
@@ -672,5 +711,5 @@
       "icone": "🔄"
     }
   ],
-  "atualizado_em": "2026-08-18T19:12:25.951Z"
+  "atualizado_em": "2026-08-18T19:48:02.081Z"
 }

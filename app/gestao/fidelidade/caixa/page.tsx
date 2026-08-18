@@ -431,6 +431,19 @@ export default function CaixaFidelidadePage() {
                       {resgatando ? "Confirmando resgate..." : "✓ Confirmar Entrega do Prêmio no Caixa"}
                     </button>
                   </>
+                ) : validacaoData.cupom.status === "expirado" ? (
+                  <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-5 text-center space-y-2">
+                    <p className="text-base font-black text-red-400">
+                      ⏳ Cupom Expirado
+                    </p>
+                    <p className="text-xs text-stone-300">
+                      O prazo de validade deste cupom expirou em{" "}
+                      {validacaoData.cupom.expira_em
+                        ? new Date(validacaoData.cupom.expira_em).toLocaleDateString("pt-BR")
+                        : "data anterior"}
+                      . Não é possível resgatar cupons vencidos.
+                    </p>
+                  </div>
                 ) : (
                   <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-5 text-center space-y-2">
                     <p className="text-base font-black text-yellow-400">
