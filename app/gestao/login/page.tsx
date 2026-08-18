@@ -123,17 +123,15 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md relative z-10">
         {/* Header e Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center p-3 bg-white/10 backdrop-blur-md rounded-full border border-white/10 mb-4 shadow-xl">
-            <Image
-              src="/logo.png"
-              alt="Melhor Bocado Café"
-              width={96}
-              height={96}
-              className="w-20 h-20 object-contain drop-shadow-md"
-              priority
-            />
-          </div>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <Image
+            src="/logo.png?v=2"
+            alt="Melhor Bocado Café"
+            width={120}
+            height={120}
+            className="w-28 h-28 object-contain mb-4 drop-shadow-2xl hover:scale-105 transition-transform duration-300"
+            priority
+          />
           <h1 className="text-xl font-black text-white tracking-tight">Portal de Gestão & Franquias</h1>
           <p className="text-white/60 text-xs font-medium mt-1">
             Sistema Unificado de Fidelidade e Roleta

@@ -6,15 +6,15 @@ export const metadata: Metadata = {
   title: "Painel de Gestão | Melhor Bocado Café",
   description: "Painel de gestão da rede Melhor Bocado Café e Sistema de Fidelidade.",
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: "/logo.png?v=2",
+    apple: "/logo.png?v=2",
   },
   openGraph: {
     title: "Painel de Gestão | Melhor Bocado Café",
     description: "Painel de gestão da rede Melhor Bocado Café e Sistema de Fidelidade.",
     images: [
       {
-        url: "/logo.png",
+        url: "/logo.png?v=2",
         width: 800,
         height: 800,
         alt: "Melhor Bocado Café",

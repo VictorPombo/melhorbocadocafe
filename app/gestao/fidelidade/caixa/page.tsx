@@ -220,7 +220,7 @@ export default function CaixaFidelidadePage() {
         <div className="flex items-center gap-3.5">
           <Link href="/gestao/fidelidade" className="flex items-center gap-2.5 group shrink-0" title="Melhor Bocado">
             <Image
-              src="/logo.png"
+              src="/logo.png?v=2"
               alt="Melhor Bocado Café"
               width={36}
               height={36}

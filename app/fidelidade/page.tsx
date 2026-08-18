@@ -69,7 +69,7 @@ export default function FidelidadePage() {
       {/* Logo / Marca */}
       <div className="text-center mb-8 flex flex-col items-center">
         <Image
-          src="/logo.png"
+          src="/logo.png?v=2"
           alt="Melhor Bocado Café"
           width={88}
           height={88}
