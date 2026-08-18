@@ -50,15 +50,16 @@ export default function FidelidadeLayout({
     >
       {/* Top Bar Sofisticada & Discreta do Clube de Fidelidade */}
       <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-pink-100/80 px-4 py-2.5 flex items-center justify-between shadow-xs">
-        <Link href="/fidelidade/girar" className="flex items-center gap-2 group">
+        <Link href="/fidelidade/girar" className="flex items-center gap-2.5 group">
           <Image
             src="/logo.png"
-            alt="Melhor Bocado"
-            width={110}
-            height={48}
-            className="h-8.5 w-auto transition-transform group-hover:scale-105"
+            alt="Melhor Bocado Café"
+            width={38}
+            height={38}
+            className="h-8.5 w-8.5 object-contain transition-transform group-hover:scale-105"
             priority
           />
+          <span className="font-extrabold text-sm text-gray-900 tracking-tight">Melhor Bocado</span>
         </Link>
 
         <div className="flex items-center gap-2">

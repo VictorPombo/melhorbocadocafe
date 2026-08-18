@@ -124,13 +124,13 @@ export default function LoginPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Header e Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center p-3 bg-white/10 backdrop-blur-md rounded-3xl border border-white/10 mb-4 shadow-xl">
+          <div className="inline-flex items-center justify-center p-3 bg-white/10 backdrop-blur-md rounded-full border border-white/10 mb-4 shadow-xl">
             <Image
               src="/logo.png"
-              alt="Melhor Bocado"
-              width={160}
-              height={75}
-              className="h-12 w-auto drop-shadow-md"
+              alt="Melhor Bocado Café"
+              width={96}
+              height={96}
+              className="w-20 h-20 object-contain drop-shadow-md"
               priority
             />
           </div>

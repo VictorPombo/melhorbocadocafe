@@ -67,19 +67,22 @@ export default function Sidebar() {
     <>
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-100 min-h-screen fixed left-0 top-0 z-40 shadow-xs">
-        <div className="p-5 border-b border-gray-100 flex flex-col items-start gap-2">
-          <Link href="/gestao/fidelidade" className="block group">
+        <div className="p-5 border-b border-gray-100 flex items-center gap-3">
+          <Link href="/gestao/fidelidade" className="block group shrink-0">
             <Image
               src="/logo.png"
-              alt="Melhor Bocado"
-              width={160}
-              height={64}
-              className="h-11 w-auto object-contain transition-transform group-hover:scale-102"
+              alt="Melhor Bocado Café"
+              width={48}
+              height={48}
+              className="h-11 w-11 object-contain transition-transform group-hover:scale-105"
               priority
             />
           </Link>
-          <div className="flex items-center gap-1.5">
-            <span className="px-2.5 py-0.5 rounded-lg bg-gradient-to-r from-pink-50 to-rose-50 text-[#e6398f] text-[10px] font-black uppercase tracking-wider border border-pink-200/60 shadow-2xs">
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm font-black text-gray-900 leading-tight truncate">
+              Melhor Bocado
+            </span>
+            <span className="px-2 py-0.5 mt-1 rounded-lg bg-gradient-to-r from-pink-50 to-rose-50 text-[#e6398f] text-[9px] font-black uppercase tracking-wider border border-pink-200/60 shadow-2xs w-fit">
               ☕ Painel de Gestão
             </span>
           </div>

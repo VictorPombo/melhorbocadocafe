@@ -53,8 +53,14 @@ export function QrCodeSvg({
             className="w-full h-full object-contain rounded-lg"
           />
           {showLogo && (
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full border-2 border-[#e6398f] p-1 shadow-md flex items-center justify-center pointer-events-none">
-              <span className="text-base select-none">🍩</span>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-11 h-11 bg-white rounded-full border-2 border-[#e6398f] p-0.5 shadow-md flex items-center justify-center pointer-events-none overflow-hidden">
+              <Image
+                src="/logo.png"
+                alt="Melhor Bocado"
+                width={36}
+                height={36}
+                className="w-full h-full object-contain"
+              />
             </div>
           )}
         </div>

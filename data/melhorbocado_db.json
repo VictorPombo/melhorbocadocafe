@@ -22,6 +22,28 @@
       "visita_numero": 1,
       "venda_id": null,
       "criado_em": "2026-08-17T21:27:21.590797+00:00"
+    },
+    {
+      "id": "bed61989-41a8-4a4e-8cd4-3114fe2301e2",
+      "visitor_id": "fb823781-a348-4cd4-9314-2f39b722f7f2",
+      "cliente_id": "cli_wah9daxumsyxbtrc",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "1937",
+      "unidade": "santana",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-18T17:15:45.780376+00:00"
+    },
+    {
+      "id": "e020789e-6f26-4280-86b2-b8c23d796e27",
+      "visitor_id": "fb823781-a348-4cd4-9314-2f39b722f7f2",
+      "cliente_id": "cli_7ygeuz8jmsyx44j8",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "3590",
+      "unidade": "tatuape",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-18T17:09:45.998878+00:00"
     }
   ],
   "cupons": [
@@ -63,6 +85,58 @@
       "criado_em": "2026-08-17T21:27:22.089076+00:00",
       "expira_em": "2026-08-24T21:27:21.055+00:00",
       "utilizado_em": "2026-08-17T21:30:06.782+00:00",
+      "premio": {
+        "id": "Café Expresso Grátis",
+        "nome": "Café Expresso Grátis",
+        "tipo": "produto",
+        "valor": 0,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "☕",
+        "cor_fatia": "#e6398f"
+      }
+    },
+    {
+      "id": "47f80598-90c9-415b-907e-6ba5252f3dfb",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "cli_wah9daxumsyxbtrc",
+      "codigo_cupom": "MB-09FM",
+      "giro_id": "",
+      "premio_id": "Donut Chocolate Belga",
+      "unidade": "santana",
+      "visita_numero": 2,
+      "criado_em": "2026-08-18T17:15:45.955019+00:00",
+      "expira_em": "2026-08-25T17:15:45.023+00:00",
+      "utilizado_em": "2026-08-18T17:16:00.493+00:00",
+      "premio": {
+        "id": "Donut Chocolate Belga",
+        "nome": "Donut Chocolate Belga",
+        "tipo": "produto",
+        "valor": 0,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "🍫",
+        "cor_fatia": "#e6398f"
+      }
+    },
+    {
+      "id": "643b8bd2-2de1-4f59-aa03-acac6deb3fa0",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "cli_7ygeuz8jmsyx44j8",
+      "codigo_cupom": "MB-USG7",
+      "giro_id": "",
+      "premio_id": "Café Expresso Grátis",
+      "unidade": "tatuape",
+      "visita_numero": 1,
+      "criado_em": "2026-08-18T17:09:46.174888+00:00",
+      "expira_em": "2026-08-25T17:09:45.553+00:00",
+      "utilizado_em": "2026-08-18T17:10:10.419+00:00",
       "premio": {
         "id": "Café Expresso Grátis",
         "nome": "Café Expresso Grátis",
@@ -413,5 +487,5 @@
       "icone": "🔄"
     }
   ],
-  "atualizado_em": "2026-08-18T02:38:28.217Z"
+  "atualizado_em": "2026-08-18T17:35:34.980Z"
 }

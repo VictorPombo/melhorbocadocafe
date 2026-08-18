@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function FidelidadePage() {
   const router = useRouter();
@@ -66,12 +67,19 @@ export default function FidelidadePage() {
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
       {/* Logo / Marca */}
-      <div className="text-center mb-10">
-        <div className="text-5xl mb-3">🍩</div>
+      <div className="text-center mb-8 flex flex-col items-center">
+        <Image
+          src="/logo.png"
+          alt="Melhor Bocado Café"
+          width={88}
+          height={88}
+          className="w-20 h-20 object-contain mb-3 drop-shadow-md"
+          priority
+        />
         <h1 className="text-2xl font-extrabold text-gray-800 tracking-tight">
           Melhor Bocado
         </h1>
-        <p className="text-sm text-gray-400 mt-1">Programa de Fidelidade</p>
+        <p className="text-sm text-gray-400 mt-0.5">Programa de Fidelidade</p>
       </div>
 
         {/* Card principal */}
