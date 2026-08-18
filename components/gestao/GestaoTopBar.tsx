@@ -14,6 +14,7 @@ import {
   LogOut,
   Sparkles,
   Crown,
+  Plus,
 } from "lucide-react";
 
 export default function GestaoTopBar() {
@@ -127,35 +128,28 @@ export default function GestaoTopBar() {
             </div>
           )}
 
+          {/* Botão + Cadastrar Nova Loja no Topo (Exclusivo Admin) */}
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent("mb_abrir_modal_nova_loja"));
+              }}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Cadastrar Nova Loja</span>
+            </button>
+          )}
+
           <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-extrabold">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span>Sistema Online</span>
           </div>
         </div>
 
-        {/* Lado Direito: Ações Rápidas & Perfil */}
+        {/* Lado Direito: Perfil & Logout */}
         <div className="flex items-center gap-2.5">
-          {/* Botão Caixa */}
-          <Link
-            href="/gestao/fidelidade/caixa"
-            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-black transition-all cursor-pointer"
-          >
-            <ShoppingCart className="w-3.5 h-3.5 text-gray-600" />
-            <span>Painel do Caixa</span>
-          </Link>
-
-          {/* Botão Testar Roleta no Balcão */}
-          <Link
-            href={`/fidelidade/girar?unidade=${unidadeId === "todas" ? "tatuape" : unidadeId}`}
-            target="_blank"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#e6398f] to-rose-500 text-white text-xs font-black shadow-sm shadow-pink-500/20 hover:opacity-95 transition-all cursor-pointer"
-          >
-            <Smartphone className="w-3.5 h-3.5" />
-            <span>Simular Roleta</span>
-          </Link>
-
-          <div className="h-5 w-[1px] bg-gray-200 hidden sm:block" />
-
           {/* Perfil & Logout */}
           <div className="flex items-center gap-2 pl-1">
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#e6398f] to-amber-400 text-white font-black text-xs flex items-center justify-center shadow-xs">

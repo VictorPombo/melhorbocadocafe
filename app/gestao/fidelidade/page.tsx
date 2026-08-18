@@ -303,6 +303,9 @@ export default function FidelidadeDashboardPage() {
     if (role === "franquia" && unidId && unidId !== "todas") {
       setLojaFiltro(unidId);
       setUnidadeAtiva(unidId);
+    } else if (unidId && unidId !== "todas") {
+      setLojaFiltro(unidId);
+      setUnidadeAtiva(unidId);
     }
 
     sincronizarMetricas();
@@ -318,22 +321,19 @@ export default function FidelidadeDashboardPage() {
       })
       .catch(() => {});
 
-    fetch("/api/fidelidade/trilha")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.sucesso && Array.isArray(data.trilha)) {
-          setTrilha(data.trilha);
-        }
-      })
-      .catch(() => {});
-
     return () => clearInterval(interval);
   }, []);
 
   // Recarregar trilha específica quando a loja selecionada mudar
   useEffect(() => {
     function carregarTrilhaDaLoja(lojaId: string) {
-      const uParam = lojaId === "todas" ? "geral" : lojaId;
+      const uParam =
+        userRole === "franquia" && userUnidadeId && userUnidadeId !== "todas"
+          ? userUnidadeId
+          : lojaId === "todas"
+          ? "geral"
+          : lojaId;
+
       fetch(`/api/fidelidade/trilha?unidade=${uParam}`)
         .then((res) => res.json())
         .then((data) => {
@@ -344,7 +344,12 @@ export default function FidelidadeDashboardPage() {
         .catch(() => {});
     }
 
-    carregarTrilhaDaLoja(lojaFiltro);
+    const lojaParaCarregar =
+      userRole === "franquia" && userUnidadeId && userUnidadeId !== "todas"
+        ? userUnidadeId
+        : lojaFiltro;
+
+    carregarTrilhaDaLoja(lojaParaCarregar);
 
     function handleLojaEvent(e: any) {
       if (e.detail?.id) {
@@ -354,9 +359,18 @@ export default function FidelidadeDashboardPage() {
       }
     }
 
+    function handleAbrirModalNovaLoja() {
+      setModalNovaLojaAberta(true);
+    }
+
     window.addEventListener("mb_loja_changed", handleLojaEvent);
-    return () => window.removeEventListener("mb_loja_changed", handleLojaEvent);
-  }, [lojaFiltro]);
+    window.addEventListener("mb_abrir_modal_nova_loja", handleAbrirModalNovaLoja);
+
+    return () => {
+      window.removeEventListener("mb_loja_changed", handleLojaEvent);
+      window.removeEventListener("mb_abrir_modal_nova_loja", handleAbrirModalNovaLoja);
+    };
+  }, [lojaFiltro, userRole, userUnidadeId]);
 
   // Handler para cadastrar nova franquia / loja
   async function handleCadastrarNovaLoja(e: React.FormEvent) {
@@ -728,7 +742,13 @@ export default function FidelidadeDashboardPage() {
   async function handleSalvarTrilha() {
     setSalvandoTrilha(true);
     try {
-      const targetLoja = lojaFiltro === "todas" ? "geral" : lojaFiltro;
+      const targetLoja =
+        userRole === "franquia" && userUnidadeId && userUnidadeId !== "todas"
+          ? userUnidadeId
+          : lojaFiltro === "todas"
+          ? "geral"
+          : lojaFiltro;
+
       const res = await fetch("/api/fidelidade/trilha", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -753,11 +773,19 @@ export default function FidelidadeDashboardPage() {
   }
 
   async function handleRestaurarTrilhaPadrao() {
-    const targetLoja = lojaFiltro === "todas" ? "geral" : lojaFiltro;
+    const targetLoja =
+      userRole === "franquia" && userUnidadeId && userUnidadeId !== "todas"
+        ? userUnidadeId
+        : lojaFiltro === "todas"
+        ? "geral"
+        : lojaFiltro;
+
     if (
       !confirm(
         `Deseja restaurar as etapas da Trilha para a configuração padrão em ${
-          targetLoja === "geral" ? "toda a Rede Geral" : `na loja ${unidades.find((u) => u.id === targetLoja)?.nome || targetLoja}`
+          targetLoja === "geral"
+            ? "toda a Rede Geral"
+            : `na loja ${unidades.find((u) => u.id === targetLoja)?.nome || targetLoja}`
         }?`
       )
     )
@@ -928,79 +956,9 @@ export default function FidelidadeDashboardPage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* SELETOR DE LOJAS / FRANQUIAS & BOTÃO DE NOVA UNIDADE */}
+      {/* IDENTIFICAÇÃO DE FRANQUIA (QUANDO LOGADO COMO FRANQUIA) */}
       {/* ========================================================================= */}
-      {userRole === "admin" ? (
-        <div className="bg-white rounded-3xl p-4 sm:p-5 border border-stone-200/90 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-black shrink-0 shadow-xs">
-              <Store className="w-3.5 h-3.5 text-amber-300" />
-              <span>Loja Ativa:</span>
-            </div>
-
-            {/* Chips de Lojas (Visão Admin) */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <button
-                type="button"
-                onClick={() => {
-                  setLojaFiltro("todas");
-                  setUnidadeAtiva("tatuape");
-                  localStorage.setItem("mb_unidade_id", "todas");
-                  localStorage.setItem("mb_unidade_nome", "Rede Consolidada");
-                  window.dispatchEvent(
-                    new CustomEvent("mb_loja_changed", { detail: { id: "todas", nome: "Rede Consolidada" } })
-                  );
-                }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                  lojaFiltro === "todas"
-                    ? "bg-gradient-to-r from-[#e6398f] to-rose-600 text-white shadow-sm shadow-pink-500/20"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                🌐 Todas as Lojas (GERAL) ({unidades.length})
-              </button>
-
-              {unidades.map((u) => {
-                const isSelected = lojaFiltro === u.id;
-                return (
-                  <button
-                    key={u.id}
-                    type="button"
-                    onClick={() => {
-                      setLojaFiltro(u.id);
-                      setUnidadeAtiva(u.id);
-                      localStorage.setItem("mb_unidade_id", u.id);
-                      localStorage.setItem("mb_unidade_nome", u.nome);
-                      window.dispatchEvent(
-                        new CustomEvent("mb_loja_changed", { detail: { id: u.id, nome: u.nome } })
-                      );
-                    }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                      isSelected
-                        ? "bg-stone-900 text-white shadow-sm"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900"
-                    }`}
-                  >
-                    <span>{u.nome}</span>
-                    {isSelected && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Ação de Cadastrar Nova Franquia (Exclusivo Admin) */}
-          <button
-            type="button"
-            onClick={() => setModalNovaLojaAberta(true)}
-            className="px-4 py-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20 shrink-0 cursor-pointer active:scale-95"
-          >
-            <Plus className="w-4 h-4" />
-            <span>+ Cadastrar Nova Loja / Franquia</span>
-          </button>
-        </div>
-      ) : (
-        /* Franquia Logada: Visão 100% Isolada da sua Loja */
+      {userRole === "franquia" && (
         <div className="bg-white rounded-3xl p-4 sm:p-5 border border-amber-200 shadow-sm flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-amber-100 border border-amber-300 text-amber-900 flex items-center justify-center text-xl font-black">
