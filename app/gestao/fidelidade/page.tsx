@@ -1219,10 +1219,11 @@ export default function FidelidadeDashboardPage() {
             {(() => {
               const resgatesFiltrados = userRole === "franquia" && userUnidadeId && userUnidadeId !== "todas"
                 ? metricasData.resgatesRecentes.filter(
-                    (r) =>
-                      r.unidade.toLowerCase() === userUnidadeId.toLowerCase() ||
-                      r.unidade.toLowerCase().includes(userUnidadeId.toLowerCase()) ||
-                      r.unidade.toLowerCase().includes((userUnidadeNome || "").toLowerCase())
+                    (r: any) =>
+                      (r.unidade_id || "").toLowerCase() === userUnidadeId.toLowerCase() ||
+                      (r.unidade || "").toLowerCase() === (userUnidadeNome || "").toLowerCase() ||
+                      (r.unidade || "").toLowerCase().includes(userUnidadeId.toLowerCase()) ||
+                      (r.unidade || "").toLowerCase().includes((userUnidadeNome || "").toLowerCase())
                   )
                 : metricasData.resgatesRecentes;
 
