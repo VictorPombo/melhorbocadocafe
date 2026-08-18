@@ -221,3 +221,104 @@ export async function buscarClientePorWhatsappDb(whatsapp: string): Promise<any>
   }
   return null;
 }
+
+export async function buscarCuponsPorClienteWhatsappDb(
+  whatsapp: string
+): Promise<{ cliente: any; cupons: any[] } | null> {
+  if (!isSupabaseConfigured || !supabase) return null;
+
+  try {
+    const zapClean = (whatsapp || "").replace(/\D/g, "");
+    if (!zapClean || zapClean.length < 8) return null;
+
+    // 1. Busca cliente por whatsapp
+    const { data: cliente } = await supabase
+      .from("mb_clientes")
+      .select("*")
+      .or(`whatsapp.eq.${zapClean},whatsapp.like.%${zapClean.slice(-8)}%`)
+      .maybeSingle();
+
+    // 2. Busca giros associados a este whatsapp
+    const { data: giros } = await supabase
+      .from("mb_giros")
+      .select("id, cliente_id, visitor_id")
+      .or(`whatsapp.eq.${zapClean},whatsapp.like.%${zapClean.slice(-8)}%`);
+
+    const clienteIds = new Set<string>();
+    const giroIds = new Set<string>();
+
+    if (cliente?.id) clienteIds.add(cliente.id);
+    if (cliente?.visitor_id) clienteIds.add(cliente.visitor_id);
+    clienteIds.add(`cli_${zapClean}`);
+
+    (giros || []).forEach((g: any) => {
+      if (g.cliente_id) clienteIds.add(g.cliente_id);
+      if (g.visitor_id) clienteIds.add(g.visitor_id);
+      if (g.id) giroIds.add(g.id);
+    });
+
+    const idList = Array.from(clienteIds);
+    const gList = Array.from(giroIds);
+
+    // 3. Busca todos os cupons correspondentes
+    let query = supabase
+      .from("mb_cupons")
+      .select("*")
+      .order("criado_em", { ascending: false });
+
+    if (idList.length > 0 && gList.length > 0) {
+      query = query.or(`cliente_id.in.(${idList.join(",")}),giro_id.in.(${gList.join(",")})`);
+    } else if (idList.length > 0) {
+      query = query.in("cliente_id", idList);
+    } else if (gList.length > 0) {
+      query = query.in("giro_id", gList);
+    } else {
+      return { cliente: cliente || null, cupons: [] };
+    }
+
+    const { data: cuponsDb, error } = await query;
+
+    if (error) {
+      console.error("[Supabase] Erro ao buscar cupons por whatsapp:", error);
+      return null;
+    }
+
+    const nomeCliente = cliente?.nome || "Cliente";
+
+    const cupons = (cuponsDb || []).map((c: any) => ({
+      id: c.id,
+      codigo_cupom: c.codigo_cupom,
+      premio_id: c.premio_id,
+      premio: {
+        id: c.premio_id,
+        nome: c.premio_nome || "Prêmio Fidelidade",
+        tipo: c.premio_tipo || "produto",
+        valor: Number(c.premio_valor) || 0,
+        icone: c.premio_icone || "🎁",
+        cor_fatia: c.premio_cor || "#e6398f",
+      },
+      cliente_nome: nomeCliente,
+      cliente_whatsapp: zapClean,
+      unidade: c.unidade === "itaim_bibi" ? "pinheiros" : c.unidade,
+      visita_numero: c.visita_numero || 1,
+      origem_cupom: c.origem_cupom || "roleta",
+      status: c.utilizado
+        ? "utilizado"
+        : new Date(c.expira_em) < new Date()
+        ? "expirado"
+        : "disponivel",
+      criado_em: c.criado_em,
+      expira_em: c.expira_em,
+      utilizado_em: c.utilizado_em || null,
+      utilizado_unidade: c.utilizado_unidade === "itaim_bibi" ? "pinheiros" : c.utilizado_unidade || null,
+    }));
+
+    return {
+      cliente: cliente || { nome: nomeCliente, whatsapp: zapClean },
+      cupons,
+    };
+  } catch (err) {
+    console.error("[Supabase] Erro ao processar busca de cupons:", err);
+    return null;
+  }
+}

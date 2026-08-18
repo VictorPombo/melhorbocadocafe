@@ -51,7 +51,7 @@
       "cliente_id": "cli_7lpd5985msyy680z",
       "premio_id": "premio_sorteado",
       "codigo_vinculo_id": "1216",
-      "unidade": "itaim_bibi",
+      "unidade": "pinheiros",
       "visita_numero": 1,
       "venda_id": null,
       "criado_em": "2026-08-18T17:39:23.456277+00:00"
@@ -62,7 +62,7 @@
       "cliente_id": "cli_q4l5hz4cmsyypv0a",
       "premio_id": "premio_sorteado",
       "codigo_vinculo_id": "1037",
-      "unidade": "itaim_bibi",
+      "unidade": "pinheiros",
       "visita_numero": 1,
       "venda_id": null,
       "criado_em": "2026-08-18T17:54:39.686131+00:00"
@@ -73,7 +73,7 @@
       "cliente_id": "cli_9eoovgbcmsyyp5ry",
       "premio_id": "premio_sorteado",
       "codigo_vinculo_id": "1037",
-      "unidade": "itaim_bibi",
+      "unidade": "pinheiros",
       "visita_numero": 1,
       "venda_id": null,
       "criado_em": "2026-08-18T17:54:07.284944+00:00"
@@ -84,10 +84,21 @@
       "cliente_id": "cli_a0duy8momsyykme1",
       "premio_id": "premio_sorteado",
       "codigo_vinculo_id": "1037",
-      "unidade": "itaim_bibi",
+      "unidade": "pinheiros",
       "visita_numero": 1,
       "venda_id": null,
       "criado_em": "2026-08-18T17:50:35.914668+00:00"
+    },
+    {
+      "id": "f47c596c-664b-4f61-9524-7bba31261b8e",
+      "visitor_id": "1d96d3ec-3176-4b19-8815-0456ac87b98a",
+      "cliente_id": "cli_up2g2tulmsyytlft",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "1037",
+      "unidade": "pinheiros",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-18T17:57:33.906698+00:00"
     }
   ],
   "cupons": [
@@ -202,7 +213,7 @@
       "codigo_cupom": "MB-S3Q2",
       "giro_id": "",
       "premio_id": "Café Expresso Grátis",
-      "unidade": "itaim_bibi",
+      "unidade": "pinheiros",
       "visita_numero": 1,
       "criado_em": "2026-08-18T17:39:23.665642+00:00",
       "expira_em": "2026-08-25T17:39:22.967+00:00",
@@ -228,7 +239,7 @@
       "codigo_cupom": "MB-MKAZ",
       "giro_id": "",
       "premio_id": "5% de Desconto",
-      "unidade": "itaim_bibi",
+      "unidade": "pinheiros",
       "visita_numero": 2,
       "criado_em": "2026-08-18T17:54:39.859838+00:00",
       "expira_em": "2026-08-25T17:54:39.222+00:00",
@@ -254,7 +265,7 @@
       "codigo_cupom": "MB-3Z8J",
       "giro_id": "",
       "premio_id": "Café Expresso Grátis",
-      "unidade": "itaim_bibi",
+      "unidade": "pinheiros",
       "visita_numero": 2,
       "criado_em": "2026-08-18T17:54:07.492443+00:00",
       "expira_em": "2026-08-25T17:54:06.539+00:00",
@@ -280,7 +291,7 @@
       "codigo_cupom": "MB-L3FQ",
       "giro_id": "",
       "premio_id": "Capuccino Pequeno",
-      "unidade": "itaim_bibi",
+      "unidade": "pinheiros",
       "visita_numero": 2,
       "criado_em": "2026-08-18T17:50:36.195553+00:00",
       "expira_em": "2026-08-25T17:50:35.042+00:00",
@@ -296,6 +307,32 @@
         "limite_diario": null,
         "limite_mensal": null,
         "icone": "🥤",
+        "cor_fatia": "#e6398f"
+      }
+    },
+    {
+      "id": "6b42ca83-5c36-481a-bfe7-7206048b57f5",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "cli_up2g2tulmsyytlft",
+      "codigo_cupom": "MB-54SS",
+      "giro_id": "",
+      "premio_id": "Donut Glazed Clássico",
+      "unidade": "pinheiros",
+      "visita_numero": 5,
+      "criado_em": "2026-08-18T17:57:34.070644+00:00",
+      "expira_em": "2026-08-25T17:57:33.446+00:00",
+      "utilizado_em": null,
+      "premio": {
+        "id": "Donut Glazed Clássico",
+        "nome": "Donut Glazed Clássico",
+        "tipo": "produto",
+        "valor": 0,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "🍩",
         "cor_fatia": "#e6398f"
       }
     }
@@ -376,10 +413,10 @@
       ]
     },
     {
-      "id": "itaim_bibi",
-      "nome": "Itaim Bibi",
+      "id": "pinheiros",
+      "nome": "Pinheiros",
       "cidade": "São Paulo - SP",
-      "bairro": "Itaim Bibi",
+      "bairro": "Pinheiros",
       "endereco": "",
       "telefone": "",
       "caixas": [
@@ -635,5 +672,5 @@
       "icone": "🔄"
     }
   ],
-  "atualizado_em": "2026-08-18T17:56:06.544Z"
+  "atualizado_em": "2026-08-18T18:22:39.093Z"
 }

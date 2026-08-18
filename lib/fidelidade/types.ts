@@ -29,7 +29,7 @@ export interface UnidadeLoja {
 
 export const UNIDADES_LOJA: UnidadeLoja[] = [
   { id: "tatuape", nome: "Tatuapé", cidade: "São Paulo - SP", bairro: "Tatuapé", ativa: true, caixas: ["Caixa 01", "Caixa 02", "Totem Autoatendimento"] },
-  { id: "itaim_bibi", nome: "Itaim Bibi", cidade: "São Paulo - SP", bairro: "Itaim Bibi", ativa: true, caixas: ["Caixa 01", "Caixa 02"] },
+  { id: "pinheiros", nome: "Pinheiros", cidade: "São Paulo - SP", bairro: "Pinheiros", ativa: true, caixas: ["Caixa 01", "Caixa 02"] },
   { id: "mooca", nome: "Mooca", cidade: "São Paulo - SP", bairro: "Mooca", ativa: true, caixas: ["Caixa 01", "Caixa 02"] },
   { id: "campo_belo", nome: "Campo Belo", cidade: "São Paulo - SP", bairro: "Campo Belo", ativa: true, caixas: ["Caixa 01"] },
   { id: "santana", nome: "Santana", cidade: "São Paulo - SP", bairro: "Santana", ativa: true, caixas: ["Caixa 01", "Caixa 02"] },

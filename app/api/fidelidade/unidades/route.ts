@@ -13,9 +13,34 @@ import {
   atualizarUnidade,
   removerUnidade,
 } from "@/lib/fidelidade/mock-data";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export async function GET() {
   try {
+    if (isSupabaseConfigured && supabase) {
+      const { data: dbUnidades } = await supabase
+        .from("mb_unidades")
+        .select("*")
+        .eq("ativa", true)
+        .order("nome", { ascending: true });
+
+      if (dbUnidades && dbUnidades.length > 0) {
+        return NextResponse.json({
+          sucesso: true,
+          unidades: dbUnidades.map((u: any) => ({
+            id: u.id,
+            nome: u.nome,
+            cidade: u.cidade,
+            bairro: u.bairro,
+            endereco: u.endereco,
+            telefone: u.telefone,
+            caixas: Array.isArray(u.caixas) ? u.caixas : ["Caixa 01 (Principal)"],
+            ativa: u.ativa !== false,
+          })),
+        });
+      }
+    }
+
     const unidades = listarUnidades();
     return NextResponse.json({ sucesso: true, unidades });
   } catch (err: any) {

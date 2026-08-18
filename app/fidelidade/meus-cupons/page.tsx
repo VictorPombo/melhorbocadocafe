@@ -1,24 +1,31 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { Cupom } from "@/lib/fidelidade/types";
 import { Gift, ChevronRight, CheckCircle2, Clock, RotateCcw } from "lucide-react";
 
-export default function MeusCuponsPage() {
+function MeusCuponsContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [whatsapp, setWhatsapp] = useState("");
   const [loading, setLoading] = useState(false);
   const [cupons, setCupons] = useState<Cupom[] | null>(null);
   const [nomeCliente, setNomeCliente] = useState<string>("");
 
-  async function handleBuscar(e: React.FormEvent) {
-    e.preventDefault();
-    if (!whatsapp) return;
+  function formatarTelefone(v: string) {
+    const d = v.replace(/\D/g, "").slice(0, 11);
+    if (d.length <= 2) return d;
+    if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  }
+
+  async function buscarCuponsZap(zapRaw: string) {
+    const cleanWpp = zapRaw.replace(/\D/g, "");
+    if (!cleanWpp || cleanWpp.length < 8) return;
 
     setLoading(true);
     try {
-      const cleanWpp = whatsapp.replace(/\D/g, "");
       const res = await fetch(`/api/fidelidade/cupons?whatsapp=${cleanWpp}`);
       const data = await res.json();
 
@@ -33,6 +40,32 @@ export default function MeusCuponsPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  useEffect(() => {
+    const paramZap = searchParams.get("whatsapp") || searchParams.get("celular") || searchParams.get("wpp");
+    if (paramZap) {
+      setWhatsapp(formatarTelefone(paramZap));
+      buscarCuponsZap(paramZap);
+      return;
+    }
+
+    try {
+      const saved = localStorage.getItem("mb_cliente_perfil");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.whatsapp) {
+          setWhatsapp(formatarTelefone(parsed.whatsapp));
+          buscarCuponsZap(parsed.whatsapp);
+        }
+      }
+    } catch {}
+  }, [searchParams]);
+
+  async function handleBuscar(e: React.FormEvent) {
+    e.preventDefault();
+    if (!whatsapp) return;
+    buscarCuponsZap(whatsapp);
   }
 
   // Formulário inicial para informar o WhatsApp
@@ -54,7 +87,7 @@ export default function MeusCuponsPage() {
             type="tel"
             placeholder="(11) 99999-9999"
             value={whatsapp}
-            onChange={(e) => setWhatsapp(e.target.value)}
+            onChange={(e) => setWhatsapp(formatarTelefone(e.target.value))}
             className="w-full px-4 py-3.5 rounded-2xl border-2 border-pink-200 bg-white text-center text-base font-black text-gray-900 focus:border-[#e6398f] outline-none shadow-xs"
             required
             autoFocus
@@ -215,5 +248,19 @@ export default function MeusCuponsPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function MeusCuponsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex-1 flex items-center justify-center p-12">
+          <div className="animate-spin h-8 w-8 border-4 border-[#e6398f] border-t-transparent rounded-full" />
+        </div>
+      }
+    >
+      <MeusCuponsContent />
+    </Suspense>
   );
 }

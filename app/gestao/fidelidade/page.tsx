@@ -2368,7 +2368,7 @@ export default function FidelidadeDashboardPage() {
                   required
                   value={formNovaLoja.nome}
                   onChange={(e) => setFormNovaLoja((prev) => ({ ...prev, nome: e.target.value }))}
-                  placeholder="Ex: Itaim Bibi, Shopping Anália Franco, Campinas"
+                  placeholder="Ex: Pinheiros, Shopping Anália Franco, Campinas"
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-bold text-gray-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
@@ -2396,7 +2396,7 @@ export default function FidelidadeDashboardPage() {
                     type="text"
                     value={formNovaLoja.bairro}
                     onChange={(e) => setFormNovaLoja((prev) => ({ ...prev, bairro: e.target.value }))}
-                    placeholder="Ex: Itaim Bibi"
+                    placeholder="Ex: Pinheiros"
                     className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs font-bold text-gray-900 outline-none focus:border-emerald-500"
                   />
                 </div>
