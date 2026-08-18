@@ -7,15 +7,15 @@ export const metadata: Metadata = {
   title: "Melhor Bocado — Programa de Fidelidade & Roleta",
   description: "Gire a roleta e ganhe prêmios exclusivos na Melhor Bocado!",
   icons: {
-    icon: "/logo.png?v=2",
-    apple: "/logo.png?v=2",
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
   openGraph: {
     title: "Melhor Bocado — Programa de Fidelidade & Roleta",
     description: "Gire a roleta e ganhe prêmios e descontos exclusivos na Melhor Bocado Café!",
     images: [
       {
-        url: "/logo.png?v=2",
+        url: "/logo.png",
         width: 800,
         height: 800,
         alt: "Melhor Bocado Café",
@@ -52,7 +52,7 @@ export default function FidelidadeLayout({
       <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-pink-100/80 px-4 py-2.5 flex items-center justify-between shadow-xs">
         <Link href="/fidelidade/girar" className="flex items-center gap-2.5 group">
           <Image
-            src="/logo.png?v=2"
+            src="/logo.png"
             alt="Melhor Bocado Café"
             width={38}
             height={38}

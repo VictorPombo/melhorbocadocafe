@@ -125,7 +125,7 @@ export default function LoginPage() {
         {/* Header e Logo */}
         <div className="text-center mb-8 flex flex-col items-center">
           <Image
-            src="/logo.png?v=2"
+            src="/logo.png"
             alt="Melhor Bocado Café"
             width={120}
             height={120}

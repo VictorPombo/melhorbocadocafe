@@ -25,11 +25,11 @@ export const metadata: Metadata = {
   description: "Sistema oficial de fidelidade, roleta de prêmios e recompensas da Melhor Bocado Café.",
   icons: {
     icon: [
-      { url: "/logo.png?v=2", type: "image/png" },
-      { url: "/favicon.ico?v=2" },
+      { url: "/logo.png", type: "image/png" },
+      { url: "/favicon.ico" },
     ],
-    shortcut: "/logo.png?v=2",
-    apple: "/logo.png?v=2",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
   },
   openGraph: {
     title: "Melhor Bocado Café — Fidelidade & Roleta de Prêmios",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     siteName: "Melhor Bocado Café",
     images: [
       {
-        url: "/logo.png?v=2",
+        url: "/logo.png",
         width: 800,
         height: 800,
         alt: "Melhor Bocado Café Logo",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Melhor Bocado Café — Fidelidade & Roleta de Prêmios",
     description: "Sistema oficial de fidelidade, roleta de prêmios e recompensas da Melhor Bocado Café.",
-    images: ["/logo.png?v=2"],
+    images: ["/logo.png"],
   },
   robots: {
     index: true,
@@ -75,10 +75,10 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${fredoka.variable} ${inter.variable}`}>
       <head>
-        <link rel="icon" type="image/png" sizes="32x32" href="/logo.png?v=2" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/logo.png?v=2" />
-        <link rel="shortcut icon" href="/logo.png?v=2" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/logo.png?v=2" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/logo.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/logo.png" />
+        <link rel="shortcut icon" href="/logo.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
       </head>
       <body className="bg-white text-gray-900 antialiased min-h-screen">
         <main>{children}</main>

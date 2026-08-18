@@ -57,7 +57,7 @@ export default function GestaoTopBar() {
         <div className="flex items-center gap-3">
           <Link href="/gestao/fidelidade" className="flex items-center gap-2.5 group shrink-0" title="Melhor Bocado Café">
             <Image
-              src="/logo.png?v=2"
+              src="/logo.png"
               alt="Melhor Bocado Café"
               width={36}
               height={36}

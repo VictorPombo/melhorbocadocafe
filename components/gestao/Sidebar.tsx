@@ -70,7 +70,7 @@ export default function Sidebar() {
         <div className="p-5 border-b border-gray-100 flex items-center gap-3">
           <Link href="/gestao/fidelidade" className="block group shrink-0">
             <Image
-              src="/logo.png?v=2"
+              src="/logo.png"
               alt="Melhor Bocado Café"
               width={48}
               height={48}

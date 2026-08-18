@@ -44,6 +44,17 @@
       "visita_numero": 1,
       "venda_id": null,
       "criado_em": "2026-08-18T17:09:45.998878+00:00"
+    },
+    {
+      "id": "095f7b8f-f70d-4b8b-a3ed-a3043bde8def",
+      "visitor_id": "1d96d3ec-3176-4b19-8815-0456ac87b98a",
+      "cliente_id": "cli_7lpd5985msyy680z",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "1216",
+      "unidade": "itaim_bibi",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-18T17:39:23.456277+00:00"
     }
   ],
   "cupons": [
@@ -137,6 +148,32 @@
       "criado_em": "2026-08-18T17:09:46.174888+00:00",
       "expira_em": "2026-08-25T17:09:45.553+00:00",
       "utilizado_em": "2026-08-18T17:10:10.419+00:00",
+      "premio": {
+        "id": "Café Expresso Grátis",
+        "nome": "Café Expresso Grátis",
+        "tipo": "produto",
+        "valor": 0,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "☕",
+        "cor_fatia": "#e6398f"
+      }
+    },
+    {
+      "id": "99241647-bef7-45a2-b686-80078eaadb27",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "cli_7lpd5985msyy680z",
+      "codigo_cupom": "MB-S3Q2",
+      "giro_id": "",
+      "premio_id": "Café Expresso Grátis",
+      "unidade": "itaim_bibi",
+      "visita_numero": 1,
+      "criado_em": "2026-08-18T17:39:23.665642+00:00",
+      "expira_em": "2026-08-25T17:39:22.967+00:00",
+      "utilizado_em": "2026-08-18T17:43:30.706+00:00",
       "premio": {
         "id": "Café Expresso Grátis",
         "nome": "Café Expresso Grátis",
@@ -487,5 +524,5 @@
       "icone": "🔄"
     }
   ],
-  "atualizado_em": "2026-08-18T17:35:34.980Z"
+  "atualizado_em": "2026-08-18T17:45:01.421Z"
 }
