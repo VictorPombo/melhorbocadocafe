@@ -86,6 +86,10 @@ export async function GET() {
       }
     });
     const listaGirosFinal = Array.from(mapGiros.values());
+    const girosById = new Map<string, any>();
+    listaGirosFinal.forEach((g) => {
+      if (g.id) girosById.set(g.id, g);
+    });
 
     // 3. Unificar Cupons (Supabase + Memória)
     const mapCupons = new Map<string, any>();
@@ -95,18 +99,32 @@ export async function GET() {
     dbCupons.forEach((c) => {
       const codigo = c.codigo_cupom;
       if (codigo) {
+        const giroRelacionado = girosById.get(c.giro_id);
         const clienteRelacionado =
           clientesById.get(c.cliente_id) ||
+          (giroRelacionado?.whatsapp ? clientesById.get(giroRelacionado.whatsapp.replace(/\D/g, "")) : null) ||
           listaClientesFinal.find(
             (cl) => cl.id === c.cliente_id || (cl.whatsapp && c.cliente_id && cl.whatsapp.includes(c.cliente_id))
           );
+
+        const nomeFinal =
+          giroRelacionado?.nome ||
+          clienteRelacionado?.nome ||
+          c.cliente_nome ||
+          "Cliente";
+
+        const zapFinal =
+          giroRelacionado?.whatsapp ||
+          clienteRelacionado?.whatsapp ||
+          c.cliente_whatsapp ||
+          "—";
 
         mapCupons.set(codigo, {
           id: c.id,
           codigo_cupom: c.codigo_cupom,
           cliente_id: c.cliente_id,
-          cliente_nome: clienteRelacionado?.nome || c.premio_nome ? clienteRelacionado?.nome || "Cliente Cadastrado" : "Cliente",
-          cliente_whatsapp: clienteRelacionado?.whatsapp || "—",
+          cliente_nome: nomeFinal,
+          cliente_whatsapp: zapFinal,
           giro_id: c.giro_id,
           premio_id: c.premio_id,
           premio_nome: c.premio_nome,
