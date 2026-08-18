@@ -656,20 +656,25 @@ export function limparTudo() {
 }
 
 export function buscarClientePorWhatsapp(
-  whatsapp: string
+  whatsapp: string,
+  unidade?: string
 ): Cliente | undefined {
   const normalizado = whatsapp.replace(/\D/g, "");
   if (!normalizado) return undefined;
   
-  // 1. Busca no clienteStore
+  // 1. Busca no clienteStore para ESTA unidade
   const cliente = clienteStore.find(
-    (c) => (c.whatsapp || c.celular || "").replace(/\D/g, "") === normalizado
+    (c) =>
+      (c.whatsapp || c.celular || "").replace(/\D/g, "") === normalizado &&
+      (!unidade || (c.unidade_cadastro || c.loja_preferida || "").toLowerCase() === unidade.toLowerCase())
   );
   if (cliente) return cliente;
 
-  // 2. Fallback inteligente: se houver cupom com este zap, reconstrói o perfil
+  // 2. Fallback inteligente em cupons desta unidade
   const cup = cupomStore.find(
-    (c) => (c.cliente_whatsapp || "").replace(/\D/g, "") === normalizado
+    (c) =>
+      (c.cliente_whatsapp || "").replace(/\D/g, "") === normalizado &&
+      (!unidade || (c.unidade || "").toLowerCase() === unidade.toLowerCase())
   );
   if (cup) {
     const novoCli: Cliente = {
@@ -689,6 +694,7 @@ export function buscarClientePorWhatsapp(
       ticket_medio: 0,
       qtd_compras: cup.visita_numero || 1,
       loja_preferida: cup.unidade,
+      unidade_cadastro: cup.unidade,
       horario_preferido: null,
       ltv: 0,
       vip: false,
@@ -701,7 +707,7 @@ export function buscarClientePorWhatsapp(
   return undefined;
 }
 
-export function cadastrarCliente(dados: Omit<Cliente, "id" | "criado_em" | "primeira_compra_em" | "ultima_compra_em" | "total_gasto" | "ticket_medio" | "qtd_compras" | "loja_preferida" | "horario_preferido" | "ltv" | "vip">): Cliente {
+export function cadastrarCliente(dados: Omit<Cliente, "id" | "criado_em" | "primeira_compra_em" | "ultima_compra_em" | "total_gasto" | "ticket_medio" | "qtd_compras" | "loja_preferida" | "horario_preferido" | "ltv" | "vip"> & { loja_preferida?: string | null }): Cliente {
   const novoCliente: Cliente = {
     ...dados,
     id: `cli_${id()}`,
@@ -711,7 +717,7 @@ export function cadastrarCliente(dados: Omit<Cliente, "id" | "criado_em" | "prim
     total_gasto: 0,
     ticket_medio: 0,
     qtd_compras: 1,
-    loja_preferida: dados.unidade_cadastro || null,
+    loja_preferida: dados.loja_preferida || dados.unidade_cadastro || null,
     horario_preferido: null,
     ltv: 0,
     vip: false,
@@ -722,10 +728,8 @@ export function cadastrarCliente(dados: Omit<Cliente, "id" | "criado_em" | "prim
 }
 
 /**
- * Deduplicação Inteligente:
- * 1. Busca por WhatsApp/Celular normalizado (apenas dígitos)
- * 2. Se não encontrou celular, busca por Nome Completo + Data de Nascimento
- * 3. Se não encontrou, cadastra novo cliente sem duplicar
+ * Deduplicação Inteligente ISOLADA POR LOJA/FRANQUIA:
+ * Cada loja possui sua base e sua contagem independente de visitas!
  */
 export function buscarOuCriarClienteIdentificado(
   nome: string,
@@ -738,21 +742,17 @@ export function buscarOuCriarClienteIdentificado(
   const nascClean = nascimento.trim();
   const zapClean = whatsapp.replace(/\D/g, "");
 
-  // 1. Chave mestre de deduplicação: Celular/WhatsApp
-  let cliente = zapClean ? buscarClientePorWhatsapp(zapClean) : undefined;
+  // 1. Chave mestre de deduplicação POR UNIDADE: Celular/WhatsApp + Loja
+  let cliente = zapClean ? buscarClientePorWhatsapp(zapClean, unidade) : undefined;
 
-  // 2. Se não achou por WhatsApp, busca por Nome Completo + Data de Nascimento
+  // 2. Se não achou por WhatsApp, busca por Nome Completo + Data de Nascimento NA MESMA LOJA
   if (!cliente && nomeClean && nascClean) {
     cliente = clienteStore.find(
       (c) =>
         c.nome.trim().toLowerCase() === nomeClean &&
-        c.nascimento.trim() === nascClean
+        c.nascimento.trim() === nascClean &&
+        (c.unidade_cadastro || c.loja_preferida || "").toLowerCase() === unidade.toLowerCase()
     );
-  }
-
-  // 3. Fallback por visitorId se aplicável
-  if (!cliente && visitorId) {
-    cliente = clienteStore.find((c) => c.id === visitorId);
   }
 
   if (cliente) {
@@ -770,11 +770,11 @@ export function buscarOuCriarClienteIdentificado(
     }
     salvarDB();
     salvarClienteSupabase(cliente).catch(() => {});
-    const visitaNumero = calcularNumeroVisita(visitorId || "", cliente.id);
+    const visitaNumero = calcularNumeroVisita(visitorId || "", cliente.id, zapClean, unidade);
     return { cliente, ehNovoCliente: false, visitaNumero };
   }
 
-  // 4. Cria novo perfil individual
+  // 3. Cria novo perfil individual para ESTA LOJA/FRANQUIA
   const novoCliente = cadastrarCliente({
     nome: nome.trim(),
     nascimento: nascClean,
@@ -785,18 +785,17 @@ export function buscarOuCriarClienteIdentificado(
     aceite_lgpd_em: new Date().toISOString(),
     aceite_lgpd_texto_versao: "1.0",
     unidade_cadastro: unidade,
+    loja_preferida: unidade,
   });
   salvarClienteSupabase(novoCliente).catch(() => {});
 
-  const visitaNumero = calcularNumeroVisita(visitorId || "", novoCliente.id);
+  const visitaNumero = calcularNumeroVisita(visitorId || "", novoCliente.id, zapClean, unidade);
   return { cliente: novoCliente, ehNovoCliente: true, visitaNumero };
 }
 
 /** Gerador de Código de Vínculo / QR Code de uso único */
 export function gerarCodigoVinculo(loja: string, caixa: string): CodigoVinculo {
-  // Código aleatório de 4 dígitos ou alfanumérico amigável
   const randomNum = randomBetween(1000, 9999);
-  const prefixoLoja = loja.slice(0, 3).toUpperCase();
   const codigoFormatado = `${randomNum}`;
 
   const codigo: CodigoVinculo = {
@@ -805,7 +804,7 @@ export function gerarCodigoVinculo(loja: string, caixa: string): CodigoVinculo {
     loja,
     caixa,
     criado_em: new Date().toISOString(),
-    expira_em: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 60 min de validade
+    expira_em: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
     status: "aguardando",
   };
   codigoVinculoStore.push(codigo);
@@ -856,7 +855,6 @@ export function consumirCodigoVinculo(
     return { sucesso: false, motivo: "expirado", codigoVinculo: cv };
   }
 
-  // Marca como consumido de forma atômica e irreversível
   cv.status = "utilizado";
   cv.utilizado_em = new Date().toISOString();
   cv.utilizado_por_cliente_id = clienteId || null;
@@ -869,10 +867,21 @@ export function vendaJaTemGiro(vendaId: string): boolean {
   return giroStore.some((g) => g.venda_id === vendaId);
 }
 
-export function calcularNumeroVisita(visitorId: string, clienteId: string | null): number {
-  const girosAnteriores = giroStore.filter(
-    (g) => (clienteId && g.cliente_id === clienteId) || (visitorId && g.visitor_id === visitorId)
-  );
+export function calcularNumeroVisita(
+  visitorId: string,
+  clienteId: string | null,
+  zap?: string,
+  unidade: string = "tatuape"
+): number {
+  const zapClean = zap ? zap.replace(/\D/g, "") : "";
+  const girosAnteriores = giroStore.filter((g) => {
+    const mesmaUnidade = (g.unidade || "").toLowerCase() === unidade.toLowerCase();
+    if (!mesmaUnidade) return false;
+
+    if (zapClean && (g.cliente_whatsapp || "").replace(/\D/g, "") === zapClean) return true;
+    if (clienteId && g.cliente_id === clienteId) return true;
+    return false;
+  });
   return girosAnteriores.length + 1;
 }
 
@@ -887,7 +896,7 @@ export function registrarGiro(
   clienteNascimento?: string,
   clienteWhatsapp?: string
 ): Giro {
-  const visita_numero = calcularNumeroVisita(visitorId, clienteId);
+  const visita_numero = calcularNumeroVisita(visitorId, clienteId, clienteWhatsapp, unidade);
   const giro: Giro = {
     id: `giro_${id()}`,
     visitor_id: visitorId,
@@ -907,7 +916,6 @@ export function registrarGiro(
   salvarGiroSupabase(giro).catch(() => {});
   return giro;
 }
-
 
 export function criarCupom(
   visitorId: string,

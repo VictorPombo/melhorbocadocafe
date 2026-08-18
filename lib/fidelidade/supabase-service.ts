@@ -18,10 +18,14 @@ export async function salvarClienteDb(cliente: {
 
   try {
     const zapClean = cliente.whatsapp.replace(/\D/g, "");
+    const unidadeLoja = cliente.unidade_origem || "tatuape";
+
+    // 1. Busca se este cliente já existe ESPECIFICAMENTE nesta unidade
     const { data: existente } = await supabase
       .from("mb_clientes")
       .select("*")
       .eq("whatsapp", zapClean)
+      .eq("unidade_origem", unidadeLoja)
       .maybeSingle();
 
     if (existente) {
@@ -50,7 +54,7 @@ export async function salvarClienteDb(cliente: {
           visitor_id: cliente.visitor_id,
           total_visitas: cliente.total_visitas || 1,
           total_resgates: 0,
-          unidade_origem: cliente.unidade_origem || "tatuape",
+          unidade_origem: unidadeLoja,
           tags: ["Novo Cliente", "1º Giro"],
         })
         .select()
@@ -59,7 +63,7 @@ export async function salvarClienteDb(cliente: {
       if (!error && data) return data;
     }
   } catch (err) {
-    console.error("[Supabase] Erro ao salvar cliente:", err);
+    console.error("[Supabase] Erro ao salvar cliente por unidade:", err);
   }
   return null;
 }
@@ -209,22 +213,53 @@ export async function resgatarCupomDb(codigoCupom: string, unidadeResgate: strin
   return null;
 }
 
-export async function buscarClientePorWhatsappDb(whatsapp: string): Promise<any> {
+export async function buscarClientePorWhatsappDb(
+  whatsapp: string,
+  unidade?: string
+): Promise<any> {
   if (!isSupabaseConfigured || !supabase) return null;
 
   try {
     const zapClean = whatsapp.replace(/\D/g, "");
-    const { data, error } = await supabase
-      .from("mb_clientes")
-      .select("*")
-      .eq("whatsapp", zapClean)
+    let query = supabase.from("mb_clientes").select("*").eq("whatsapp", zapClean);
+
+    if (unidade) {
+      query = query.eq("unidade_origem", unidade);
+    }
+
+    const { data, error } = await query
+      .order("created_at", { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (!error && data) return data;
   } catch (err) {
-    console.error("[Supabase] Erro ao buscar cliente:", err);
+    console.error("[Supabase] Erro ao buscar cliente por whatsapp e unidade:", err);
   }
   return null;
+}
+
+export async function calcularVisitasPorUnidadeDb(
+  whatsapp: string,
+  unidade: string
+): Promise<number> {
+  if (!isSupabaseConfigured || !supabase) return 1;
+
+  try {
+    const zapClean = whatsapp.replace(/\D/g, "");
+    const { count, error } = await supabase
+      .from("mb_giros")
+      .select("*", { count: "exact", head: true })
+      .eq("whatsapp", zapClean)
+      .eq("unidade", unidade);
+
+    if (!error && typeof count === "number") {
+      return count + 1;
+    }
+  } catch (err) {
+    console.error("[Supabase] Erro ao calcular visitas por unidade:", err);
+  }
+  return 1;
 }
 
 export async function buscarCuponsPorClienteWhatsappDb(

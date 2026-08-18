@@ -163,7 +163,7 @@ function GirarContent() {
     }
   }, [codigoParam, unidadeParam]);
 
-  // Consulta se o WhatsApp já possui cadastro no backend
+  // Consulta se o WhatsApp já possui cadastro nesta unidade específica no backend
   async function verificarClientePorTelefone(
     zapRaw: string,
     nomeFallback?: string,
@@ -175,25 +175,29 @@ function GirarContent() {
     setEtapaIdentificacao("verificando");
     setErro("");
 
+    const targetUnidade = unidadeParam || unidade || "pinheiros";
+
     try {
-      const res = await fetch(`/api/fidelidade/cliente/buscar?whatsapp=${zapDigits}`);
+      const res = await fetch(`/api/fidelidade/cliente/buscar?whatsapp=${zapDigits}&unidade=${targetUnidade}`);
       const data = await res.json();
 
       if (data.encontrado && data.cliente) {
         setNome(data.cliente.nome);
         setNascimento(data.cliente.nascimento || nascFallback || "");
         setQtdVisitasCliente((data.cliente.qtd_compras || 0) + 1);
-        if (data.cliente.unidade && !unidadeParam) {
-          setUnidade(data.cliente.unidade);
-        }
         setEtapaIdentificacao("reconhecido");
       } else {
-        if (nomeFallback) setNome(nomeFallback);
-        if (nascFallback) setNascimento(nascFallback);
+        // Primeira vez do cliente NESTA unidade!
+        const sugestaoNome = data.sugestao?.nome || nomeFallback || "";
+        const sugestaoNasc = data.sugestao?.nascimento || nascFallback || "";
+        if (sugestaoNome) setNome(sugestaoNome);
+        if (sugestaoNasc) setNascimento(sugestaoNasc);
         setQtdVisitasCliente(1);
         setEtapaIdentificacao("novo_cadastro");
       }
     } catch {
+      if (nomeFallback) setNome(nomeFallback);
+      if (nascFallback) setNascimento(nascFallback);
       setQtdVisitasCliente(1);
       setEtapaIdentificacao("novo_cadastro");
     }
@@ -694,7 +698,25 @@ function GirarContent() {
                   Olá, {nome}! 👋
                 </h3>
                 <p className="text-xs text-[#e6398f] font-extrabold mt-0.5">
-                  {qtdVisitasCliente > 1 ? `${qtdVisitasCliente}ª Visita no Melhor Bocado` : "1ª Visita de Boas-Vindas"}
+                  {qtdVisitasCliente > 1
+                    ? `${qtdVisitasCliente}ª Visita em ${(() => {
+                        const cleanKey = (unidade || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+                        const encontrada = listaUnidades.find((u) => {
+                          const cleanId = u.id.toLowerCase().replace(/[^a-z0-9]/g, "");
+                          const cleanNome = u.nome.toLowerCase().replace(/[^a-z0-9]/g, "");
+                          return cleanId === cleanKey || cleanNome.includes(cleanKey) || cleanKey.includes(cleanId);
+                        });
+                        return encontrada?.nome || (unidade ? unidade.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Melhor Bocado");
+                      })()}`
+                    : `1ª Visita de Boas-Vindas em ${(() => {
+                        const cleanKey = (unidade || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+                        const encontrada = listaUnidades.find((u) => {
+                          const cleanId = u.id.toLowerCase().replace(/[^a-z0-9]/g, "");
+                          const cleanNome = u.nome.toLowerCase().replace(/[^a-z0-9]/g, "");
+                          return cleanId === cleanKey || cleanNome.includes(cleanKey) || cleanKey.includes(cleanId);
+                        });
+                        return encontrada?.nome || (unidade ? unidade.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Melhor Bocado");
+                      })()}`}
                 </p>
                 <p className="text-[11px] text-gray-500 mt-1 font-mono">
                   {whatsapp}
@@ -739,10 +761,18 @@ function GirarContent() {
               <div className="bg-amber-50 rounded-2xl p-3 border border-amber-200 flex items-center justify-between">
                 <div>
                   <p className="text-[11px] font-extrabold text-amber-900">
-                    ✨ Primeiro Acesso ({whatsapp})
+                    ✨ 1ª Visita na Unidade {(() => {
+                      const cleanKey = (unidade || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+                      const encontrada = listaUnidades.find((u) => {
+                        const cleanId = u.id.toLowerCase().replace(/[^a-z0-9]/g, "");
+                        const cleanNome = u.nome.toLowerCase().replace(/[^a-z0-9]/g, "");
+                        return cleanId === cleanKey || cleanNome.includes(cleanKey) || cleanKey.includes(cleanId);
+                      });
+                      return encontrada?.nome || (unidade ? unidade.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Melhor Bocado");
+                    })()} ({whatsapp})
                   </p>
                   <p className="text-[10px] text-amber-700">
-                    Digite seu nome para salvar seu cupom
+                    {nome ? "Confirme seus dados para liberar seu giro de boas-vindas" : "Digite seu nome para liberar seu giro de boas-vindas"}
                   </p>
                 </div>
                 <button
