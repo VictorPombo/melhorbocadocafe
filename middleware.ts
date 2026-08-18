@@ -43,16 +43,8 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    // 2. Se já estiver autenticado e acessar /gestao/login, redirecionar para a home do painel
-    if (isAuthed && isLoginPage) {
-      if (roleCookie === "caixa") {
-        return NextResponse.redirect(new URL("/gestao/fidelidade/caixa", request.url));
-      }
-      return NextResponse.redirect(new URL("/gestao/fidelidade", request.url));
-    }
-
-    // 3. Regra de autorização para perfil "Caixa": acesso restrito ao terminal de caixa
-    if (isAuthed && roleCookie === "caixa" && !pathname.startsWith("/gestao/fidelidade/caixa")) {
+    // 2. Regra de autorização para perfil "Caixa": acesso restrito ao terminal de caixa
+    if (isAuthed && roleCookie === "caixa" && !pathname.startsWith("/gestao/fidelidade/caixa") && !isLoginPage) {
       return NextResponse.redirect(new URL("/gestao/fidelidade/caixa", request.url));
     }
   }
