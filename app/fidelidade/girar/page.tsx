@@ -87,7 +87,8 @@ function GirarContent() {
       })
       .catch(() => {});
 
-    fetch("/api/fidelidade/trilha")
+    const targetLoja = unidadeParam || "geral";
+    fetch(`/api/fidelidade/trilha?unidade=${targetLoja}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.sucesso && Array.isArray(data.trilha)) {

@@ -330,6 +330,34 @@ export default function FidelidadeDashboardPage() {
     return () => clearInterval(interval);
   }, []);
 
+  // Recarregar trilha específica quando a loja selecionada mudar
+  useEffect(() => {
+    function carregarTrilhaDaLoja(lojaId: string) {
+      const uParam = lojaId === "todas" ? "geral" : lojaId;
+      fetch(`/api/fidelidade/trilha?unidade=${uParam}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.sucesso && Array.isArray(data.trilha)) {
+            setTrilha(data.trilha);
+          }
+        })
+        .catch(() => {});
+    }
+
+    carregarTrilhaDaLoja(lojaFiltro);
+
+    function handleLojaEvent(e: any) {
+      if (e.detail?.id) {
+        setLojaFiltro(e.detail.id);
+        setUnidadeAtiva(e.detail.id === "todas" ? "tatuape" : e.detail.id);
+        carregarTrilhaDaLoja(e.detail.id);
+      }
+    }
+
+    window.addEventListener("mb_loja_changed", handleLojaEvent);
+    return () => window.removeEventListener("mb_loja_changed", handleLojaEvent);
+  }, [lojaFiltro]);
+
   // Handler para cadastrar nova franquia / loja
   async function handleCadastrarNovaLoja(e: React.FormEvent) {
     e.preventDefault();
@@ -700,14 +728,21 @@ export default function FidelidadeDashboardPage() {
   async function handleSalvarTrilha() {
     setSalvandoTrilha(true);
     try {
+      const targetLoja = lojaFiltro === "todas" ? "geral" : lojaFiltro;
       const res = await fetch("/api/fidelidade/trilha", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trilha }),
+        body: JSON.stringify({ trilha, unidade: targetLoja }),
       });
       const data = await res.json();
       if (data.sucesso) {
-        setMensagemTrilha("✓ Configurações da Trilha de Visitas salvas com sucesso!");
+        setMensagemTrilha(
+          `✓ Trilha de Visitas salva com sucesso para ${
+            targetLoja === "geral"
+              ? "a Rede Geral (Consolidada)"
+              : `a loja ${unidades.find((u) => u.id === targetLoja)?.nome || targetLoja}`
+          }!`
+        );
         setTimeout(() => setMensagemTrilha(null), 4000);
       }
     } catch {
@@ -718,18 +753,32 @@ export default function FidelidadeDashboardPage() {
   }
 
   async function handleRestaurarTrilhaPadrao() {
-    if (!confirm("Deseja restaurar as 10 etapas da Trilha para a configuração original?")) return;
+    const targetLoja = lojaFiltro === "todas" ? "geral" : lojaFiltro;
+    if (
+      !confirm(
+        `Deseja restaurar as etapas da Trilha para a configuração padrão em ${
+          targetLoja === "geral" ? "toda a Rede Geral" : `na loja ${unidades.find((u) => u.id === targetLoja)?.nome || targetLoja}`
+        }?`
+      )
+    )
+      return;
     setSalvandoTrilha(true);
     try {
       const res = await fetch("/api/fidelidade/trilha", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ acao: "resetar" }),
+        body: JSON.stringify({ acao: "resetar", unidade: targetLoja }),
       });
       const data = await res.json();
       if (data.sucesso && data.trilha) {
         setTrilha(data.trilha);
-        setMensagemTrilha("✓ Trilha de visitas restaurada para o padrão original!");
+        setMensagemTrilha(
+          `✓ Trilha de visitas restaurada para o padrão em ${
+            targetLoja === "geral"
+              ? "toda a Rede Geral"
+              : `na loja ${unidades.find((u) => u.id === targetLoja)?.nome || targetLoja}`
+          }!`
+        );
         setTimeout(() => setMensagemTrilha(null), 4000);
       }
     } catch {
@@ -893,14 +942,22 @@ export default function FidelidadeDashboardPage() {
             <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 type="button"
-                onClick={() => setLojaFiltro("todas")}
+                onClick={() => {
+                  setLojaFiltro("todas");
+                  setUnidadeAtiva("tatuape");
+                  localStorage.setItem("mb_unidade_id", "todas");
+                  localStorage.setItem("mb_unidade_nome", "Rede Consolidada");
+                  window.dispatchEvent(
+                    new CustomEvent("mb_loja_changed", { detail: { id: "todas", nome: "Rede Consolidada" } })
+                  );
+                }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                   lojaFiltro === "todas"
                     ? "bg-gradient-to-r from-[#e6398f] to-rose-600 text-white shadow-sm shadow-pink-500/20"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                🌐 Rede Consolidada ({unidades.length})
+                🌐 Todas as Lojas (GERAL) ({unidades.length})
               </button>
 
               {unidades.map((u) => {
@@ -912,6 +969,11 @@ export default function FidelidadeDashboardPage() {
                     onClick={() => {
                       setLojaFiltro(u.id);
                       setUnidadeAtiva(u.id);
+                      localStorage.setItem("mb_unidade_id", u.id);
+                      localStorage.setItem("mb_unidade_nome", u.nome);
+                      window.dispatchEvent(
+                        new CustomEvent("mb_loja_changed", { detail: { id: u.id, nome: u.nome } })
+                      );
                     }}
                     className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                       isSelected
@@ -1675,16 +1737,24 @@ export default function FidelidadeDashboardPage() {
           {/* Header e Ações */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="p-2 rounded-xl bg-amber-100 text-amber-800 font-black text-sm">
                   📍 Trilha de Recompensas por Visita ({trilha.length} Visitas Configuradas)
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-pink-100 text-[#e6398f] text-[10px] font-black uppercase">
                   Fidelômetro Ativo
                 </span>
+                <span className="px-3 py-1 rounded-full bg-stone-900 text-amber-300 text-xs font-black border border-stone-800 flex items-center gap-1.5 shadow-xs">
+                  <span>🏬 Loja em Edição:</span>
+                  <span className="text-white">
+                    {lojaFiltro === "todas"
+                      ? "Rede Consolidada (Geral)"
+                      : `Loja ${unidades.find((u) => u.id === lojaFiltro)?.nome || lojaFiltro}`}
+                  </span>
+                </span>
               </div>
               <p className="text-sm text-gray-500 mt-1">
-                Adicione ou remova visitas para montar trilhas com <strong>quantas etapas desejar (5, 8, 10, 12, 15...)</strong>. Configure se cada visita entrega <strong>Prêmio Direto Fixo</strong> ou <strong>Roleta da Sorte</strong>.
+                Adicione ou remova visitas para montar trilhas com <strong>quantas etapas desejar</strong>. Cada loja pode ter sua própria trilha independente ou seguir o padrão da Rede Geral.
               </p>
             </div>
 

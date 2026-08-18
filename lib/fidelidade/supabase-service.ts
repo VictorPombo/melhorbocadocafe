@@ -379,7 +379,142 @@ export async function buscarCuponsPorClienteWhatsappDb(
       cupons,
     };
   } catch (err) {
-    console.error("[Supabase] Erro ao processar busca de cupons:", err);
-    return null;
+    console.error("[Supabase] Erro ao buscar cupons por whatsapp:", err);
+  }
+  return null;
+}
+
+// =============================================================================
+// Gestão de Trilha de Visitas por Loja / Franquia no Supabase
+// =============================================================================
+
+export async function buscarTrilhaDb(unidade: string = "geral"): Promise<EtapaTrilhaVisita[] | null> {
+  if (!isSupabaseConfigured || !supabase) return null;
+
+  try {
+    const targetUnidade = (unidade || "geral").toLowerCase();
+
+    // 1. Tenta buscar a trilha específica desta unidade
+    if (targetUnidade !== "geral" && targetUnidade !== "todas") {
+      const { data: trilhaLoja, error } = await supabase
+        .from("mb_trilha_visitas")
+        .select("*")
+        .eq("unidade", targetUnidade)
+        .order("visita", { ascending: true });
+
+      if (!error && trilhaLoja && trilhaLoja.length > 0) {
+        return trilhaLoja.map((r: any) => ({
+          visita: r.visita,
+          titulo: r.titulo || (r.modo === "fixo" ? `Recompensa Especial (${r.visita}ª Visita)` : "Roleta Premiada"),
+          descricao: r.descricao || (r.modo === "fixo" ? `Parabéns por ${r.visita} visitas! Recompensa garantida de fidelidade.` : `Gire a roleta da sorte na sua ${r.visita}ª visita e concorra a prêmios!`),
+          modo: r.modo || "roleta",
+          premio_id: r.premio_id,
+          premio_fixo: r.premio_fixo || undefined,
+          premios_roleta: r.premios_roleta || undefined,
+          ativo: r.ativo ?? true,
+          unidade: targetUnidade,
+        }));
+      }
+    }
+
+    // 2. Fallback: Trilha da Rede / Geral
+    const { data: trilhaGeral, error: errGeral } = await supabase
+      .from("mb_trilha_visitas")
+      .select("*")
+      .eq("unidade", "geral")
+      .order("visita", { ascending: true });
+
+    if (!errGeral && trilhaGeral && trilhaGeral.length > 0) {
+      return trilhaGeral.map((r: any) => ({
+        visita: r.visita,
+        titulo: r.titulo || (r.modo === "fixo" ? `Recompensa Especial (${r.visita}ª Visita)` : "Roleta Premiada"),
+        descricao: r.descricao || (r.modo === "fixo" ? `Parabéns por ${r.visita} visitas! Recompensa garantida de fidelidade.` : `Gire a roleta da sorte na sua ${r.visita}ª visita e concorra a prêmios!`),
+        modo: r.modo || "roleta",
+        premio_id: r.premio_id,
+        premio_fixo: r.premio_fixo || undefined,
+        premios_roleta: r.premios_roleta || undefined,
+        ativo: r.ativo ?? true,
+        unidade: "geral",
+      }));
+    }
+  } catch (err) {
+    console.error("[Supabase] Erro ao buscar trilha de visitas:", err);
+  }
+  return null;
+}
+
+export async function salvarTrilhaDb(
+  trilha: EtapaTrilhaVisita[],
+  unidade: string = "geral"
+): Promise<boolean> {
+  if (!isSupabaseConfigured || !supabase) return false;
+
+  try {
+    const targetUnidade = (unidade || "geral").toLowerCase();
+
+    // 1. Remove etapas antigas desta unidade
+    await supabase
+      .from("mb_trilha_visitas")
+      .delete()
+      .eq("unidade", targetUnidade);
+
+    // 2. Insere novas etapas para esta unidade
+    const rows = trilha.map((e, idx) => ({
+      visita: e.visita || idx + 1,
+      modo: e.modo,
+      premio_id: e.premio_id || null,
+      premio_fixo: e.premio_fixo || null,
+      premios_roleta: e.premios_roleta || null,
+      ativo: e.ativo ?? true,
+      unidade: targetUnidade,
+      updated_at: new Date().toISOString(),
+    }));
+
+    const { error: errInsert } = await supabase
+      .from("mb_trilha_visitas")
+      .insert(rows);
+
+    return !errInsert;
+  } catch (err) {
+    console.error("[Supabase] Erro ao salvar trilha de visitas:", err);
+    return false;
+  }
+}
+
+export async function resetarTrilhaDb(unidade: string = "geral"): Promise<boolean> {
+  if (!isSupabaseConfigured || !supabase) return false;
+
+  try {
+    const targetUnidade = (unidade || "geral").toLowerCase();
+
+    if (targetUnidade !== "geral" && targetUnidade !== "todas") {
+      // Deletar customizações da loja faz com que ela herde a trilha geral
+      await supabase
+        .from("mb_trilha_visitas")
+        .delete()
+        .eq("unidade", targetUnidade);
+      return true;
+    }
+
+    // Se for geral, restaura as 10 etapas padrão
+    const defaultSteps = [
+      { visita: 1, modo: "roleta", ativo: true, unidade: "geral" },
+      { visita: 2, modo: "roleta", ativo: true, unidade: "geral" },
+      { visita: 3, modo: "roleta", ativo: true, unidade: "geral" },
+      { visita: 4, modo: "roleta", ativo: true, unidade: "geral" },
+      { visita: 5, modo: "fixo", premio_id: "premio_donut_classico", ativo: true, unidade: "geral" },
+      { visita: 6, modo: "roleta", ativo: true, unidade: "geral" },
+      { visita: 7, modo: "roleta", ativo: true, unidade: "geral" },
+      { visita: 8, modo: "roleta", ativo: true, unidade: "geral" },
+      { visita: 9, modo: "roleta", ativo: true, unidade: "geral" },
+      { visita: 10, modo: "fixo", premio_id: "premio_donut_belga", ativo: true, unidade: "geral" },
+    ];
+
+    await supabase.from("mb_trilha_visitas").delete().eq("unidade", "geral");
+    const { error } = await supabase.from("mb_trilha_visitas").insert(defaultSteps);
+    return !error;
+  } catch (err) {
+    console.error("[Supabase] Erro ao resetar trilha de visitas:", err);
+    return false;
   }
 }

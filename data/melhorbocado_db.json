@@ -110,6 +110,50 @@
       "visita_numero": 1,
       "venda_id": null,
       "criado_em": "2026-08-18T19:41:00.05644+00:00"
+    },
+    {
+      "id": "giro_ckjipcd6msz3a43q",
+      "visitor_id": "67e309cc-1282-4531-9dfa-e39399015d96",
+      "cliente_id": "35a25ba2-320e-438f-9afc-2dae24b37237",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "2083",
+      "unidade": "pinheiros",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-18T20:02:22.821624+00:00"
+    },
+    {
+      "id": "giro_i64rspb0msz37d6x",
+      "visitor_id": "67e309cc-1282-4531-9dfa-e39399015d96",
+      "cliente_id": "35a25ba2-320e-438f-9afc-2dae24b37237",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "5584",
+      "unidade": "pinheiros",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-18T20:00:14.684163+00:00"
+    },
+    {
+      "id": "giro_3fupv1iemsz35ggz",
+      "visitor_id": "67e309cc-1282-4531-9dfa-e39399015d96",
+      "cliente_id": "35a25ba2-320e-438f-9afc-2dae24b37237",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "4093",
+      "unidade": "pinheiros",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-18T19:58:45.834483+00:00"
+    },
+    {
+      "id": "giro_lef6nwssmsz32shd",
+      "visitor_id": "67e309cc-1282-4531-9dfa-e39399015d96",
+      "cliente_id": "35a25ba2-320e-438f-9afc-2dae24b37237",
+      "premio_id": "premio_sorteado",
+      "codigo_vinculo_id": "1891",
+      "unidade": "pinheiros",
+      "visita_numero": 1,
+      "venda_id": null,
+      "criado_em": "2026-08-18T19:56:41.161486+00:00"
     }
   ],
   "cupons": [
@@ -361,6 +405,118 @@
       "criado_em": "2026-08-18T19:40:59.654+00:00",
       "expira_em": "2026-08-25T19:40:59.654+00:00",
       "utilizado_em": null,
+      "premio": {
+        "id": "Café Expresso Grátis",
+        "nome": "Café Expresso Grátis",
+        "tipo": "produto",
+        "valor": 0,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "☕",
+        "cor_fatia": "#e6398f"
+      }
+    },
+    {
+      "id": "cup_k54x1iyhmsz3a43r",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "35a25ba2-320e-438f-9afc-2dae24b37237",
+      "codigo_cupom": "MB-M41W",
+      "giro_id": "",
+      "premio_id": "Donut Chocolate Belga",
+      "unidade": "pinheiros",
+      "visita_numero": 2,
+      "cliente_nome": "Sami Keila",
+      "cliente_whatsapp": "11992268026",
+      "criado_em": "2026-08-18T20:02:22.407+00:00",
+      "expira_em": "2026-08-25T20:02:22.407+00:00",
+      "utilizado_em": null,
+      "premio": {
+        "id": "Donut Chocolate Belga",
+        "nome": "Donut Chocolate Belga",
+        "tipo": "produto",
+        "valor": 0,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "🍫",
+        "cor_fatia": "#e6398f"
+      }
+    },
+    {
+      "id": "cup_a8h8wtjomsz37d6x",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "35a25ba2-320e-438f-9afc-2dae24b37237",
+      "codigo_cupom": "MB-8O4K",
+      "giro_id": "",
+      "premio_id": "5% de Desconto",
+      "unidade": "pinheiros",
+      "visita_numero": 2,
+      "cliente_nome": "Sami Keila",
+      "cliente_whatsapp": "11992268026",
+      "criado_em": "2026-08-18T20:00:14.217+00:00",
+      "expira_em": "2026-08-25T20:00:14.217+00:00",
+      "utilizado_em": null,
+      "premio": {
+        "id": "5% de Desconto",
+        "nome": "5% de Desconto",
+        "tipo": "desconto",
+        "valor": 5,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "🏷️",
+        "cor_fatia": "#e6398f"
+      }
+    },
+    {
+      "id": "cup_1qgr23ppmsz35gh0",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "35a25ba2-320e-438f-9afc-2dae24b37237",
+      "codigo_cupom": "MB-3H5X",
+      "giro_id": "",
+      "premio_id": "Café Expresso Grátis",
+      "unidade": "pinheiros",
+      "visita_numero": 1,
+      "cliente_nome": "Sami Keila",
+      "cliente_whatsapp": "11992268026",
+      "criado_em": "2026-08-18T19:58:45.156+00:00",
+      "expira_em": "2026-08-25T19:58:45.156+00:00",
+      "utilizado_em": null,
+      "premio": {
+        "id": "Café Expresso Grátis",
+        "nome": "Café Expresso Grátis",
+        "tipo": "produto",
+        "valor": 0,
+        "probabilidade": 10,
+        "posicao_roleta": 1,
+        "ativo": true,
+        "limite_diario": null,
+        "limite_mensal": null,
+        "icone": "☕",
+        "cor_fatia": "#e6398f"
+      }
+    },
+    {
+      "id": "cup_o9ma2ithmsz32shd",
+      "visitor_id": "vis_supabase",
+      "cliente_id": "35a25ba2-320e-438f-9afc-2dae24b37237",
+      "codigo_cupom": "MB-P327",
+      "giro_id": "",
+      "premio_id": "Café Expresso Grátis",
+      "unidade": "pinheiros",
+      "visita_numero": 1,
+      "cliente_nome": "Sami Keila",
+      "cliente_whatsapp": "11992268026",
+      "criado_em": "2026-08-18T19:56:40.753+00:00",
+      "expira_em": "2026-08-25T19:56:40.753+00:00",
+      "utilizado_em": "2026-08-18T20:09:07.256+00:00",
       "premio": {
         "id": "Café Expresso Grátis",
         "nome": "Café Expresso Grátis",
@@ -711,5 +867,5 @@
       "icone": "🔄"
     }
   ],
-  "atualizado_em": "2026-08-18T19:48:02.081Z"
+  "atualizado_em": "2026-08-18T20:53:35.820Z"
 }

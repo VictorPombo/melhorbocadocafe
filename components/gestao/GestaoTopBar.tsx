@@ -21,6 +21,7 @@ export default function GestaoTopBar() {
   const [role, setRole] = useState("admin");
   const [unidadeNome, setUnidadeNome] = useState("Rede Consolidada");
   const [unidadeId, setUnidadeId] = useState("todas");
+  const [listaLojas, setListaLojas] = useState<{ id: string; nome: string }[]>([]);
 
   useEffect(() => {
     setRole(localStorage.getItem("mb_role") || "admin");
@@ -28,7 +29,36 @@ export default function GestaoTopBar() {
     const nomeLimpo = rawNome.replace(/\(Matriz\)/gi, "").replace(/\s+/g, " ").trim();
     setUnidadeNome(nomeLimpo);
     setUnidadeId(localStorage.getItem("mb_unidade_id") || "todas");
+
+    fetch("/api/fidelidade/unidades")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.sucesso && Array.isArray(data.unidades)) {
+          setListaLojas(data.unidades);
+        }
+      })
+      .catch(() => {});
   }, []);
+
+  function handleTrocarLoja(novoId: string) {
+    let novoNome = "Rede Consolidada";
+    if (novoId !== "todas") {
+      const achou = listaLojas.find((u) => u.id === novoId);
+      if (achou) novoNome = achou.nome;
+    }
+
+    setUnidadeId(novoId);
+    setUnidadeNome(novoNome);
+
+    localStorage.setItem("mb_unidade_id", novoId);
+    localStorage.setItem("mb_unidade_nome", novoNome);
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("mb_loja_changed", { detail: { id: novoId, nome: novoNome } })
+      );
+    }
+  }
 
   function handleLogout() {
     localStorage.removeItem("mb_auth");
@@ -53,7 +83,7 @@ export default function GestaoTopBar() {
   return (
     <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-gray-100 px-4 lg:px-8 py-2.5 transition-all">
       <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto">
-        {/* Lado Esquerdo: Logo Oficial + Identificação da Loja */}
+        {/* Lado Esquerdo: Logo Oficial + Seletor de Loja no Topo */}
         <div className="flex items-center gap-3">
           <Link href="/gestao/fidelidade" className="flex items-center gap-2.5 group shrink-0" title="Melhor Bocado Café">
             <Image
@@ -64,31 +94,40 @@ export default function GestaoTopBar() {
               className="h-8.5 w-8.5 object-contain transition-transform group-hover:scale-105"
               priority
             />
-            <span className="font-extrabold text-sm text-gray-900 hidden sm:inline-block">Melhor Bocado</span>
+            <span className="font-extrabold text-sm text-gray-900 hidden sm:inline-block">Melhor Bocado Café</span>
           </Link>
 
           <div className="h-5 w-[1px] bg-gray-200 hidden sm:block" />
 
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-stone-900 text-white text-xs font-black shadow-xs">
-            {isAdmin ? (
-              <>
-                <Crown className="w-3.5 h-3.5 text-amber-400" />
-                <span>Admin Geral • Rede Completa</span>
-              </>
-            ) : isFranquia ? (
-              <>
-                <Store className="w-3.5 h-3.5 text-pink-400" />
-                <span>Franquia • {unidadeNome}</span>
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Caixa • {unidadeNome}</span>
-              </>
-            )}
-          </div>
+          {/* Seletor Superior de Lojas (Geral vs. Lojas Separadas) */}
+          {isAdmin ? (
+            <div className="relative flex items-center">
+              <select
+                id="topbar-store-select"
+                aria-label="Selecionar Loja Ativa"
+                value={unidadeId}
+                onChange={(e) => handleTrocarLoja(e.target.value)}
+                className="bg-stone-900 hover:bg-stone-800 text-amber-300 text-xs font-black py-1.5 pl-3 pr-8 rounded-2xl border border-stone-800 shadow-xs outline-none cursor-pointer transition-all appearance-none"
+              >
+                <option value="todas">🌐 Todas as Lojas (GERAL)</option>
+                {listaLojas.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    📍 {u.nome}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute right-2.5 text-amber-300 text-[10px]">
+                ▼
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-stone-900 text-white text-xs font-black shadow-xs">
+              <Store className="w-3.5 h-3.5 text-pink-400" />
+              <span>Franquia • {unidadeNome}</span>
+            </div>
+          )}
 
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-extrabold">
+          <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-extrabold">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span>Sistema Online</span>
           </div>

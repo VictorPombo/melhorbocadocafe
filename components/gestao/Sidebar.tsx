@@ -80,7 +80,7 @@ export default function Sidebar() {
           </Link>
           <div className="flex flex-col min-w-0">
             <span className="text-sm font-black text-gray-900 leading-tight truncate">
-              Melhor Bocado
+              Melhor Bocado Café
             </span>
             <span className="px-2 py-0.5 mt-1 rounded-lg bg-gradient-to-r from-pink-50 to-rose-50 text-[#e6398f] text-[9px] font-black uppercase tracking-wider border border-pink-200/60 shadow-2xs w-fit">
               ☕ Painel de Gestão

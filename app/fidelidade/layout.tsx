@@ -59,7 +59,7 @@ export default function FidelidadeLayout({
             className="h-8.5 w-8.5 object-contain transition-transform group-hover:scale-105"
             priority
           />
-          <span className="font-extrabold text-sm text-gray-900 tracking-tight">Melhor Bocado</span>
+          <span className="font-extrabold text-sm text-gray-900 tracking-tight">Melhor Bocado Café</span>
         </Link>
 
         <div className="flex items-center gap-2">

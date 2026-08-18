@@ -218,7 +218,7 @@ export default function CaixaFidelidadePage() {
       {/* Header do Caixa / Terminal */}
       <header className="px-6 py-3.5 bg-stone-900/95 backdrop-blur-md border-b border-stone-800 flex items-center justify-between sticky top-0 z-40 shadow-lg">
         <div className="flex items-center gap-3.5">
-          <Link href="/gestao/fidelidade" className="flex items-center gap-2.5 group shrink-0" title="Melhor Bocado">
+          <Link href="/gestao/fidelidade" className="flex items-center gap-2.5 group shrink-0" title="Melhor Bocado Café">
             <Image
               src="/logo.png"
               alt="Melhor Bocado Café"
@@ -227,7 +227,7 @@ export default function CaixaFidelidadePage() {
               className="h-8.5 w-8.5 object-contain transition-transform group-hover:scale-105"
               priority
             />
-            <span className="font-extrabold text-sm text-stone-200 hidden md:inline-block">Melhor Bocado</span>
+            <span className="font-extrabold text-sm text-stone-200 hidden md:inline-block">Melhor Bocado Café</span>
           </Link>
 
           <div className="h-6 w-[1px] bg-stone-800 hidden sm:block" />

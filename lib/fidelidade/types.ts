@@ -145,13 +145,15 @@ export interface PremioFixoTrilha {
 }
 
 export interface EtapaTrilhaVisita {
-  visita: number; // 1 a 10
+  visita: number;
   titulo: string;
   modo: ModoVisita; // "roleta" ou "fixo"
+  premio_id?: string;
   premio_fixo?: PremioFixoTrilha;
   premios_roleta?: Premio[]; // Roleta personalizada exclusiva desta etapa
   descricao: string;
   ativo: boolean;
+  unidade?: string;
 }
 
 export interface Cupom {
