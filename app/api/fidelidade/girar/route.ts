@@ -73,13 +73,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validação de uso único no banco de dados Supabase
+    // Validação de uso único no banco de dados Supabase para esta loja
     if (isSupabaseConfigured && supabase) {
       try {
         const { data: giroExistente } = await supabase
           .from("mb_giros")
           .select("id, criado_em")
           .eq("codigo_vinculo", vinculoCode)
+          .eq("unidade", unidade)
           .maybeSingle();
 
         if (giroExistente) {

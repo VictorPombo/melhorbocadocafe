@@ -135,19 +135,24 @@ function GirarContent() {
 
     // 3. Validação do QR Code se fornecido
     if (codigoParam) {
-      // Checagem local instantânea
+      const targetLoja = unidadeParam || "pinheiros";
+
+      // Checagem local instantânea por loja
       try {
-        if (localStorage.getItem(`mb_qr_utilizado_${codigoParam}`)) {
+        if (
+          localStorage.getItem(`mb_qr_utilizado_${targetLoja}_${codigoParam}`) ||
+          localStorage.getItem(`mb_qr_utilizado_${codigoParam}`)
+        ) {
           setBloqueioFraude(true);
           setErro("Este QR Code já foi utilizado. Peça ao atendente do caixa para gerar um novo QR Code.");
         }
       } catch {}
 
-      // Checagem remota no banco Supabase
+      // Checagem remota no banco Supabase para esta loja
       fetch("/api/fidelidade/codigo-vinculo/validar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ codigo: codigoParam, loja: unidadeParam || "pinheiros" }),
+        body: JSON.stringify({ codigo: codigoParam, loja: targetLoja }),
       })
         .then((res) => res.json())
         .then((data) => {
@@ -155,7 +160,7 @@ function GirarContent() {
             setBloqueioFraude(true);
             setErro("Este QR Code já foi utilizado. Peça ao atendente do caixa para gerar um novo QR Code.");
             try {
-              localStorage.setItem(`mb_qr_utilizado_${codigoParam}`, "true");
+              localStorage.setItem(`mb_qr_utilizado_${targetLoja}_${codigoParam}`, "true");
             } catch {}
           }
         })
@@ -356,6 +361,8 @@ function GirarContent() {
 
       if (codigoVinculo) {
         try {
+          const uKey = unidade || "pinheiros";
+          localStorage.setItem(`mb_qr_utilizado_${uKey}_${codigoVinculo}`, "true");
           localStorage.setItem(`mb_qr_utilizado_${codigoVinculo}`, "true");
         } catch {}
       }

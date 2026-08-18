@@ -20,15 +20,21 @@ export async function POST(req: NextRequest) {
     }
 
     const cleanCodigo = String(codigo).trim();
+    const cleanLoja = (loja || "").trim().toLowerCase();
 
-    // 1. Verificar no Supabase se este QR Code / código já foi utilizado para um giro
+    // 1. Verificar no Supabase se este QR Code já foi utilizado especificamente NESTA loja
     if (isSupabaseConfigured && supabase) {
       try {
-        const { data: giroExistente } = await supabase
+        let query = supabase
           .from("mb_giros")
           .select("id, criado_em, whatsapp, nome, unidade")
-          .eq("codigo_vinculo", cleanCodigo)
-          .maybeSingle();
+          .eq("codigo_vinculo", cleanCodigo);
+
+        if (cleanLoja) {
+          query = query.eq("unidade", cleanLoja);
+        }
+
+        const { data: giroExistente } = await query.maybeSingle();
 
         if (giroExistente) {
           return NextResponse.json({
